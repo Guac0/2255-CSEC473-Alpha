@@ -1,0 +1,11 @@
+flask
+flask-login
+Flask-Session
+Flask-SQLAlchemy
+pyopenssl
+#nuitka
+htmlmin
+jsmin
+gunicorn
+concurrent-log-handler
+sdnotify
