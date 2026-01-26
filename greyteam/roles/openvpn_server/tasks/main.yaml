@@ -1,0 +1,9 @@
+---
+# See https://thetooth.io/blog/openvpn-server-automation/
+- name: Install openvpn server
+  ansible.builtin.include_tasks: openvpn.yaml
+
+- name: Generate client certs
+  ansible.builtin.include_tasks: client_certs.yaml
+
+# You will need to manually configure ufw, openstack floating ip, and openstack security groups

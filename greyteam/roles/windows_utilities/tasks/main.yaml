@@ -1,0 +1,9 @@
+---
+- name: Install Chrome
+  ansible.builtin.include_tasks: install_chrome.yaml
+
+- name: Install notepadpp
+  ansible.builtin.include_tasks: install_notepadpp.yaml
+
+#- name: Download sysinternals
+#  ansible.builtin.include_tasks: install_sysinternals.yaml

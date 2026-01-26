@@ -1,0 +1,9 @@
+app-cred-key_cdt_1-openrc.sh
+aan8745-openrc.sh
+clouds.yaml
+old2/
+old/
+.terraform/
+.terraform.locl.hcl
+terraform.tfstate
+terraform.tfstate.backup

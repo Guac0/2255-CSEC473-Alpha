@@ -1,0 +1,10 @@
+---
+- name: Ensure SIEM admin users exist and are in sudo group
+  ansible.builtin.user:
+    name: "{{ siem_user }}"
+    password: "{{ siem_user_password | ansible.builtin.password_hash('sha512') }}" 
+    groups: sudo
+    # groups: "{{ ['sudo'] + linux_groups }}"
+    append: yes
+    shell: /bin/bash
+    create_home: yes 

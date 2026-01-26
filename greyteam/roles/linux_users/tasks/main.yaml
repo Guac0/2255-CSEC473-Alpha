@@ -1,0 +1,7 @@
+---
+- name: Deploy SIEM User
+  ansible.builtin.include_tasks: users_siem.yaml 
+
+- name: Deploy Users
+  ansible.builtin.include_tasks: users.yaml
+  when: "'team_hosts' in group_names"

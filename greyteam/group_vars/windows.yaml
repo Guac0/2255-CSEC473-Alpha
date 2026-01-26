@@ -1,0 +1,32 @@
+ansible_connection: winrm
+#ansible_user: localuser
+#ansible_password: password
+ansible_winrm_transport: ntlm
+ansible_winrm_server_cert_validation: ignore
+ansible_port: 5985
+#ansible_connection: psrp
+#ansible_psrp_cert_validation: ignore
+#ansible_psrp_protocol: https
+#ansible_psrp_auth: ntlm
+#ansible_psrp_credssp_auth_mechanism: ntlm
+#ansible_become: yes
+#ansible_become_user: SYSTEM
+#ansible_become_method: runas
+ansible_python_interpreter: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+
+
+
+
+windows_working_dir: /tmp/ansible
+windows_local_users:
+  - luser1
+  - luser2
+windows_local_admins:
+  - ladmin1
+  - ladmin2
+windows_domain_users:
+  - duser1
+  - duser2
+windows_domain_admins:
+  - dadmin1
+  - dadmin2

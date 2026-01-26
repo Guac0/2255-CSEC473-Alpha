@@ -1,0 +1,11 @@
+greyteam_user: greyteam
+greyteam_password: ponyuploc0!
+
+ansible_user: "{{ greyteam_user }}"
+ansible_password: "{{ greyteam_password }}"
+ansible_ssh_private_key_file: ~/.ssh/irsec2024
+
+users_password: FriendshipIsMagic0!
+
+domain: mlp.local
+mgmt_dns: 8.8.8.8

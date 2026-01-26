@@ -1,0 +1,28 @@
+---
+- name: Set active network profiles type to private
+  win_shell: Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+  ignore_errors: true
+
+- name: Set AllowUnencrypted in WinRM config
+  ansible.windows.win_command: cmd /c winrm set winrm/config/service @{AllowUnencrypted="true"}
+
+- name : Reboot Windows Machine After WinRM config
+  win_reboot:
+
+- name: Set TrustedHosts in WinRM config
+  ansible.windows.win_command: cmd /c winrm set winrm/config/client @{TrustedHosts="*"}
+
+- name: Allow Inbound WinRM Traffic (HTTP)
+  win_shell: New-NetFirewallRule -DisplayName 'Allow WinRM HTTP In' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 5985
+
+- name: Allow Inbound WinRM Traffic (HTTPS)
+  win_shell: New-NetFirewallRule -DisplayName 'Allow WinRM HTTPS In' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 5985
+
+- name: Allow Outbound WinRM Traffic (HTTP)
+  win_shell: New-NetFirewallRule -DisplayName 'Allow WinRM HTTP Out' -Direction Outbound -Action Allow -Protocol TCP -LocalPort 5985
+
+- name: Allow Outbound WinRM Traffic (HTTPS)
+  win_shell: New-NetFirewallRule -DisplayName 'Allow WinRM HTTPS Out' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 5985

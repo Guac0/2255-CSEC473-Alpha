@@ -1,0 +1,17 @@
+---
+- name: Ensure Sysinternals directory exists
+  win_file:
+    path: C:\Sysinternals
+    state: directory
+
+- name: Download Sysinternals Suite
+  win_get_url:
+    url: https://download.sysinternals.com/files/SysinternalsSuite.zip
+    dest: C:\Sysinternals\sysinternalssuite.zip
+    force: yes
+
+- name: Unzip Sysinternals Suite
+  win_unzip:
+    src: C:\Sysinternals\sysinternalssuite.zip
+    dest: C:\Sysinternals
+    overwrite: yes

@@ -1,0 +1,14 @@
+---
+- name: Add Registry Key for Red Team Query 
+  ansible.windows.win_regedit: 
+    path: '{{ win_redteamkey1_path }}'
+    name: '{{ win_redteamkey1_name }}'
+    data: '{{ win_redteamkey1_data }}'
+    type: '{{ win_redteamkey1_type }}'
+
+- name: Add Registry Key for Red Team Query 
+  ansible.windows.win_regedit: 
+    path: '{{ win_redteamkey2_path }}'
+    name: '{{ win_redteamkey2_name }}'
+    data: '{{ win_redteamkey2_data }}'
+    type: '{{ win_redteamkey2_type }}'

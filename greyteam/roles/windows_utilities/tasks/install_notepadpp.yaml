@@ -1,0 +1,18 @@
+---
+- name: Ensure Temp directory exists
+  win_file:
+    path: C:\Temp
+    state: directory
+
+- name: Download Notepadpp installer
+  win_get_url:
+    url: "{{ notepadpp_installer_url }}"
+    dest: "{{ notepadpp_installer_path }}"
+    force: yes
+
+- name: Install Notepadpp for all users (silent install)
+  win_package:
+    path: "{{ notepadpp_installer_path }}"
+    arguments: "/S"           # Silent install for all users
+    state: present
+    creates_path: "C:\\Program Files\\Notepad++\\notepad++.exe"

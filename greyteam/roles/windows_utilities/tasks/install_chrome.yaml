@@ -1,0 +1,15 @@
+---
+- name: Create Directory
+  ansible.windows.win_file:
+    path: "{{ windows_working_dir }}\\chrome"
+    state: directory
+
+- name: Copy over file
+  ansible.windows.win_copy: 
+    src: files/chrome_install.exe
+    dest: "{{ windows_working_dir }}\\chrome"
+
+- name: Install Chrome
+  ansible.windows.win_command: 'chrome_install.exe /silent /install'
+  args:
+    chdir: "{{ windows_working_dir }}\\chrome"
