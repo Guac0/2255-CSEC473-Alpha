@@ -7,20 +7,20 @@
 
 - name: Create Directory
   ansible.windows.win_file:
-    path: "{{ working_dir }}\\npp"
+    path: "{{ windows_working_dir }}\\npp"
     state: directory
   when: not app_check.stat.exists
 
 - name: Copy over file
   ansible.windows.win_copy: 
     src: files/npp.Installer.x64.exe
-    dest: "{{ working_dir }}\\npp"
+    dest: "{{ windows_working_dir }}\\npp"
   when: not app_check.stat.exists
 
 - name: Install Npp
   ansible.windows.win_command: 'npp.Installer.x64.exe /S'
   args:
-    chdir: "{{ working_dir }}\\npp"
+    chdir: "{{ windows_working_dir }}\\npp"
   when: not app_check.stat.exists
 
 - name: Add Npp shortcut to Desktop
