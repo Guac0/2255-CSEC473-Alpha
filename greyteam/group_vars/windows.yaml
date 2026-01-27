@@ -17,7 +17,7 @@ ansible_python_interpreter: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\pow
 
 
 
-windows_working_dir: /tmp/ansible
+windows_working_dir: C:\\tmp\\ansible
 windows_local_users:
   - luser1
   - luser2

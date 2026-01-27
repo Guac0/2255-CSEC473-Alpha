@@ -6,7 +6,7 @@ git clone <repo>
 cd <repo>
 python -m venv venv
 source venv/bin/activate
-pip3 install ansible argcomplete pywinrm passlib
+pip3 install -r requirements.txt
 activate-global-python-argcomplete
 ansible-galaxy install -r requirements.yml
 
