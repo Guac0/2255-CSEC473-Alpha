@@ -1,17 +1,25 @@
 ---
+- name: Check if sysinternals is downloaded
+  ansible.windows.win_stat:
+    path: "C:\\Sysinternals"
+  register: app_check
+
 - name: Ensure Sysinternals directory exists
   win_file:
-    path: C:\Sysinternals
+    path: "C:\\Sysinternals"
     state: directory
+  when: not app_check.stat.exists
 
 - name: Download Sysinternals Suite
   win_get_url:
     url: https://download.sysinternals.com/files/SysinternalsSuite.zip
-    dest: C:\Sysinternals\sysinternalssuite.zip
+    dest: "C:\\Sysinternals\\sysinternalssuite.zip"
     force: yes
+  when: not app_check.stat.exists
 
 - name: Unzip Sysinternals Suite
   win_unzip:
-    src: C:\Sysinternals\sysinternalssuite.zip
-    dest: C:\Sysinternals
+    src: "C:\\Sysinternals\\sysinternalssuite.zip"
+    dest: "C:\\Sysinternals"
     overwrite: yes
+  when: not app_check.stat.exists

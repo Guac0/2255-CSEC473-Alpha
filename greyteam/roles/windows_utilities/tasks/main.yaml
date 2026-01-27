@@ -5,6 +5,9 @@
 - name: Install notepadpp
   ansible.builtin.include_tasks: install_notepadpp.yaml
 
+- name: Install Thunderbird
+  ansible.builtin.include_tasks: install_thunderbird.yaml
+
 #- name: Download sysinternals
 #  ansible.builtin.include_tasks: install_sysinternals.yaml
 

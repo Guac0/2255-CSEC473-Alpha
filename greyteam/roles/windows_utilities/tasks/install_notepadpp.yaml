@@ -3,19 +3,28 @@
   ansible.windows.win_stat:
     path: "C:\\Program Files\\Notepad++\\notepad++.exe"
   register: app_check
-  ignore_errors: true
+
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ windows_working_dir }}\\npp\\npp.Installer.x64.exe"
+  register: installer_check
+  when: not app_check.stat.exists
 
 - name: Create Directory
   ansible.windows.win_file:
     path: "{{ windows_working_dir }}\\npp"
     state: directory
-  when: not app_check.stat.exists
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
 
 - name: Copy over file
   ansible.windows.win_copy: 
     src: files/npp.Installer.x64.exe
     dest: "{{ windows_working_dir }}\\npp"
-  when: not app_check.stat.exists
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
 
 - name: Install Npp
   ansible.windows.win_command: 'npp.Installer.x64.exe /S'

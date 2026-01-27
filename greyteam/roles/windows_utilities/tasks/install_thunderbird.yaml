@@ -1,0 +1,36 @@
+---
+- name: Check if app is installed
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\Mozilla Thunderbird\\thunderbird.exe "
+  register: app_check
+  ignore_errors: true
+
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ windows_working_dir }}\\thunderbird\\thunderbird_install.exe"
+  register: installer_check
+  when: not app_check.stat.exists
+
+- name: Create Directory
+  ansible.windows.win_file:
+    path: "{{ windows_working_dir }}\\thunderbird"
+    state: directory
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Copy over file
+  ansible.windows.win_copy: 
+    src: files/thunderbird_install.exe
+    dest: "{{ windows_working_dir }}\\thunderbird"
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Install Thunderbird
+  ansible.windows.win_command: 'thunderbird_install.exe /S /PreventRebootRequired=true'
+  args:
+    chdir: "{{ windows_working_dir }}\\thunderbird"
+  when: not app_check.stat.exists
+
+# chrome installer automatically adds desktop shortcut to all users

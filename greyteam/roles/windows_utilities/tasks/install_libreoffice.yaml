@@ -3,23 +3,32 @@
   ansible.windows.win_stat:
     path: "C:\\Program Files\\LibreOffice\\program\\sbase.exe"
   register: app_check
-  ignore_errors: true
+
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ windows_working_dir }}\\libreoffice\\LibreOffice_Win_x86-64.msi"
+  register: installer_check
+  when: not app_check.stat.exists
 
 - name: Create Directory
   ansible.windows.win_file:
     path: "{{ windows_working_dir }}\\libreoffice"
     state: directory
-  when: not app_check.stat.exists
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
 
 - name: Copy over file
   ansible.windows.win_copy: 
     # files/npp.Installer.x64.exe
-    src: files/libreoffice_Win_x86-64.msi
+    src: files/LibreOffice_Win_x86-64.msi
     dest: "{{ windows_working_dir }}\\libreoffice"
-  when: not app_check.stat.exists
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
 
 - name: Install libreoffice for all users
-  ansible.windows.win_command: 'msiexec /i "libreoffice_Win_x86-64.msi" /qn REBOOTYESNO=No ALLUSERS=1 ADDLOCAL=ALL CREATEDESKTOPLINK=1 UI_LANGS=en_GB ISCHECKFORPRODUCTUPDATES=0 QUICKSTART=0'
+  ansible.windows.win_command: 'msiexec /i "LibreOffice_Win_x86-64.msi" /qn REBOOTYESNO=No ALLUSERS=1 ADDLOCAL=ALL CREATEDESKTOPLINK=1 UI_LANGS=en_GB ISCHECKFORPRODUCTUPDATES=0 QUICKSTART=0'
   args:
     chdir: "{{ windows_working_dir }}\\libreoffice"
   when: not app_check.stat.exists
