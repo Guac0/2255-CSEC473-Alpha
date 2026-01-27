@@ -1,0 +1,35 @@
+---
+- name: Check if app is installed
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\LibreOffice\\program\\sbase.exe"
+  register: app_check
+  ignore_errors: true
+
+- name: Create Directory
+  ansible.windows.win_file:
+    path: "{{ working_dir }}\\libreoffice"
+    state: directory
+  when: not app_check.stat.exists
+
+- name: Copy over file
+  ansible.windows.win_copy: 
+    # files/npp.Installer.x64.exe
+    src: files/libreoffice_Win_x86-64.msi
+    dest: "{{ working_dir }}\\libreoffice"
+  when: not app_check.stat.exists
+
+- name: Install libreoffice for all users
+  ansible.windows.win_command: 'msiexec /i "libreoffice_Win_x86-64.msi" /qn REBOOTYESNO=No ALLUSERS=1 ADDLOCAL=ALL CREATEDESKTOPLINK=1 UI_LANGS=en_GB ISCHECKFORPRODUCTUPDATES=0 QUICKSTART=0'
+  args:
+    chdir: "{{ working_dir }}\\libreoffice"
+  when: not app_check.stat.exists
+  #ignore_errors: true
+# Automatically creates a desktop shortcut due to CREATEDESKTOPLINK=1
+
+#libreoffice restarts the system when done no matter what i do, so check for that. also ignore errors
+- name: Wait for the host to come back online
+  ansible.builtin.wait_for_connection:
+    timeout: 600  # wait up to 10 minutes
+    delay: 10     # wait 10 seconds before starting to check
+    sleep: 10      # interval between connection checks
+  when: not app_check.stat.exists

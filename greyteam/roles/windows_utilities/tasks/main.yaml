@@ -7,3 +7,10 @@
 
 #- name: Download sysinternals
 #  ansible.builtin.include_tasks: install_sysinternals.yaml
+
+- name: Install System Shortcuts
+  ansible.builtin.include_tasks: install_shortcuts.yaml
+
+- name: Install LibreOffice
+  ansible.builtin.include_tasks: install_libreoffice.yaml
+#libreoffice restarts the system when done no matter what i do so dont put anything after it LOL

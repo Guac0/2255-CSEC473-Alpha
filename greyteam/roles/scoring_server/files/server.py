@@ -2395,24 +2395,6 @@ def list_users():
         logger.error(f"/list_users - Database or serialization error: {e}")
         return jsonify({"error": "Failed to retrieve user list"}), 500
 
-@app.route("/list_users_simple", methods=["POST"])
-@login_required
-def list_users_simple():
-    """
-    Retrieves a simple dictionary of all users and their roles from the database.
-    """
-    try:
-        logger.info(f"/list_users_simple - Successful connection from {current_user.id} at {request.remote_addr}")
-        
-        users = WebUser.query.all()
-        user_roles = {user.username: user.role for user in users}
-
-        return jsonify(user_roles)
-
-    except Exception as e:
-        logger.error(f"/list_users_simple - Database error: {e}")
-        return jsonify({"error": "Failed to retrieve simple user list"}), 500
-
 @app.route("/list_tokens", methods=["POST"])
 @login_required
 @admin_required

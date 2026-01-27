@@ -4,6 +4,6 @@ clouds.yaml
 old2/
 old/
 .terraform/
-.terraform.locl.hcl
+.terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.backup
