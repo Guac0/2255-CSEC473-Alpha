@@ -153,6 +153,8 @@ class AuthToken(db.Model):
     timestamp = db.Column(db.Integer, default=lambda: int(time.time()), nullable=False)
     added_by = db.Column(db.String(128))
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     def __repr__(self):
         return f"<AuthToken {self.token[:8]}...>"
 
@@ -160,8 +162,7 @@ class WebUser(db.Model):
     __tablename__ = 'web_users'
     
     username = db.Column(db.String(64), primary_key=True, nullable=False)
-    
-    password = db.Column(db.String(128), nullable=False) 
+    password = db.Column(db.String(64), nullable=False) 
     role = db.Column(db.String(20), nullable=False) # "admin", "analyst", or "guest"
 
     def __repr__(self):
@@ -171,6 +172,64 @@ class WebhookQueue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     incident_id = db.Column(db.Integer, db.ForeignKey('incidents.incident_id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Host(db.Model):
+    __tablename__ = 'hosts'
+    
+    hostname = db.Column(db.String(64), primary_key=True, nullable=False)
+    os = db.Column(db.String(32), nullable=False)
+    ip = db.Column(db.String(50), nullable=False)
+
+    def __repr__(self):
+        return f"<Ansible Task {self.task} (ReturnCode: {self.returncode}, Result: {self.result})>"
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+class ScoringUser(db.Model):
+    __tablename__ = 'scoring_users'
+    hostname = db.Column(db.String(64), primary_key=True, nullable=False)
+    username = db.Column(db.String(64), primary_key=True, nullable=False)
+    password = db.Column(db.String(64), nullable=False)
+
+    def __repr__(self):
+        return f"<ScoringUser {self.username}@{self.hostname}>"
+    def to_dict(self):
+        #return {"hostname": self.hostname,"username": self.username} # no password
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+class ScoringUserList(db.Model):
+    __tablename__ = 'scoring_user_lists'
+    index = db.Column(db.Integer, primary_key=True, nullable=False)
+    username = db.Column(db.String(64), primary_key=True, nullable=False)
+
+    def __repr__(self):
+        return f"<ScoringUserList Index: {self.index}, User: {self.username}>"
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+class ScoringHistory(db.Model):
+    __tablename__ = 'scoring_histories'
+    round = db.Column(db.Integer, primary_key=True, nullable=False)
+    name = db.Column(db.String(64), primary_key=True, nullable=False)
+    value = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f"<ScoringHistory Round: {self.round}, Name: {self.name}, Value: {self.value}>"
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+class ScoringCriteria(db.Model):
+    __tablename__ = 'scoring_criterias'
+    hostname = db.Column(db.String(64), primary_key=True, nullable=False)
+    name = db.Column(db.String(64), primary_key=True, nullable=False)
+    userlist_index = db.Column(db.Integer, nullable=False)
+    content = db.Column(db.String(2048), primary_key=True, nullable=False)
+    location = db.Column(db.String(128), primary_key=True, nullable=False)
+
+    def __repr__(self):
+        return f"<ScoringCriteria Host: {self.hostname}, Name: {self.name}>"
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 # =================================
 # ======= UTILITY FUNCTIONS =======
@@ -1006,10 +1065,11 @@ def start_server():
     app.run(host=HOST, port=PORT, ssl_context='adhoc', use_reloader=False, debug=False)
 
 if __name__ == "__main__":
+    pass
     #create_db_tables()
 
     # Start threads before test data to avoid delays
     #threading.Thread(target=webhook_main, daemon=True).start()
 
-    # Start main app. Do not put any code below this line
+    # Start main app. Do not put any code below this line. Comment out when using gunicorn
     start_server()
