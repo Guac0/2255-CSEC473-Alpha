@@ -33,7 +33,7 @@
 ######## Generic ######
 
 - name: Run Windows Standards 
-  hosts: windows:&team_hosts
+  hosts: windows:&inscope
   roles:
     - windows_standards
   tags: 
@@ -43,7 +43,7 @@
     - stds
 
 - name: Create Local Users
-  hosts: windows:&team_hosts
+  hosts: windows:&inscope
   roles:
     - windows_users_local
   tags:
@@ -52,7 +52,7 @@
   - local_users
 
 - name: Install Utilities
-  hosts: windows:&team_hosts
+  hosts: windows:&inscope
   roles:
     - windows_utilities
   tags:
@@ -61,7 +61,7 @@
     - utilities
 
 - name: Set Wallpaper
-  hosts: windows:&team_hosts
+  hosts: windows:&inscope
   roles:
     - windows_wallpaper
   tags:
@@ -70,7 +70,7 @@
     - wallpaper
 
 - name: Deploy User Files
-  hosts: windows:&team_hosts
+  hosts: windows:&inscope
   roles:
     - windows_user_files
   tags:
@@ -81,7 +81,7 @@
 ###### Services #######
 
 - name: Windows Deploy MSSQL
-  hosts: windows:&team_hosts
+  hosts: windows:&inscope
   roles:
     - windows_mssql
   tags:
@@ -92,7 +92,7 @@
 ####### Finish #######
 
 - name: Post Deploy Cleanup
-  hosts: windows:&team_hosts
+  hosts: windows:&inscope
   roles:
     - windows_finish
   tags:
@@ -107,7 +107,7 @@
 ####### Generic #######
 
 - name: Deploy Linux Standards
-  hosts: linux:&team_hosts
+  hosts: linux:&inscope
   roles:
     - linux_standards
   tags:
@@ -117,7 +117,7 @@
     - stds
 
 - name: Deploy Linux Users
-  hosts: linux:&team_hosts
+  hosts: linux:&inscope
   roles:
     - linux_users
   tags:
@@ -130,7 +130,7 @@
 ####### Finish ########
 
 - name: Reboot
-  hosts: linux:&team_hosts
+  hosts: linux:&inscope
   roles:
     - linux_reboot
   tags:
