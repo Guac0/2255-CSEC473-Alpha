@@ -2,7 +2,7 @@
 users:
   - name: greyteam
     ssh_authorized_keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGPzFvs7zP0Io885nrE6JgdjAW2bexaOk1dzrhK279rD guac@Zelus
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFmv5bHeXcqyTWcXr3kCu9ZKJlRxLxEaZjY9bYsCl+J6 Guac@Zelus
     gecos: greyteam user
     groups: [adm, sudo]
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]

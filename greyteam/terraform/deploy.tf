@@ -1,7 +1,7 @@
 resource "openstack_compute_instance_v2" "deploy" {
   name            = "deploy"
-  flavor_name     = "small.2gb"
-  #key_pair        = "guac_irsec_2025"
+  flavor_name     = "medium"
+  key_pair        = "cdt"
 
   block_device {
     #uuid                  = "a96980db-1cda-40d6-bb2e-ac26d445e6bd" #UbuntuJammy2204-Desktop
@@ -14,7 +14,7 @@ resource "openstack_compute_instance_v2" "deploy" {
   }
 
   network {
-    name = "MAIN-NAT"
+    name = "aan8745"
     #name = "deploy"
     #fixed_ip_v4 = "10.1.100.1"
   }
