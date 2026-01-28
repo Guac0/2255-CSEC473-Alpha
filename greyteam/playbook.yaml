@@ -1,1 +1,139 @@
 ---
+
+#################################
+########### Management ##########
+#################################
+
+- name: Deploy OpenVPN Server
+  hosts: jumpbox
+  roles:
+    - openvpn_server
+  tags: 
+    - mgmt
+    - openvpn
+    - openvpn_server
+
+- name: Deploy Scoring Server
+  hosts: deploy
+  roles:
+    - scoring_server
+  tags: 
+    - mgmt
+    - scoring
+    - scoring_server
+
+#################################
+########### Team Hosts ##########
+#################################
+
+#######################
+######## WINDOWS ######
+#######################
+
+######## Generic ######
+
+- name: Run Windows Standards 
+  hosts: windows:&team_hosts
+  roles:
+    - windows_standards
+  tags: 
+    - windows
+    - team
+    - standards
+    - stds
+
+- name: Create Local Users
+  hosts: windows:&team_hosts
+  roles:
+    - windows_users_local
+  tags:
+  - windows
+  - team
+  - local_users
+
+- name: Install Utilities
+  hosts: windows:&team_hosts
+  roles:
+    - windows_utilities
+  tags:
+    - windows
+    - team
+    - utilities
+
+- name: Set Wallpaper
+  hosts: windows:&team_hosts
+  roles:
+    - windows_wallpaper
+  tags:
+    - windows
+    - team
+    - wallpaper
+
+- name: Deploy User Files
+  hosts: windows:&team_hosts
+  roles:
+    - windows_user_files
+  tags:
+    - windows
+    - team
+    - files
+
+###### Services #######
+
+- name: Windows Deploy MSSQL
+  hosts: windows:&team_hosts
+  roles:
+    - windows_mssql
+  tags:
+    - windows
+    - team
+    - mssql
+
+####### Finish #######
+
+- name: Post Deploy Cleanup
+  hosts: windows:&team_hosts
+  roles:
+    - windows_finish
+  tags:
+    - windows 
+    - team 
+    - post_deploy
+
+#######################
+######## LINUX ########
+#######################
+
+####### Generic #######
+
+- name: Deploy Linux Standards
+  hosts: linux:&team_hosts
+  roles:
+    - linux_standards
+  tags:
+    - linux 
+    - team 
+    - standards
+    - stds
+
+- name: Deploy Linux Users
+  hosts: linux:&team_hosts
+  roles:
+    - linux_users
+  tags:
+    - linux 
+    - team 
+    - users
+
+###### Services #######
+
+####### Finish ########
+
+- name: Reboot
+  hosts: linux:&team_hosts
+  roles:
+    - linux_reboot
+  tags:
+    - linux 
+    - team 
+    - reboot
