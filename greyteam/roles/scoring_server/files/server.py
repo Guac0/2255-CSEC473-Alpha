@@ -757,6 +757,7 @@ def is_safe_path(next_url: str) -> bool:
     return (parsed.scheme == "" and parsed.netloc == "" and next_url.startswith("/"))
 
 # === MISC ===
+
 def get_random_time_offset_epoch(minutes_offset=30, direction="either"):
     """
     Returns a random timestamp in seconds since the epoch,
@@ -937,33 +938,6 @@ def list_logfile(filepath=LOGFILE,lines=50):
         logger.error(f"/list_logfile - Successful connection from {current_user.id} at {request.remote_addr}")
         return f"FileNotFound {filepath}", 400
 
-@app.route("/save_export", methods=["POST"])
-@login_required
-@admin_required
-def save_export(filepath=SAVEFILE):
-    return jsonify({"error": "Deprecated"}), 500
-
-    logger.info(f"/save_export - Successful connection from {current_user.id} at {request.remote_addr}")
-    
-    try:
-        with open(filepath, "r") as f:
-            state = json.load(f)
-
-        incident = {
-            "timestamp": time.time(),
-            "agent_id":f"custom",
-            "oldStatus": False,
-            "newStatus": False,
-            "message": f"Server - Save Exported by User {current_user.id}",
-            "sla": 0
-        }
-        create_incident(incident)
-
-        return state
-    except FileNotFoundError:
-        logger.error(f"/save_export - Successful connection from {current_user.id} at {request.remote_addr}")
-        return f"FileNotFound {filepath}", 400
-
 # === FRONTEND INTERACTION ===
     
 @app.route("/add_user", methods=["POST"])
@@ -1064,6 +1038,37 @@ def delete_user():
         logger.error(f"/delete_user - Database error: {e}")
         return jsonify({"error": "Database error while deleting user"}), 500
 
+@app.route("/update_password", methods=["POST"])
+@login_required
+def update_password():
+    data = request.json
+    username = data.get("username")
+    password = data.get("password")
+
+    if not all([username,password]):
+        logger.warning(f"/update_password - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {[username]}")
+        return "Missing data", 400
+    
+    if current_user.role != "admin":
+        if username != current_user.id:
+            logger.warning(f"/update_password - Failed connection from {current_user.id} at {request.remote_addr} - cannot change other user. Full details: {[username]}")
+            return "Target username must be the same as current username", 400
+    
+    user_to_update = WebUser.query.filter_by(username=username).first()
+
+    try:
+        user_role = user_to_update.role
+        user_to_update.password = generate_password_hash(password)
+        db.session.commit()
+        
+        logger.info(f"/update_password - Successful connection from {current_user.id} at {request.remote_addr}. Changing password for user {username}.")
+        return jsonify({"status": "ok"})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/update_password - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": "Database error while updating user"}), 500
+
 @app.route("/add_token", methods=["POST"])
 @login_required
 @admin_required
@@ -1149,6 +1154,494 @@ def delete_token():
         db.session.rollback()
         logger.error(f"/delete_token - Database error: {e}")
         return jsonify({"error": "Database error while deleting token"}), 500
+
+# --- Hosts Endpoints ---
+
+@app.route("/add_host", methods=["POST"])
+def add_host():
+    data = request.json
+    hostname = data.get("hostname")
+    ip = data.get("ip")
+    os = data.get("os")
+
+    if not all([hostname, ip, os]):
+        logger.warning(f"/add_host - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {data}")
+        return "Missing data", 400
+
+    try:
+        new_host = Host(hostname=hostname, ip=ip, os=os)
+        db.session.add(new_host)
+        db.session.commit()
+
+        logger.info(f"/add_host - Successful connection from {current_user.id} at {request.remote_addr}. Added host {hostname} with IP {ip}")
+        return jsonify({"status": "ok", "id": new_host.id})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/add_host - Database error from {current_user.id} at {request.remote_addr}: {e}. Data: {data}")
+        return jsonify({"error": "Database error while adding host"}), 500
+
+@app.route("/remove_host", methods=["POST"])
+def remove_host():
+    data = request.json
+    host_id = data.get("id")
+
+    if not host_id:
+        logger.warning(f"/remove_host - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {data}")
+        return "Missing data", 400
+
+    host_to_delete = Host.query.get(host_id)
+    if not host_to_delete:
+        logger.warning(f"/remove_host - Failed connection from {current_user.id} at {request.remote_addr} - host not found. Full details: {data}")
+        return "Host not found", 400
+
+    try:
+        host_name = host_to_delete.hostname
+        
+        # Note: Cascading deletes should be handled by DB relationships to maintain referential integrity
+        db.session.delete(host_to_delete)
+        db.session.commit()
+
+        logger.info(f"/remove_host - Successful connection from {current_user.id} at {request.remote_addr}. Deleted host {host_name} (ID: {host_id})")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/remove_host - Database error from {current_user.id} at {request.remote_addr}: {e}. Data: {data}")
+        return jsonify({"error": "Database error while deleting host"}), 500
+
+@app.route("/update_host_ip", methods=["POST"])
+def update_host_ip():
+    data = request.json
+    host_id = data.get("id")
+    new_ip = data.get("ip")
+
+    if not all([host_id, new_ip]):
+        logger.warning(f"/update_host_ip - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {data}")
+        return "Missing data", 400
+
+    host = Host.query.get(host_id)
+    if not host:
+        logger.warning(f"/update_host_ip - Failed connection from {current_user.id} at {request.remote_addr} - host not found. Full details: {data}")
+        return "Host not found", 400
+
+    try:
+        old_ip = host.ip
+        host.ip = new_ip
+        db.session.commit()
+
+        logger.info(f"/update_host_ip - Successful connection from {current_user.id} at {request.remote_addr}. Updated {host.hostname} IP from {old_ip} to {new_ip}")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/update_host_ip - Database error from {current_user.id} at {request.remote_addr}: {e}. Data: {data}")
+        return jsonify({"error": "Database error while updating IP"}), 500
+
+@app.route("/get_hosts", methods=["GET"])
+def get_hosts():
+    try:
+        hosts = Host.query.all()
+        host_list = [host.to_dict() for host in hosts]
+        
+        logger.info(f"/get_hosts - Successful connection from {current_user.id} at {request.remote_addr}. Returned {len(host_list)} hosts.")
+        return jsonify(host_list)
+    except Exception as e:
+        logger.error(f"/get_hosts - Database error from {current_user.id}: {e}")
+        return jsonify({"error": "Database error while retrieving hosts"}), 500
+
+# --- ScoringUser Endpoints ---
+
+@app.route("/add_scoring_user", methods=["POST"])
+def add_scoring_user():
+    data = request.json
+    host_id = data.get("host_id")
+    username = data.get("username")
+    password = data.get("password")
+
+    if not all([host_id, username, password]):
+        logger.warning(f"/add_scoring_user - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {data}")
+        return "Missing data", 400
+
+    try:
+        new_user = ScoringUser(
+            host_id=host_id,
+            username=username,
+            password=password
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        logger.info(f"/add_scoring_user - Successful connection from {current_user.id} at {request.remote_addr}. Added user {username} to host {host_id}")
+        return jsonify({"status": "ok", "id": new_user.id})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/add_scoring_user - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}. Data: {data}")
+        return jsonify({"error": "Database error while adding scoring user"}), 500
+
+@app.route("/remove_scoring_user", methods=["POST"])
+def remove_scoring_user():
+    data = request.json
+    user_id = data.get("id")
+
+    if not all([user_id]):
+        logger.warning(f"/remove_scoring_user - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {[user_id]}")
+        return "Missing data", 400
+
+    user_to_delete = ScoringUser.query.get(user_id)
+    if not user_to_delete:
+        logger.warning(f"/remove_scoring_user - Failed connection from {current_user.id} at {request.remote_addr} - user not found. Full details: {[user_id]}")
+        return "User not found", 400
+
+    try:
+        username = user_to_delete.username
+        host_id = user_to_delete.host_id
+        
+        db.session.delete(user_to_delete)
+        db.session.commit()
+
+        logger.info(f"/remove_scoring_user - Successful connection from {current_user.id} at {request.remote_addr}. Deleted user {username} (ID: {user_id}) from host {host_id}")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/remove_scoring_user - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": "Database error while deleting user"}), 500
+
+@app.route("/update_scoring_user_pwd", methods=["POST"])
+def update_scoring_user_pwd():
+    data = request.json
+    user_id = data.get("id")
+    new_password = data.get("password")
+
+    if not all([user_id, new_password]):
+        logger.warning(f"/update_scoring_user_pwd - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {[user_id]}")
+        return "Missing data", 400
+
+    user = ScoringUser.query.get(user_id)
+    if not user:
+        logger.warning(f"/update_scoring_user_pwd - Failed connection from {current_user.id} at {request.remote_addr} - user not found. Full details: {[user_id]}")
+        return "User not found", 400
+
+    try:
+        user.password = new_password
+        db.session.commit()
+
+        logger.info(f"/update_scoring_user_pwd - Successful connection from {current_user.id} at {request.remote_addr}. Updated password for user {user.username} (ID: {user_id})")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/update_scoring_user_pwd - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": "Database error while updating password"}), 500
+
+@app.route("/get_scoring_users", methods=["GET"])
+def get_scoring_users():
+    """Returns all users without passwords for general display."""
+    try:
+        users = ScoringUser.query.all()
+        # Custom dict comprehension to exclude password
+        user_list = [{"id": u.id, "host_id": u.host_id, "username": u.username} for u in users]
+        
+        logger.info(f"/get_scoring_users - Successful connection from {current_user.id} at {request.remote_addr}. Returned {len(user_list)} users.")
+        return jsonify(user_list)
+    except Exception as e:
+        logger.error(f"/get_scoring_users - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": "Database error"}), 500
+
+@app.route("/get_scoring_users_with_pwd", methods=["GET"])
+def get_scoring_users_with_pwd():
+    """Returns all users including passwords"""
+    try:
+        users = ScoringUser.query.all()
+        user_list = [u.to_dict() for u in users]
+        
+        logger.info(f"/get_scoring_users_with_pwd - Successful connection from {current_user.id} at {request.remote_addr}. SENSITIVE DATA ACCESSED.")
+        return jsonify(user_list)
+    except Exception as e:
+        logger.error(f"/get_scoring_users_with_pwd - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": "Database error"}), 500
+
+# --- ScoringHistory Endpoints ---
+
+@app.route("/get_scoring_latest", methods=["GET"])
+def get_scoring_latest():
+    try:
+        # Get the highest round number currently in the database
+        latest_round = db.session.query(func.max(ScoringHistory.round)).scalar()
+        
+        if latest_round is None:
+            logger.info(f"/get_scoring_latest - Success from {current_user.id} at {request.remote_addr}. No history found.")
+            return jsonify([])
+
+        # Fetch all service results for that specific round
+        results = ScoringHistory.query.filter_by(round=latest_round).all()
+        history_list = [h.to_dict() for h in results]
+
+        logger.info(f"/get_scoring_latest - Success from {current_user.id} at {request.remote_addr}. Round: {latest_round}, Count: {len(history_list)}")
+        return jsonify(history_list)
+    except Exception as e:
+        logger.error(f"/get_scoring_latest - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": "Database error while fetching latest scores"}), 500
+
+@app.route("/get_scoring_host", methods=["POST"])
+def get_scoring_host():
+    data = request.json
+    host_id = data.get("host_id")
+    start_round = data.get("start_round")
+    end_round = data.get("end_round")
+
+    if not host_id:
+        logger.warning(f"/get_scoring_host - Failed request from {current_user.id} at {request.remote_addr} - missing host_id. Full details: {data}")
+        return "Missing host_id", 400
+
+    try:
+        query = ScoringHistory.query.filter_by(host_id=host_id)
+        
+        if start_round is not None:
+            query = query.filter(ScoringHistory.round >= start_round)
+        if end_round is not None:
+            query = query.filter(ScoringHistory.round <= end_round)
+            
+        results = query.order_by(ScoringHistory.round.desc()).all()
+        history_list = [h.to_dict() for h in results]
+
+        logger.info(f"/get_scoring_host - Success from {current_user.id} at {request.remote_addr}. Host: {host_id}, Count: {len(history_list)}")
+        return jsonify(history_list)
+    except Exception as e:
+        logger.error(f"/get_scoring_host - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}. Data: {data}")
+        return jsonify({"error": "Database error while fetching host history"}), 500
+
+@app.route("/get_scoring_service", methods=["POST"])
+def get_scoring_service():
+    data = request.json
+    service_id = data.get("service_id")
+    start_round = data.get("start_round")
+    end_round = data.get("end_round")
+
+    if not service_id:
+        logger.warning(f"/get_scoring_service - Failed request from {current_user.id} at {request.remote_addr} - missing service_id. Full details: {data}")
+        return "Missing service_id", 400
+
+    try:
+        query = ScoringHistory.query.filter_by(service_id=service_id)
+        
+        if start_round is not None:
+            query = query.filter(ScoringHistory.round >= start_round)
+        if end_round is not None:
+            query = query.filter(ScoringHistory.round <= end_round)
+            
+        results = query.order_by(ScoringHistory.round.desc()).all()
+        history_list = [h.to_dict() for h in results]
+
+        logger.info(f"/get_scoring_service - Success from {current_user.id} at {request.remote_addr}. Service: {service_id}, Count: {len(history_list)}")
+        return jsonify(history_list)
+    except Exception as e:
+        logger.error(f"/get_scoring_service - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}. Data: {data}")
+        return jsonify({"error": "Database error while fetching service history"}), 500
+
+@app.route("/get_scoring_round", methods=["POST"])
+def get_scoring_round():
+    data = request.json
+    round_num = data.get("round")
+    start_round = data.get("start_round")
+    end_round = data.get("end_round")
+
+    # Validate that we have either a specific round or an interval
+    if round_num is None and (start_round is None and end_round is None):
+        logger.warning(f"/get_scoring_round - Failed from {current_user.id} - missing round data. Full details: {data}")
+        return "Missing round data", 400
+
+    try:
+        query = ScoringHistory.query
+        
+        if round_num is not None:
+            query = query.filter_by(round=round_num)
+        else:
+            if start_round is not None:
+                query = query.filter(ScoringHistory.round >= start_round)
+            if end_round is not None:
+                query = query.filter(ScoringHistory.round <= end_round)
+
+        results = query.all()
+        history_list = [h.to_dict() for h in results]
+
+        logger.info(f"/get_scoring_round - Success from {current_user.id} at {request.remote_addr}. Data: {data}, Count: {len(history_list)}")
+        return jsonify(history_list)
+    except Exception as e:
+        logger.error(f"/get_scoring_round - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}. Data: {data}")
+        return jsonify({"error": "Database error while fetching round data"}), 500
+
+@app.route("/set_scoring", methods=["POST"])
+def set_scoring():
+    data = request.json
+    service_id = data.get("service_id")
+    host_id = data.get("host_id")
+    round_num = data.get("round")
+    value = data.get("value")
+
+    if None in [service_id, host_id, round_num, value]:
+        logger.warning(f"/set_scoring - Failed request from {current_user.id} at {request.remote_addr} - missing data. Full details: {data}")
+        return "Missing data", 400
+
+    try:
+        # Check if a record already exists for this service and round to avoid duplicates
+        existing_record = ScoringHistory.query.filter_by(service_id=service_id, round=round_num).first()
+        
+        if existing_record:
+            existing_record.value = value
+            existing_record.host_id = host_id
+            msg = f"Updated round {round_num} for service {service_id}"
+        else:
+            new_score = ScoringHistory(
+                service_id=service_id,
+                host_id=host_id,
+                round=round_num,
+                value=value
+            )
+            db.session.add(new_score)
+            msg = f"Created round {round_num} for service {service_id}"
+
+        db.session.commit()
+        logger.info(f"/set_scoring - Successful connection from {current_user.id} at {request.remote_addr}. {msg}")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/set_scoring - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}. Data: {data}")
+        return jsonify({"error": "Database error while setting score"}), 500
+
+# --- ScoringCriteria Endpoints ---
+
+@app.route("/set_criteria", methods=["POST"])
+def set_criteria():
+    """Wipes existing criteria for a service and sets new ones."""
+    data = request.json
+    service_id = data.get("service_id")
+    criteria_list = data.get("criteria") # Expecting list of dicts: [{content, location}, ...]
+
+    if not all([service_id, criteria_list]):
+        logger.warning(f"/set_criteria - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {data}")
+        return "Missing data", 400
+
+    try:
+        # Remove existing criteria for this service
+        ScoringCriteria.query.filter_by(service_id=service_id).delete()
+        
+        for item in criteria_list:
+            new_crit = ScoringCriteria(
+                service_id=service_id,
+                host_id=item.get("host_id"),
+                content=item.get("content"),
+                location=item.get("location")
+            )
+            db.session.add(new_crit)
+        
+        db.session.commit()
+        logger.info(f"/set_criteria - Successful connection from {current_user.id} at {request.remote_addr}. Data: {data}")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/set_criteria - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/add_criteria", methods=["POST"])
+def add_criteria():
+    data = request.json
+    host_id = data.get("host_id")
+    service_id = data.get("service_id")
+    content = data.get("content")
+    location = data.get("location")
+
+    if not all([host_id, service_id, content, location]):
+        logger.warning(f"/add_criteria - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {data}")
+        return "Missing data", 400
+
+    try:
+        new_criteria = ScoringCriteria(
+            host_id=host_id,
+            service_id=service_id,
+            content=content,
+            location=location
+        )
+        db.session.add(new_criteria)
+        db.session.commit()
+
+        logger.info(f"/add_criteria - Successful connection from {current_user.id} at {request.remote_addr}. Added criteria ID {new_criteria.id}")
+        return jsonify({"status": "ok", "id": new_criteria.id})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/add_criteria - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": "Database error"}), 500
+
+@app.route("/remove_criteria", methods=["POST"])
+def remove_criteria():
+    data = request.json
+    criteria_id = data.get("id")
+
+    if not criteria_id:
+        logger.warning(f"/remove_criteria - Failed connection from {current_user.id} at {request.remote_addr} - missing ID. Full details: {data}")
+        return "Missing ID", 400
+
+    criteria = ScoringCriteria.query.get(criteria_id)
+    if not criteria:
+        logger.warning(f"/remove_criteria - Failed connection from {current_user.id} - criteria {criteria_id} not found.")
+        return "Criteria not found", 404
+
+    try:
+        db.session.delete(criteria)
+        db.session.commit()
+
+        logger.info(f"/remove_criteria - Successful connection from {current_user.id} at {request.remote_addr}. Removed ID {criteria_id}")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/remove_criteria - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/update_criteria_content", methods=["POST"])
+def update_criteria_content():
+    data = request.json
+    criteria_id = data.get("id")
+    new_content = data.get("content")
+
+    if not all([criteria_id, new_content]):
+        logger.warning(f"/update_criteria_content - Failed connection from {current_user.id} - missing data: {data}")
+        return "Missing data", 400
+
+    criteria = ScoringCriteria.query.get(criteria_id)
+    if not criteria:
+        return "Criteria not found", 404
+
+    try:
+        criteria.content = new_content
+        db.session.commit()
+        
+        logger.info(f"/update_criteria_content - User {current_user.id} updated content for ID {criteria_id}")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/update_criteria_content - Failed connection from {current_user.id} at {request.remote_addr} - Error: {e}")
+        return jsonify({"error": "Update failed"}), 500
+
+@app.route("/update_criteria_locations", methods=["POST"])
+def update_criteria_locations():
+    data = request.json
+    criteria_id = data.get("id")
+    new_location = data.get("location")
+
+    if not all([criteria_id, new_location]):
+        logger.warning(f"/update_criteria_locations - Failed connection from {current_user.id} - missing data: {data}")
+        return "Missing data", 400
+
+    criteria = ScoringCriteria.query.get(criteria_id)
+    if not criteria:
+        return "Criteria not found", 404
+
+    try:
+        criteria.location = new_location
+        db.session.commit()
+        
+        logger.info(f"/update_criteria_locations - User {current_user.id} updated location for ID {criteria_id}")
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"/update_criteria_locations - Failed connection from {current_user.id} at {request.remote_addr} - Error: {e}")
+        return jsonify({"error": "Update failed"}), 500
 
 # =================================
 # ============= MAIN ==============
