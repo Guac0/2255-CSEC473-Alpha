@@ -1,0 +1,48 @@
+---
+all:
+  vars:
+  children:
+    jumpbox:
+      vars:
+        ansible_host: "192.168.1.109"
+      hosts:
+        jumpbox:
+    deploy:
+      vars:
+        ansible_host: "192.168.1.111"
+      hosts:
+        deploy:
+    debian1:
+      vars:
+        ansible_host: "192.168.1.112"
+      hosts:
+        debian1:
+    winserv1:
+      vars:
+        ansible_host: "192.168.1.106"
+      hosts:
+        windows_server_1:
+
+    # Hosts that are Windows
+    windows:
+      children:
+        winserv1:
+    # Hosts that are Linux
+    linux:
+      children:
+        debian1:
+        deploy:
+        jumpbox:
+    unix:
+      children:
+        linux:
+    # Hosts for the Teams
+    inscope:
+      children:
+        debian1:
+        winserv1:
+    # Hosts for management/SIEMs
+    mgmt:
+      children:
+        deploy:
+        jumpbox:
