@@ -1,48 +1,82 @@
 ---
 all:
-  vars:
   children:
-    jumpbox:
-      vars:
-        ansible_host: "192.168.1.109"
+### all hosts
+    hosts:
       hosts:
-        jumpbox:
-    deploy:
-      vars:
-        ansible_host: "192.168.1.111"
-      hosts:
-        deploy:
-    debian1:
-      vars:
-        ansible_host: "192.168.1.112"
-      hosts:
-        debian1:
-    winserv1:
-      vars:
-        ansible_host: "192.168.1.106"
-      hosts:
-        windows_server_1:
+        canterlot:
+          ansible_host: 192.168.100.10
+        manehatten:
+          ansible_host: 192.168.100.11
+        ponyville:
+          ansible_host: 192.168.100.12
+        seaddle:
+          ansible_host: 192.168.100.13
+        crystal_empire:
+          ansible_host: 192.168.100.14
+        baltamare:
+          ansible_host: 192.168.100.15
+        neighara_falls:
+          ansible_host: 192.168.100.16
+        cloudsdale:
+          ansible_host: 192.168.100.17
+        vanhoover:
+          ansible_host: 192.168.100.18
+        fillydelphia:
+          ansible_host: 192.168.100.19
+        las_pegasus:
+          ansible_host: 192.168.100.20
+        appleloosa:
+          ansible_host: 192.168.100.21
+        everfree_forest:
+          ansible_host: 192.168.100.22
+        griffonstone:
+          ansible_host: 192.168.100.23
 
     # Hosts that are Windows
     windows:
-      children:
-        winserv1:
+      hosts:
+        canterlot:
+        manehatten:
+        baltamare:
+        neighara_falls:
+        fillydelphia:
+        las_pegasus:
+        appleloosa:
+        
     # Hosts that are Linux
     linux:
-      children:
-        debian1:
-        deploy:
-        jumpbox:
+      hosts:
+        ponyville:
+        seaddle:
+        crystal_empire:
+        cloudsdale:
+        vanhoover:
+        everfree_forest:
+        griffonstone:
+        
     unix:
       children:
         linux:
-    # Hosts for the Teams
-    inscope:
-      children:
-        debian1:
-        winserv1:
-    # Hosts for management/SIEMs
+
+    # Hosts for management/SIEM
     mgmt:
-      children:
-        deploy:
-        jumpbox:
+      hosts:
+        canterlot:
+
+    # Hosts that are inscope
+    inscope:
+      hosts:
+        manehatten:
+        ponyville:
+        seaddle:
+        crystal_empire:
+        baltamare:
+        neighara_falls:
+        cloudsdale:
+        vanhoover:
+        fillydelphia:
+        las_pegasus:
+        appleloosa:
+        everfree_forest:
+        griffonstone:
