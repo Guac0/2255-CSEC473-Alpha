@@ -17,7 +17,7 @@ from server import (
     periodic_ansible, setup_logging, create_db_tables, start_server
 )
 
-def check(service:Service) -> bool:
+def check(service:Service) -> int:
     """
     Used by processes to output check results to the main thread
 
@@ -28,11 +28,14 @@ def check(service:Service) -> bool:
     """
     # Match scorecheck name to a check
     check_obj : checks.Check = None
-    match service.scorecheck_name:
-        case 'http':
-            check_obj = checks.Http(service.id)
-        case _: # Default: no class match
-            return False
+    try:
+        match service.scorecheck_name:
+            case 'http':
+                check_obj = checks.Http(service.id)
+            case _: # Default: no class match
+                raise ValueError(f'Check type "{service.scorecheck_name}" not implemented.')
+    except Exception as e:
+        raise e
 
     return check_obj.check()
 
@@ -86,17 +89,21 @@ if __name__ == "__main__":
                     # I use timeout of 0 b/c I already waited above
                     # Use of async is mostly to get the timeout error
                     success = processes[i].get(0)
+                    message = "Check succeeded"
                 except mp.TimeoutError as e:
-                    success = False
+                    success = -1
+                    message = "Check timed out"
                 except Exception as e:
-                    success = False
+                    success = 0
+                    message = e
 
                 # Construct score
                 new_score = ScoringHistory (
                     service_id = services[i].id,
                     host = services[i].host_id,
                     round = round_num,
-                    value = success
+                    value = success,
+                    message = message
                 )
                 db.session.add(new_score)
                 logger.info(f"Created round {round_num} for service {services[i].id}")

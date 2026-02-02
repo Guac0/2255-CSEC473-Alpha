@@ -4,83 +4,91 @@ from server import (
     Service, ScoringUser, ScoringCriteria
 )
 
+class Criterion:
+    team:int
+    loc:str
+    content:str
+
+    def __init__(self, criterion:ScoringCriteria) -> None:
+        try:
+            self.team = criterion.team
+            self.loc = criterion.location
+            self.content = criterion.content
+        except Exception as e:
+            raise e
 
 class Check:
     '''
     Template for all checks.
-
-    Attributes
-    ---
-    check_id : int
-        the ID of the service that we are conducting the check for
-    host : str
-        the IP of the host that we are conducting the check on
-    criteria : list[str]
-        a list of criteria for the check
     
-    Methods
-    ---
-    check()
-        performs a check, returning whether the check succeeded or failed
+    :var check_id: the ID of the service that we are conducting the check for
+    :vartype check_id: int
+    :var host: the IP of the host that we are conducting the check on
+    :vartype host: str
+    :var criteria: a list of criteria for the check
     '''
     check_id:int
     host:str
-    criteria:list[str]
+    criteria:list[Criterion]
 
     def __init__(self, check:Service) -> None:
-        self.check_id = check.id
-        self.host = check.host_id
-        self.criteria = [criteria.content for criteria in check.scoringcriterias]
+        try:
+            self.check_id = check.id
+            self.host = check.host_id
+            self.criteria = [Criterion(criterion) for criterion in ScoringCriteria.query.filter_by(service_id = self.check_id)]
+        except Exception as e:
+            raise e
 
     def update_criteria(self) -> None:
         '''
         Updates the criteria from the database
         '''
-        criteria = ScoringCriteria.query.filter_by(service_id = self.check_id)
-        
-        self.criteria = [criterion.content for criterion in criteria]
+        try:
+            self.criteria = [Criterion(criterion) for criterion in ScoringCriteria.query.filter_by(service_id = self.check_id)]
+        except Exception as e:
+            raise e
 
-    def check () -> bool:
+    def check () -> int:
         '''
         Performs a check.
-
-        Returns
-        ---
-        bool
-            True if check succeeds, False if check fails
+        
+        :return: the integer identifier of the appropriate team
+        :rtype: int
         '''
-        return False
+
+        return -1
 
 class Http (Check):
-    website:str
-    text:str
 
     def __init__(self, check: Service) -> None:
-        super().__init__(check)
-
-        self.website = self.host
-
-        # Attempt to match criteria with fields
-        # This entire statement is BS'd
-        for criterion in self.criteria:
-            if "path" in criterion:
-                self.website += criterion
-            elif "text" in criterion:
-                self.text = criterion
-        
+        super().__init__(check)        
 
     def check (self):
-        res = subprocess.run(
-            ["curl", self.website],
-            capture_output=True,
-            text=True
-        )
-
-        if res.returncode != 0: return False
-
-        if self.text in res.stdout: return True
-
-        return False
+        err = []
+        for criterion in self.criteria:
+            res = subprocess.run(
+                ["curl", criterion.loc],
+                capture_output=True,
+                text=True
+            )
+            
+            # Check succeeded
+            if res.returncode == 0 and criterion.content in res.stdout:
+                return criterion.team
+            # Command failed
+            elif res.returncode != 0:
+                err.insert(0, res.stderr)
+            # Incorrect output
+            elif criterion.content not in res.stdout:
+                err.append("Content did not match expected value")
+        
+        # Some criterion caused an error
+        if len(err) > 0:
+            # Note that stderrs take precedent over content mismatches
+            raise Exception(err[0])
+        
+        # All criterion failed, meaning that the service is down :(
+        return 0
 
 class Ssh (Check):
     users:list[tuple[str,str]]
