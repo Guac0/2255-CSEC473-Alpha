@@ -287,6 +287,7 @@ class ScoringHistory(db.Model):
     host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'), index=True, nullable=False)
     round = db.Column(db.Integer, index=True, nullable=False)
     value = db.Column(db.Integer, nullable=False)
+    message = db.Column(db.String(128), nullable=False)
 
     __table_args__ = (
         # Optimizes 'Get all services for one round'
@@ -316,6 +317,7 @@ class ScoringCriteria(db.Model):
     #userlist_index = db.Column(db.Integer, index=True, nullable=False)
     content = db.Column(db.Text, nullable=False)
     location = db.Column(db.String(128), nullable=False)
+    team = db.Column(db.Integer, nullable=False)
 
     scoringuserlist = db.relationship('ScoringUserList', backref='scoringcriteria')
 
