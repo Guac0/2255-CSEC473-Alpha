@@ -1,9 +1,13 @@
 import threading
+import multiprocessing
 import time
 import sdnotify
+import sys
+import checks
 # Import your functions from your main app file
 from server import (
-    app, db, 
+    app, db,
+    ScoringCriteria, ScoringHistory, Service,
     CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE, SAVE_INTERVAL, STALE_TIME,
     DEFAULT_WEBHOOK_SLEEP_TIME, MAX_WEBHOOK_MSG_PER_MINUTE, WEBHOOK_URL,
     INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, AUTHCONFIG_STRICT_IP,
@@ -21,9 +25,20 @@ Used by threads to output check results to the main thread
 @param service_id the ID of the service associated with the check
 @param out the dictionary which takes the thread output. The key is service ID and the value is the check output (successful/nonsuccessful)
 '''
-def check(check_func:Callable, args:list, service_id:int, out:dict[int, int]):
-    out[check_name] = -1
-    out[check_name] = check_func(args)
+def check(args: tuple[Service, dict[int, int]]):
+    check_id:int = args[0].id
+    res: dict[int,int] = args[1]
+
+    # Match scorecheck name to a check
+    check_obj:checks.Check = None
+    match args[0].scorecheck_name:
+        case 'http':
+            check_obj = checks.Http(check_id)
+        case _: # Default: no class match
+            res[check_id] = 0
+            return
+
+    res[check_id] = 1 if check_obj.check(args) else 0
 
 if __name__ == "__main__":
     logger = setup_logging()
@@ -55,7 +70,7 @@ if __name__ == "__main__":
         services = Service.query.all()
     except Exception as e:
         logger.error("Failed to pull services - Exiting...")
-        return
+        sys.exit()
 
     # Perform checks
     round_num:int = 1
@@ -63,35 +78,43 @@ if __name__ == "__main__":
         logger.info(f'Beginning to score round {round_num}')
 
         res : dict[int, int] = {} # Relate service ID to result
+        check_processes : list[multiprocessing.Process] = [] # Threads
         # Get check info
         for service in services:
-            # Load in scoring criteria
-            session.query(ScoringCriteria).\
-                filter(ScoringCriteria.service_id == service.id)
-            # Match to score type (HTTP, etc)
-            # Add new thread to checks dict, with value being -1
+            res[services.id] = -1
 
+            check_processes.append(multiprocessing.Process(
+                target= check,
+                args= [service, res]
+            ))
         # Start checks
-        for check in checks:
-            check.start()
+        for check_process in check_processes:
+            check_process.start()
 
         # Wait for checks
         time.sleep(60)
 
+        # Stop all check processes
+        # If a process hasn't finished, theres probably something funky
+        # Going on
+        for check_process in check_processes:
+            if check_process.is_alive():
+                check_process.terminate()
+
         # Update to service history
         for service in services:
-            newScore = ScoringHistory(
+            new_score = ScoringHistory(
                 service_id = service.id,
                 host_id = service.host_id,
                 round = round_num,
                 value = res[services.id]
             )
             db.session.add(new_score)
-            logger.info(f"Created round {round_num} for service {service_id}")
+            logger.info(f"Created round {round_num} for service {service.id}")
             db.session.commit()
 
         # Increment round number
-        round_num ++
+        round_num += 1
 
             
 
