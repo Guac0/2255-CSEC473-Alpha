@@ -1,3 +1,6 @@
+---
+# Variables that apply to all Windows hosts.
+
 #ansible_user: localuser
 #ansible_password: password
 
@@ -7,7 +10,6 @@
 
 ansible_connection: winrm
 ansible_winrm_server_cert_validation: ignore
-windows_data: "This is a windows server"
 #ansible_winrm_transport: ntlm
 #ansible_port: 5985
 

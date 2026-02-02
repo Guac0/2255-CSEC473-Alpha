@@ -1,0 +1,8 @@
+---
+# For use with the "example" playbook
+- name: Execute Example Tasks #any string works
+  hosts: all # Considers all hosts in the "all" group in inventory.yaml to be valid destinations
+  roles:
+    - example # The role (folder name in roles/) to run
+  tags: 
+    - example # Just for organization - you can execute a playbook with a specific tag and all roles with that tag will be executed

@@ -1,3 +1,6 @@
+---
+# Variables that apply to all hosts.
+
 greyteam_user: greyteam
 greyteam_password: ponyuploc0!
 
