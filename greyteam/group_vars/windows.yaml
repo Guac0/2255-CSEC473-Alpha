@@ -1,22 +1,25 @@
-ansible_connection: winrm
 #ansible_user: localuser
 #ansible_password: password
-ansible_winrm_transport: ntlm
+
+#ansible_become: yes
+#ansible_become_user: SYSTEM
+#ansible_become_method: runas
+
+ansible_connection: winrm
 ansible_winrm_server_cert_validation: ignore
-ansible_port: 5985
+windows_data: "This is a windows server"
+#ansible_winrm_transport: ntlm
+#ansible_port: 5985
+
+# PSRP
 #ansible_connection: psrp
 #ansible_psrp_cert_validation: ignore
 #ansible_psrp_protocol: https
 #ansible_psrp_auth: ntlm
 #ansible_psrp_credssp_auth_mechanism: ntlm
-#ansible_become: yes
-#ansible_become_user: SYSTEM
-#ansible_become_method: runas
-ansible_python_interpreter: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
 
-
-
-
+#ansible_python_interpreter: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+payload_key_location: 'C:\\greyteam_key'
 windows_working_dir: C:\\tmp\\ansible
 windows_local_users:
   - luser1

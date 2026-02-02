@@ -4,4 +4,3 @@ ansible_become_user: root
 
 # Payload keying
 payload_key_location: '/greyteam_key'
-payload_key_content: 'Do not modify this file in any way (name, content, permissions). Contact greyteam if you have questions.'
