@@ -1,5 +1,5 @@
 import threading
-import multiprocessing
+import multiprocessing as mp
 import time
 import sdnotify
 import sys
@@ -7,7 +7,7 @@ import checks
 # Import your functions from your main app file
 from server import (
     app, db,
-    ScoringCriteria, ScoringHistory, Service,
+    ScoringHistory, Service, Host,
     CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE, SAVE_INTERVAL, STALE_TIME,
     DEFAULT_WEBHOOK_SLEEP_TIME, MAX_WEBHOOK_MSG_PER_MINUTE, WEBHOOK_URL,
     INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, AUTHCONFIG_STRICT_IP,
@@ -17,28 +17,24 @@ from server import (
     periodic_ansible, setup_logging, create_db_tables, start_server
 )
 
-'''
-Used by threads to output check results to the main thread
+def check(service:Service) -> bool:
+    """
+    Used by processes to output check results to the main thread
 
-@param check_func the function which carries out the check
-@param args arguments to put into the check
-@param service_id the ID of the service associated with the check
-@param out the dictionary which takes the thread output. The key is service ID and the value is the check output (successful/nonsuccessful)
-'''
-def check(args: tuple[Service, dict[int, int]]):
-    check_id:int = args[0].id
-    res: dict[int,int] = args[1]
-
+    Parameters
+    ---
+    service : Service
+        The Service object to perform a check for
+    """
     # Match scorecheck name to a check
-    check_obj:checks.Check = None
-    match args[0].scorecheck_name:
+    check_obj : checks.Check = None
+    match service.scorecheck_name:
         case 'http':
-            check_obj = checks.Http(check_id)
+            check_obj = checks.Http(service.id)
         case _: # Default: no class match
-            res[check_id] = 0
-            return
+            return False
 
-    res[check_id] = 1 if check_obj.check(args) else 0
+    return check_obj.check()
 
 if __name__ == "__main__":
     logger = setup_logging()
@@ -67,7 +63,7 @@ if __name__ == "__main__":
     # Pull services from db
     try:
         logger.info("Pulling services")
-        services = Service.query.all()
+        services:list[Service] = Service.query.all()
     except Exception as e:
         logger.error("Failed to pull services - Exiting...")
         sys.exit()
@@ -77,43 +73,35 @@ if __name__ == "__main__":
     while True:
         logger.info(f'Beginning to score round {round_num}')
 
-        res : dict[int, int] = {} # Relate service ID to result
-        check_processes : list[multiprocessing.Process] = [] # Threads
-        # Get check info
-        for service in services:
-            res[services.id] = -1
+        # Pool of processes
+        with mp.Pool(processes=len(services)) as pool:
+            # Carry out checks
+            processes = [pool.apply_async(check, (service.id)) for service in services]
 
-            check_processes.append(multiprocessing.Process(
-                target= check,
-                args= [service, res]
-            ))
-        # Start checks
-        for check_process in check_processes:
-            check_process.start()
+            # Wait for round end
+            time.sleep(60)
 
-        # Wait for checks
-        time.sleep(60)
+            for i in range(services):
+                try:
+                    # I use timeout of 0 b/c I already waited above
+                    # Use of async is mostly to get the timeout error
+                    success = processes[i].get(0)
+                except mp.TimeoutError as e:
+                    success = False
+                except Exception as e:
+                    success = False
 
-        # Stop all check processes
-        # If a process hasn't finished, theres probably something funky
-        # Going on
-        for check_process in check_processes:
-            if check_process.is_alive():
-                check_process.terminate()
-
-        # Update to service history
-        for service in services:
-            new_score = ScoringHistory(
-                service_id = service.id,
-                host_id = service.host_id,
-                round = round_num,
-                value = res[services.id]
-            )
-            db.session.add(new_score)
-            logger.info(f"Created round {round_num} for service {service.id}")
-            db.session.commit()
-
-        # Increment round number
+                # Construct score
+                new_score = ScoringHistory (
+                    service_id = services[i].id,
+                    host = services[i].host_id,
+                    round = round_num,
+                    value = success
+                )
+                db.session.add(new_score)
+                logger.info(f"Created round {round_num} for service {services[i].id}")
+                db.session.commit()
+            
         round_num += 1
 
             

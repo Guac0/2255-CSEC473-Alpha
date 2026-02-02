@@ -1,11 +1,28 @@
 import subprocess
 import random
 from server import (
-    Service, ScoringUser
+    Service, ScoringUser, ScoringCriteria
 )
 
-''' The Check class. Acts as a template for all checks. '''
+
 class Check:
+    '''
+    Template for all checks.
+
+    Attributes
+    ---
+    check_id : int
+        the ID of the service that we are conducting the check for
+    host : str
+        the IP of the host that we are conducting the check on
+    criteria : list[str]
+        a list of criteria for the check
+    
+    Methods
+    ---
+    check()
+        performs a check, returning whether the check succeeded or failed
+    '''
     check_id:int
     host:str
     criteria:list[str]
@@ -15,15 +32,25 @@ class Check:
         self.host = check.host_id
         self.criteria = [criteria.content for criteria in check.scoringcriterias]
 
-    '''
-    Performs a check.
+    def update_criteria(self) -> None:
+        '''
+        Updates the criteria from the database
+        '''
+        criteria = ScoringCriteria.query.filter_by(service_id = self.check_id)
+        
+        self.criteria = [criterion.content for criterion in criteria]
 
-    @returns True if check succeeded, False if check failed
-    '''
     def check () -> bool:
+        '''
+        Performs a check.
+
+        Returns
+        ---
+        bool
+            True if check succeeds, False if check fails
+        '''
         return False
 
-''' HTTP check, which checks if a piece of text is within a web response'''
 class Http (Check):
     website:str
     text:str
