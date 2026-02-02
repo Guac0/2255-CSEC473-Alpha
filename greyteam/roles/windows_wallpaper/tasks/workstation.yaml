@@ -1,0 +1,13 @@
+---
+- name: Change WallpaperStyle to 4 (all users) # This does not override windows not being activated and blocking wallpaper change
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System
+    name: WallpaperStyle
+    data: 4
+
+- name: Change Wallpaper (all users) # This does not override windows not being activated and blocking wallpaper change
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System
+    name: Wallpaper
+    data: "C:\\wallpaper\\Wallpaper.jpg"
+

@@ -1,0 +1,21 @@
+---
+- name: Check if hostname-specific wallpaper exists
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ inventory_hostname_short }}.jpg" # role_path needed due to delegation
+  register: wallpaper_check
+  delegate_to: localhost
+
+- name: Ensure wallpaper folder exists
+  ansible.windows.win_file:
+    path: "C:\\wallpaper"
+    state: directory
+
+- name: Copy Wallpaper to Working Directory
+  ansible.windows.win_copy:
+    src: "{{ wallpaper_check.stat.exists | ternary('files/' + inventory_hostname_short + '.jpg', 'files/wallpaper.jpg') }}"
+    dest: "{{ windows_working_dir }}\\Wallpaper.jpg"
+
+- name: Copy Wallpaper to Wallpaper Directory
+  ansible.windows.win_copy:
+    src: "{{ wallpaper_check.stat.exists | ternary('files/' + inventory_hostname_short + '.jpg', 'files/wallpaper.jpg') }}"
+    dest: "C:\\wallpaper\\Wallpaper.jpg"
