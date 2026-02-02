@@ -5,11 +5,22 @@
   register: app_check
   ignore_errors: true
 
+# If app is installed, nothing below this line will execute
+
+# Optimize file transfer by skipping transfer if installer is already present
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ windows_working_dir }}\\mssql"
+  register: installer_check
+  when: not app_check.stat.exists
+
 - name: Create Directory
   ansible.windows.win_file:
     path: "{{ windows_working_dir }}\\mssql"
     state: directory
-  when: not app_check.stat.exists
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
 
 - name: Copy over installer file
   ansible.windows.win_copy: 
@@ -24,7 +35,7 @@
   when: not app_check.stat.exists
 
 - name: Install MSSQL
-  ansible.windows.win_command: './installer.exe /ConfigurationFile={{ windows_working_dir }}\\config.ini {{ sa_password_switch }}' #/AGTSVCPASSWORD
+  ansible.windows.win_command: './installer.exe /ConfigurationFile={{ windows_working_dir }}\\config.ini {{ sa_password_switch }}'
   args:
     chdir: "{{ windows_working_dir }}\\mssql"
   when: not app_check.stat.exists

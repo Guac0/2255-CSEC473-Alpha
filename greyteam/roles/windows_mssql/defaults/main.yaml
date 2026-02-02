@@ -1,9 +1,10 @@
 ---
+# See templates/config.ini.j2 for a full explanation of each of these parameters
 mssql_sqlsvcaccount: "domain\admin"
 mssql_sqlsvcpassword: "{{ users_password }}"
 mssql_sqlsysadminaccounts: "Administrators" #"domain\admin"
 mssql_database_name: "db"
-mssql_host: "{{ ansible_default_ipv4.address }}"
-mssql_port: 1433
 mssql_agtsvcaccount: "NT AUTHORITY\NETWORK SERVICE" #NT Service\SQLSERVERAGENT"
 mssql_instancename: "MSSQLSERVER"
+
+mssql_host: "{{ ansible_default_ipv4.address }}"

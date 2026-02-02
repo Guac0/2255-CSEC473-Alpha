@@ -1,4 +1,6 @@
 ---
+# Checks the 3 most reliable locations on Windows systems that are set if Windows believes a restart is pending
+# Source: u/zoredache at https://www.reddit.com/r/ansible/comments/kt5q02/install_pending_windows_updates_and_reboot_first/
 - name: Examine various registry locations identify a pending reboot
   win_shell: |
 

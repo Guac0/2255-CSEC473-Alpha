@@ -1,4 +1,5 @@
 ; Config file for MSSQL2025 Express
+; See: https://learn.microsoft.com/en-us/sql/database-engine/install-windows/install-sql-server-from-the-command-prompt?view=sql-server-ver17
 [OPTIONS]
 
 ; Suppress output and GUIs
@@ -27,6 +28,9 @@ SQLSYSADMINACCOUNTS="{{ mssql_sqlsysadminaccounts }}"
 
 ; REQUIRED - Specifies the account for the SQL Server Agent service.
 AGTSVCACCOUNT="{{ mssql_agtsvcaccount }}"
+
+; Specifies the password for SQL Server Agent service account. This parameter can be omitted when using a managed service account, virtual account, or built-in account.
+;AGTSVCPASSWORD=""
 
 ; Specifies the startup mode for the SQL Server Agent service.
 AGTSVCSTARTUPTYPE="Automatic"
