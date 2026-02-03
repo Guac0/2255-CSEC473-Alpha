@@ -107,7 +107,7 @@
 ####### Generic #######
 
 - name: Deploy Linux Standards
-  hosts: linux:&inscope
+  hosts: linux
   roles:
     - linux_standards
   tags:
@@ -129,11 +129,22 @@
 
 ####### Finish ########
 
+- name: Clean Up
+  hosts: linux
+  roles:
+    - linux_finish
+  tags:
+    - linux 
+    - team
+    - finish
+    - post_deploy
+
 - name: Reboot
-  hosts: linux:&inscope
+  hosts: linux
   roles:
     - linux_reboot
   tags:
     - linux 
     - team 
     - reboot
+    - post_deploy

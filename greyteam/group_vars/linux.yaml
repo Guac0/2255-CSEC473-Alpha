@@ -7,3 +7,5 @@ ansible_become_user: root
 
 # Payload keying
 payload_key_location: '/greyteam_key'
+
+working_dir: /tmp/ansible

@@ -22,7 +22,7 @@ ansible_winrm_server_cert_validation: ignore
 
 #ansible_python_interpreter: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
 payload_key_location: 'C:\\greyteam_key'
-windows_working_dir: C:\\tmp\\ansible
+working_dir: C:\\tmp\\ansible
 windows_local_users:
   - luser1
   - luser2

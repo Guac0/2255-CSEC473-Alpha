@@ -1,4 +1,12 @@
 ---
+- name: Create working dir
+  ansible.builtin.file:
+    path: "{{ working_dir }}"
+    state: directory
+    mode: '0777'
+    owner: root
+    group: root
+
 - name: Set timezone to US Eastern (October time)
   ansible.builtin.command: timedatectl set-timezone America/New_York
 
