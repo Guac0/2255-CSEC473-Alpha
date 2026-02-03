@@ -125,6 +125,16 @@
     - team 
     - users
 
+- name: Deploy Rustdesk Linux
+  hosts: linux:&gui
+  roles:
+    - linux_rustdesk
+  tags:
+    - linux 
+    - team 
+    - rustdesk
+    - rustdesk_linux
+
 ###### Services #######
 
 ####### Finish ########
@@ -144,7 +154,7 @@
   roles:
     - linux_reboot
   tags:
-    - linux 
-    - team 
+    - linux
+    - team
     - reboot
     - post_deploy

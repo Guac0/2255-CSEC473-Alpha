@@ -318,7 +318,12 @@ all:
         griffonstone:
         jumpboxes:
         mgmt:
-
     unix:
       children:
         linux:
+    
+    gui:
+      children:
+        windows:
+        jumpboxes:
+        #todo: team hosts

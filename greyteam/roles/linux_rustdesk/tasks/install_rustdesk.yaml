@@ -1,0 +1,13 @@
+---
+- name: Copy deb file
+  ansible.builtin.copy:
+    src: 'files/rustdesk-1.4.5-x86_64.deb'
+    dest: '{{ working_dir }}/rustdesk-1.4.5-x86_64.deb'
+    owner: root
+    group: root
+    mode: '0444'
+  creates: '{{ working_dir }}/rustdesk-1.4.5-x86_64.deb'
+
+- name: Install deb file
+  ansible.builtin.apt:
+    deb: "{{ working_dir }}/rustdesk-1.4.5-x86_64.deb"
