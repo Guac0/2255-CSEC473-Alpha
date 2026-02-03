@@ -20,6 +20,12 @@
     - "xz-utils"
   ignore_errors: yes
 
+- name: Install Remmina for GUI hosts
+  package:
+    name: remmina
+    state: present
+  when: "'gui' in group_names"
+
 #- name: Install python packages
 #  ansible.builtin.pip:
 #    name: "{{ item }}"

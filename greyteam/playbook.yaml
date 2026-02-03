@@ -51,6 +51,16 @@
   - team
   - local_users
 
+#- name: Deploy Rustdesk Windows
+#  hosts: windows:&gui
+#  roles:
+#    - windows_rustdesk
+#  tags:
+#    - windows 
+#    - team 
+#    - rustdesk
+#    - rustdesk_windows
+
 - name: Install Utilities
   hosts: windows:&inscope
   roles:
