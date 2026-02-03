@@ -1,0 +1,6 @@
+---
+# User who can be logged in to CUPS, and who would get the print jobs (if they actually worked)
+printer_admin: "cups_admin"
+printer_admin_passwd: "password"
+# Printer name to be displayed. Should not contain special characters other than _
+printer_name: "printer"

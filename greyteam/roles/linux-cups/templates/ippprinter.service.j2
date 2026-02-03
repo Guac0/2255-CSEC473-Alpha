@@ -1,0 +1,5 @@
+[Unit]
+Description=IPP Printer (save to file)
+
+[Service]
+ExecStart=/usr/sbin/ippeveprinter -d /home/{{ printer_admin }}/print -c /usr/sbin/ippeveps {{ printer_name }}
