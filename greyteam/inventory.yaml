@@ -28,7 +28,7 @@ all:
       hosts:
         seaddle:
 
-    crystal_empire:
+    crystal-empire:
       vars:
         ansible_host: "10.1.1.5"   # Database (CachyOS)
       hosts:
@@ -40,7 +40,7 @@ all:
       hosts:
         baltamare:
 
-    neighara_falls:
+    neighara-falls:
       vars:
         ansible_host: "192.168.1.2"   # Win10 WKST2
       hosts:
@@ -60,11 +60,11 @@ all:
 
     fillydelphia:
       vars:
-        ansible_host: "192.168.1.5"  # Windows XP Boss
+        ansible_host: "192.168.1.6"  # Windows XP Boss
       hosts:
         fillydelphia:
 
-    las_pegasus:
+    las-pegasus:
       vars:
         ansible_host: "172.16.1.1"  # External Web (IIS)
       hosts:
@@ -76,7 +76,7 @@ all:
       hosts:
         appleloosa:
 
-    everfree_forest:
+    everfree-forest:
       vars:
         ansible_host: "172.16.1.3"  # IRC Chat
       hosts:
@@ -87,7 +87,213 @@ all:
         ansible_host: "172.16.1.4"  # External FTP
       hosts:
         griffonstone:
+    
+# Blue team jumpboxes
+    jumpblue1:
+      vars:
+        ansible_host: "172.20.0.41"
+      hosts:
+        jumpblue1:
+    jumpblue2:
+      vars:
+        ansible_host: "172.20.0.42"
+      hosts:
+        jumpblue2:
+    jumpblue3:
+      vars:
+        ansible_host: "172.20.0.43"
+      hosts:
+        jumpblue3:
+    jumpblue4:
+      vars:
+        ansible_host: "172.20.0.44"
+      hosts:
+        jumpblue4:
+    jumpblue5:
+      vars:
+        ansible_host: "172.20.0.45"
+      hosts:
+        jumpblue5:
+    jumpblue6:
+      vars:
+        ansible_host: "172.20.0.46"
+      hosts:
+        jumpblue6:
+    jumpblue7:
+      vars:
+        ansible_host: "172.20.0.47"
+      hosts:
+        jumpblue7:
+    jumpblue8:
+      vars:
+        ansible_host: "172.20.0.48"
+      hosts:
+        jumpblue8:
+    jumpblue9:
+      vars:
+        ansible_host: "172.20.0.49"
+      hosts:
+        jumpblue9:
+    jumpblue10:
+      vars:
+        ansible_host: "172.20.0.40"
+      hosts:
+        jumpblue10:
 
+# Grey team jumpboxes
+    jumpgrey1:
+      vars:
+        ansible_host: "172.20.0.71"
+      hosts:
+        jumpgrey1:
+    jumpgrey2:
+      vars:
+        ansible_host: "172.20.0.72"
+      hosts:
+        jumpgrey2:
+    jumpgrey3:
+      vars:
+        ansible_host: "172.20.0.73"
+      hosts:
+        jumpgrey3:
+    jumpgrey4:
+      vars:
+        ansible_host: "172.20.0.74"
+      hosts:
+        jumpgrey4:
+    jumpgrey5:
+      vars:
+        ansible_host: "172.20.0.75"
+      hosts:
+        jumpgrey5:
+    jumpgrey6:
+      vars:
+        ansible_host: "172.20.0.76"
+      hosts:
+        jumpgrey6:
+    jumpgrey7:
+      vars:
+        ansible_host: "172.20.0.77"
+      hosts:
+        jumpgrey7:
+    jumpgrey8:
+      vars:
+        ansible_host: "172.20.0.78"
+      hosts:
+        jumpgrey8:
+    jumpgrey9:
+      vars:
+        ansible_host: "172.20.0.79"
+      hosts:
+        jumpgrey9:
+    jumpgrey10:
+      vars:
+        ansible_host: "172.20.0.70"
+      hosts:
+        jumpgrey10:
+
+# Deploy
+    deploy:
+      vars:
+        ansible_host: "172.20.0.80"
+      hosts:
+        deploy:
+
+# Scoring
+    scoring:
+      vars:
+        ansible_host: "172.20.0.100"
+      hosts:
+        scoring:
+    scoring1:
+      vars:
+        ansible_host: "172.20.0.67"
+      hosts:
+        scoring1:
+    scoring2:
+      vars:
+        ansible_host: "172.20.0.82"
+      hosts:
+        scoring2:
+    scoring3:
+      vars:
+        ansible_host: "172.20.0.90"
+      hosts:
+        scoring3:
+    scoring4:
+      vars:
+        ansible_host: "172.20.0.106"
+      hosts:
+        scoring4:
+    scoring5:
+      vars:
+        ansible_host: "172.20.0.115"
+      hosts:
+        scoring5:
+
+
+# Groups
+    # Hosts for the Teams
+    inscope:
+      children:
+        manehatten:
+        ponyville:
+        seaddle:
+        crystal-empire:
+        baltamare:
+        neighara-falls:
+        cloudsdale:
+        vanhoover:
+        fillydelphia:
+        las-pegasus:
+        appleloosa:
+        everfree-forest:
+        griffonstone:
+    # Hosts for scoring
+    scoring_workers:
+      children:
+        scoring1:
+        scoring2:
+        scoring3:
+        scoring4:
+        scoring5:
+    scoring_all:
+      children:
+        scoring_workers:
+        scoring:
+    jumpgrey:
+      children:
+        jumpgrey1:
+        jumpgrey2:
+        jumpgrey3:
+        jumpgrey4:
+        jumpgrey5:
+        jumpgrey6:
+        jumpgrey7:
+        jumpgrey8:
+        jumpgrey9:
+        jumpgrey10:
+    jumpblue:
+      children:
+        jumpblue1:
+        jumpblue2:
+        jumpblue3:
+        jumpblue4:
+        jumpblue5:
+        jumpblue6:
+        jumpblue7:
+        jumpblue8:
+        jumpblue9:
+        jumpblue10:
+    jumpboxes:
+      children:
+        jumpblue:
+        jumpgrey:
+    # Hosts for management
+    mgmt:
+      children:
+        deploy:
+        scoring_all:
 
 # OS-based groups
     # Hosts that are Windows
@@ -96,42 +302,23 @@ all:
         canterlot:
         manehatten:
         baltamare:
-        neighara_falls:
+        neighara-falls:
         fillydelphia:
-        las_pegasus:
+        las-pegasus:
         appleloosa:
     # Hosts that are Linux
     linux:
       children:
         ponyville:
         seaddle:
-        crystal_empire:
+        crystal-empire:
         cloudsdale:
         vanhoover:
-        everfree_forest:
+        everfree-forest:
         griffonstone:
+        jumpboxes:
+        mgmt:
+
     unix:
       children:
         linux:
-
-
-    # Hosts for the Teams
-    inscope:
-      children:
-        manehatten:
-        ponyville:
-        seaddle:
-        crystal_empire:
-        baltamare:
-        neighara_falls:
-        cloudsdale:
-        vanhoover:
-        fillydelphia:
-        las_pegasus:
-        appleloosa:
-        everfree_forest:
-        griffonstone:
-    # Hosts for management/SIEMs
-    mgmt:
-      children:
-        canterlot:
