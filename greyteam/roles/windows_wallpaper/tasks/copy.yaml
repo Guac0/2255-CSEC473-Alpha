@@ -13,7 +13,7 @@
 - name: Copy Wallpaper to Working Directory
   ansible.windows.win_copy:
     src: "{{ wallpaper_check.stat.exists | ternary('files/' + inventory_hostname_short + '.jpg', 'files/wallpaper.jpg') }}"
-    dest: "{{ windows_working_dir }}\\Wallpaper.jpg"
+    dest: "{{ working_dir }}\\Wallpaper.jpg"
 
 - name: Copy Wallpaper to Wallpaper Directory
   ansible.windows.win_copy:

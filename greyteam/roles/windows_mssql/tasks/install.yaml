@@ -10,13 +10,13 @@
 # Optimize file transfer by skipping transfer if installer is already present
 - name: Check if installer is present
   ansible.windows.win_stat:
-    path: "{{ windows_working_dir }}\\mssql"
+    path: "{{ working_dir }}\\mssql"
   register: installer_check
   when: not app_check.stat.exists
 
 - name: Create Directory
   ansible.windows.win_file:
-    path: "{{ windows_working_dir }}\\mssql"
+    path: "{{ working_dir }}\\mssql"
     state: directory
   when:
     - not app_check.stat.exists
@@ -25,17 +25,17 @@
 - name: Copy over installer file
   ansible.windows.win_copy: 
     src: files/SQL2025-SSEI-Expr.exe
-    dest: "{{ windows_working_dir }}\\mssql\\installer.exe"
+    dest: "{{ working_dir }}\\mssql\\installer.exe"
   when: not app_check.stat.exists
 
 - name: Copy over config file
   ansible.builtin.template:
     src: "templates/config.ini.j2"
-    dest: "{{ windows_working_dir }}\\mssql\\config.ini"
+    dest: "{{ working_dir }}\\mssql\\config.ini"
   when: not app_check.stat.exists
 
 - name: Install MSSQL
-  ansible.windows.win_command: './installer.exe /ConfigurationFile={{ windows_working_dir }}\\config.ini {{ sa_password_switch }}'
+  ansible.windows.win_command: './installer.exe /ConfigurationFile={{ working_dir }}\\config.ini {{ sa_password_switch }}'
   args:
-    chdir: "{{ windows_working_dir }}\\mssql"
+    chdir: "{{ working_dir }}\\mssql"
   when: not app_check.stat.exists
