@@ -1,14 +1,16 @@
 ---
-# Note: this file is built for a Linux host.
-# Windows hosts have their own task versions (btw, they're called modules)
-# for example: ansible.windows.win_copy
+# Eleanor Fan
+# ezf6031
+# 02/03/2026
 
+# Base install of CUPS
 - name: Install CUPS
   ansible.builtin.apt:
     name: cups
     update_cache: yes
   become: yes
 
+# Overwrites default config to allow public access to the web GUI
 - name: Alter config
   ansible.builtin.copy:
     src: "files/cupsd.conf"
@@ -16,6 +18,7 @@
     owner: root
     group: root
 
+# Create user to login to GUI & receive print files
 - name: Create printer admin
   ansible.builtin.user:
     name: "{{ printer_admin }}"
@@ -24,11 +27,14 @@
     group: lpadmin
   become: yes
 
+# Create directory to output print files to
 - name: Create printer output directory
   ansible.builtin.file:
     path: "/home/{{ printer_admin }}/print"
     state: directory
 
+# Create & start service so that we have a simulated printer
+# to actually print to
 - name: Create printer service
   ansible.builtin.template:
     src: "templates/ippprinter.service.j2"
@@ -41,6 +47,7 @@
     state: restarted
   become: yes
 
+# Set our new printer to be the default printer
 - name: Set printer to default
   ansible.builtin.command:
     cmd: "lpoptions -d {{ printer_name }}"

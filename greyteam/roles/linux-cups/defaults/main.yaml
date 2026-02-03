@@ -1,4 +1,8 @@
 ---
+# Eleanor Fan
+# ezf6031
+# 02/03/2026
+
 # User who can be logged in to CUPS, and who would get the print jobs (if they actually worked)
 printer_admin: "cups_admin"
 printer_admin_passwd: "password"
