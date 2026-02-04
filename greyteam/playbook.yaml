@@ -1,6 +1,6 @@
 ---
 - name: Ping Linux
-  hosts: all
+  hosts: linux
   tags:
     - ping
     - linux
@@ -9,7 +9,7 @@
       ansible.builtin.ping:
 
 - name: Ping Windows
-  hosts: all
+  hosts: windows
   tags: 
     - ping
     - windows
