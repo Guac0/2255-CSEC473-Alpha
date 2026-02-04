@@ -9,14 +9,11 @@ resource "openstack_compute_instance_v2" "canterlot" {
     uuid                  = "d05fa605-c188-45b8-a3d4-5bb0fe4560fa"
     source_type           = "image"
     destination_type      = "volume"
-    volume_size           = 100
+    volume_size           = 60
     boot_index            = 0
     delete_on_termination = true
   }
 
-  network {
-    name = "MAIN-NAT"
-  }
 
   network {
     uuid        = openstack_networking_network_v2.network_blue.id
@@ -25,5 +22,5 @@ resource "openstack_compute_instance_v2" "canterlot" {
 
   security_groups = ["secgroup_inscope"]
 
-  user_data = file("cloudbased-config.ps1")
+  user_data = file("cloudbase-config.ps1")
 }
