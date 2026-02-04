@@ -5,6 +5,9 @@ all:
       hosts:
         canterlot:
           ansible_host: "10.0.10.1"
+    dns: #alias dc to dns
+      children:
+        dc:
   
     mssql:
       hosts:
