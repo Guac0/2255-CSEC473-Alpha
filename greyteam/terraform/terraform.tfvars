@@ -35,7 +35,7 @@ scoringworker = {
 deb13 = {
   "apache2" = { hostname = "ponyvile", ip = "10.0.10.3", network = "core"}
   "mariadb" = { hostname = "seaddle", ip = "10.0.10.4", network = "core"}
-  "cups" = { hostname = "todo", ip = "10.0.10.5", network = "core"}
+  "cups" = { hostname = "trotsylvania", ip = "10.0.10.5", network = "core"}
   "irc" = { hostname = "everfree-forest", ip = "10.0.20.3", network = "dmz"}
   "nginx" = { hostname = "griffonstone", ip = "10.0.20.4", network = "dmz"}
 }
