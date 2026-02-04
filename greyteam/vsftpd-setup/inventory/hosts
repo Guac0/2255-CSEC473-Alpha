@@ -1,3 +1,0 @@
-[ftp_servers]
-ctf-ftp ansible_host=100.65.6.247 ansible_user=student ansible_become=true
-

@@ -1,6 +1,0 @@
-- name: restart vsftpd
-  systemd:
-    name: vsftpd
-    state: restarted
-    daemon_reload: yes
-
