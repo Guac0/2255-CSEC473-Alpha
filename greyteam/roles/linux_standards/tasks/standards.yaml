@@ -42,4 +42,4 @@
     owner: root
     group: root
     mode: '0444'
-  when: "'team_hosts' in group_names"
+  when: "'inscope' in group_names"

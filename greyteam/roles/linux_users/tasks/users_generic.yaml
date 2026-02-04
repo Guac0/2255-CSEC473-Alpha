@@ -1,0 +1,12 @@
+---
+- name: Remove cyberrange user
+  ansible.builtin.user:
+    name: cyberrange
+    state: absent
+    remove: yes
+
+- name: Change root password
+  ansible.builtin.user:
+    name: root
+    password: "{{ team_password | ansible.builtin.password_hash('sha512') }}"
+  when: "'inscope' in group_names or 'jumpblue' in group_names"

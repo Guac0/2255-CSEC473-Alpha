@@ -144,23 +144,14 @@
     - stds
 
 - name: Deploy Linux Users
-  hosts: linux:&inscope
+  hosts: linux
   roles:
     - linux_users
   tags:
     - linux 
     - team 
     - users
-
-- name: Deploy Linux User Blueteam
-  hosts: linux:&jumpblue
-  roles:
-    - linux_users_blue
-  tags:
-    - linux 
-    - team 
-    - users
-    - users_blue
+    - users_linux
 
 - name: Deploy Rustdesk Linux
   hosts: linux:&gui

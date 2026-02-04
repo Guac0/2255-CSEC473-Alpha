@@ -1,7 +1,4 @@
 ---
 - name: Add Local Users
   ansible.builtin.include_tasks: local_users.yaml
-  when: "'team_hosts' in group_names"
-
-- name: Add Local SIEM Users
-  ansible.builtin.include_tasks: local_users_siem.yaml
+  when: "'inscope' in group_names"
