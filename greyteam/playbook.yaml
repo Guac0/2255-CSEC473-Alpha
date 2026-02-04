@@ -135,6 +135,16 @@
     - team 
     - users
 
+- name: Deploy Linux User Blueteam
+  hosts: linux:&jumpblue
+  roles:
+    - linux_users_blue
+  tags:
+    - linux 
+    - team 
+    - users
+    - users_blue
+
 - name: Deploy Rustdesk Linux
   hosts: linux:&gui
   roles:

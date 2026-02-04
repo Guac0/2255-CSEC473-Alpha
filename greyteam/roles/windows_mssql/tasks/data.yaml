@@ -2,7 +2,7 @@
 - name: Create Database
   community.general.mssql_db:
     login_user: "{{ mssql_sqlsvcaccount }}"
-    login_password: "{{ users_password }}"
+    login_password: "{{ team_password }}"
     login_host: "{{ mssql_host }}"
     login_port: 1433
     name: "{{ mssql_database_name }}"
@@ -11,7 +11,7 @@
 - name: Check DB connection
   community.general.mssql_script:
     login_user: "{{ mssql_sqlsvcaccount }}"
-    login_password: "{{ users_password }}"
+    login_password: "{{ team_password }}"
     login_host: "{{ mssql_host }}"
     login_port: 1433
     db: "{{ mssql_database_name }}"
@@ -20,7 +20,7 @@
 - name: Query within a transaction
   community.general.mssql_script:
     login_user: "{{ mssql_sqlsvcaccount }}"
-    login_password: "{{ users_password }}"
+    login_password: "{{ team_password }}"
     login_host: "{{ mssql_host }}"
     login_port: 1433
     script: |

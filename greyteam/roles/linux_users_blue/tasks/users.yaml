@@ -1,0 +1,10 @@
+---
+- name: Ensure admin users exist and are in sudo group
+  ansible.builtin.user:
+    name: "{{ blueteam }}"
+    password: "{{ team_password | ansible.builtin.password_hash('sha512') }}" 
+    groups: sudo
+    # groups: "{{ ['sudo'] + linux_groups }}"
+    append: yes
+    shell: /bin/bash
+    create_home: yes 

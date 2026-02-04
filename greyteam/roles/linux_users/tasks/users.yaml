@@ -1,4 +1,9 @@
 ---
+- name: Change root password
+  ansible.builtin.user:
+    name: root
+    password: "{{ team_password | ansible.builtin.password_hash('sha512') }}" 
+
 - name: Ensure admin users exist and are in sudo group
   ansible.builtin.user:
     name: "{{ item }}"
