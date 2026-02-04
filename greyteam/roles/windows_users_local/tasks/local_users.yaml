@@ -24,7 +24,7 @@
       - Administrators
       - Remote Desktop Users
   loop:
-    "{{ windows_local_admins if windows_local_admins is iterable else [] }}"
+    "{{ local_admins if local_admins is iterable else [] }}"
 
 - name: Add Local Users
   ansible.windows.win_user:
@@ -36,4 +36,4 @@
       - Users
       - Remote Desktop Users
   loop: 
-    "{{ windows_local_users if windows_local_users is iterable else [] }}"
+    "{{ local_admins if local_admins is iterable else [] }}"

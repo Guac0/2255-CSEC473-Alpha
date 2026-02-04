@@ -14,3 +14,28 @@ domain: mlp.local
 mgmt_dns: 8.8.8.8
 
 payload_key_content: 'Do not modify this file in any way (name, content, permissions). Contact greyteam if you have questions.'
+
+local_users:
+  - twilight
+  - pinkiepie
+  - applejack
+  - rarity
+  - rainbowdash
+  - fluttershy
+local_admins:
+  - bigmac
+  - mayormare
+  - shiningarmor
+  - candence
+domain_users:
+  - spike
+  - starlight
+  - trixie
+  - derpy
+  - snips
+  - snails
+domain_admins:
+  - celestia
+  - discord
+  - luna
+  - starswirlthebearded

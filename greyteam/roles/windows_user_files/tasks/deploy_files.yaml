@@ -15,7 +15,7 @@
   ansible.windows.win_stat:
     path: "C:\\Users\\{{ item }}\\Documents"
   register: user_check
-  loop: "{{ windows_local_users + windows_local_admins + windows_domain_users + windows_domain_admins }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
+  loop: "{{ local_admins + local_admins + domain_users + domain_admins }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
 
 - name: Copy user files from staging to user folder 
   ansible.windows.win_copy:

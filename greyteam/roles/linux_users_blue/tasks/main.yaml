@@ -1,4 +1,0 @@
----
-- name: Deploy Users
-  ansible.builtin.include_tasks: users.yaml
-  when: "'team_hosts' in group_names"
