@@ -127,6 +127,15 @@
     - team
     - mssql
 
+- name: Windows Deploy DNS
+  hosts: dns
+  roles:
+    - windows_dns
+  tags:
+    - windows
+    - inscope
+    - dns
+
 ####### Finish #######
 
 - name: Post Deploy Cleanup
