@@ -6,6 +6,7 @@
     - ping
     - ping_linux
     - linux
+    - generic
   tasks:
     - name: Ping Linux
       ansible.builtin.ping:
@@ -17,6 +18,7 @@
     - ping
     - ping_windows
     - windows
+    - generic
   tasks:
     - name: Ping Windows
       ansible.windows.win_ping:
@@ -62,15 +64,17 @@
     - team
     - standards
     - stds
+    - generic
 
 - name: Create Local Users
   hosts: windows:&inscope:!cement
   roles:
     - windows_users_local
   tags:
-  - windows
-  - team
-  - local_users
+    - windows
+    - team
+    - local_users
+    - generic
 
 #- name: Deploy Rustdesk Windows
 #  hosts: windows:&gui:!cement
@@ -90,6 +94,7 @@
     - windows
     - team
     - utilities
+    - generic
 
 - name: Set Wallpaper
   hosts: windows:&inscope:!cement
@@ -99,6 +104,7 @@
     - windows
     - team
     - wallpaper
+    - generic
 
 - name: Deploy User Files
   hosts: windows:&inscope:!cement
@@ -108,6 +114,7 @@
     - windows
     - team
     - files
+    - generic
 
 ###### Services #######
 
@@ -130,6 +137,7 @@
     - windows 
     - team 
     - post_deploy
+    - generic
 
 #######################
 ######## LINUX ########
@@ -146,6 +154,7 @@
     - team 
     - standards
     - stds
+    - generic
 
 - name: Deploy Linux Users
   hosts: linux
@@ -156,6 +165,7 @@
     - team 
     - users
     - users_linux
+    - generic
 
 - name: Deploy Rustdesk Linux
   hosts: linux:&gui
@@ -166,6 +176,7 @@
     - team 
     - rustdesk
     - rustdesk_linux
+    - generic
 
 ###### Services #######
 
@@ -189,6 +200,7 @@
     - team
     - finish
     - post_deploy
+    - generic
 
 - name: Reboot
   hosts: linux
@@ -199,3 +211,4 @@
     - team
     - reboot
     - post_deploy
+    - generic
