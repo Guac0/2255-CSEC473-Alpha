@@ -11,8 +11,8 @@
     start_mode: auto
     state: started
 
-- name: Create forward lookup DNS zone
-  ansible.windows.win_dns_zone:
-    name: "{{ dns_zone_name }}"
-    type: primary
-    dynamic_update: secure
+# - name: Create forward lookup DNS zone
+#   ansible.windows.win_dns_zone:
+#     name: "{{ dns_zone_name }}"
+#     type: primary
+#     dynamic_update: secure
