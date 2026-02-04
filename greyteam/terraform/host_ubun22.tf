@@ -11,7 +11,8 @@ resource "openstack_compute_instance_v2" "ubun22" {
   key_pair        = "cdt"
 
   block_device {
-    uuid                  = "6cccb629-50af-4068-81ff-2e41c109f095" #ubuntu22
+    uuid                  = "1cde3ec3-03d3-4c17-a512-d3799ae92dad" #ubuntu2404desktop
+    #uuid                  = "6cccb629-50af-4068-81ff-2e41c109f095" #ubuntu2204desktop
     source_type           = "image"
     destination_type      = "volume"
     volume_size           = 40
