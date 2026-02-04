@@ -19,15 +19,6 @@ chpasswd:
     greyteam:ponyuploc0!
   expire: false
 
-write_files:
-  - path: /etc/sddm.conf.d/autologin.conf
-    content: |
-      [Autologin]
-      User=
-      Session=
-    owner: root:root
-    permissions: '0644'
-
 package_update: true
 #package_upgrade: true
 #packages:
@@ -39,7 +30,4 @@ runcmd:
   # Ensure account isn't expired
   - chage -E -1 -M 99999 greyteam
   # Delete golden image user
-  - pkill -u cyberrange || true
-  - [ userdel, -f, -r, cyberrange ]
-    # Ensure the login screen (SDDM) refreshes its user list
-  - systemctl restart sddm
+  - userdel -f -r cyberrange
