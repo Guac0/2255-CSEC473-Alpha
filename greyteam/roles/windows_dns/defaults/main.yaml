@@ -1,0 +1,5 @@
+---
+# Default DNS configuration values
+# Modify these to redeploy in another environment
+
+dns_zone_name: ""
