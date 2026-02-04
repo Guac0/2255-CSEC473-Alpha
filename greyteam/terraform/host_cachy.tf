@@ -1,7 +1,7 @@
 resource "openstack_compute_instance_v2" "crystalempire" {
   depends_on = [openstack_networking_secgroup_v2.secgroup_blue]
 
-  name            = crystalempire
+  name            = "crystalempire"
   flavor_name     = "medium"
   key_pair        = "cdt"
 

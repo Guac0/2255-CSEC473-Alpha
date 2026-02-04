@@ -1,7 +1,7 @@
 resource "openstack_compute_instance_v2" "whinnyapolis" {
   depends_on = [openstack_networking_secgroup_v2.secgroup_blue]
 
-  name            = whinnyapolis
+  name            = "whinnyapolis"
   flavor_name     = "medium"
   key_pair        = "cdt"
 

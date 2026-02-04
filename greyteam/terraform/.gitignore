@@ -5,3 +5,7 @@ old*
 .terraform*
 terraform.tfstate
 terraform.tfstate.backup
+
+host_void.tf
+host_cement.tf
+host_cachy.tf
