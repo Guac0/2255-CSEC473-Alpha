@@ -1,6 +1,6 @@
 ---
-- name: Logout Cyberrange User before Deletion
-  ansible.builtin.include_tasks: users_logout.yaml
+#- name: Logout Cyberrange User before Deletion
+#  ansible.builtin.include_tasks: users_logout.yaml
 
 - name: Deploy Generic Users
   ansible.builtin.include_tasks: users_generic.yaml

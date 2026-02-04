@@ -10,7 +10,7 @@ resource "openstack_compute_instance_v2" "scoringworker" {
     uuid                  = "612bfbe6-7404-4e77-9d2a-0c7705e6b539" #debian-trixie-server
     source_type           = "image"
     destination_type      = "volume"
-    volume_size           = 25
+    volume_size           = 30
     boot_index            = 0
     delete_on_termination = true
   }
@@ -23,5 +23,5 @@ resource "openstack_compute_instance_v2" "scoringworker" {
   security_groups = ["secgroup_grey"]
 
   # Cloud-init user setup
-  user_data = file("cloud-init-ubuntu.yaml")
+  user_data = file("cloud-init-debian.yaml")
 }

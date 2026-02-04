@@ -25,5 +25,5 @@ resource "openstack_compute_instance_v2" "deploy" {
   security_groups = ["secgroup_grey"]
 
   # Cloud-init user setup
-  user_data = file("cloud-init-ubuntu.yaml")
+  user_data = file("cloud-init-debian.yaml")
 }

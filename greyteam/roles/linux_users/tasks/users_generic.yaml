@@ -1,9 +1,9 @@
 ---
-- name: Remove cyberrange user
-  ansible.builtin.user:
-    name: "{{ delete_user }}"
-    state: absent
-    remove: yes
+#- name: Remove cyberrange user
+#  ansible.builtin.user:
+#    name: "{{ delete_user }}"
+#    state: absent
+#    remove: yes
 
 - name: Change root password
   ansible.builtin.user:
