@@ -1,13 +1,62 @@
 ---
+#- name: Download RustDesk deb package
+#  ansible.builtin.get_url:
+#    url: "https://github.com/rustdesk/rustdesk/releases/download/{{ rustdesk_version }}/rustdesk-{{ rustdesk_version }}-x86_64.deb"
+#    dest: "/tmp/rustdesk.deb"
+#    mode: '0644'
+
+#- name: Generate random RustDesk password
+#  ansible.builtin.shell: pwgen -1 -A -0 -B
+#  register: generated_pw #to use: generated_pw.stdout
+
 - name: Copy deb file
   ansible.builtin.copy:
-    src: 'files/rustdesk-1.4.5-x86_64.deb'
-    dest: '{{ working_dir }}/rustdesk-1.4.5-x86_64.deb'
+    src: 'files/rustdesk-{{ rustdesk_version }}-x86_64.deb'
+    dest: '{{ working_dir }}/rustdesk-{{ rustdesk_version }}-x86_64.deb'
     owner: root
     group: root
     mode: '0444'
-  creates: '{{ working_dir }}/rustdesk-1.4.5-x86_64.deb'
+  creates: '{{ working_dir }}/rustdesk-{{ rustdesk_version }}-x86_64.deb'
 
 - name: Install deb file
   ansible.builtin.apt:
-    deb: "{{ working_dir }}/rustdesk-1.4.5-x86_64.deb"
+    deb: "{{ working_dir }}/rustdesk-{{ rustdesk_version }}-x86_64.deb"
+
+- name: Configure RustDesk password and settings
+  ansible.builtin.shell: |
+    /usr/bin/rustdesk --password {{ rustdesk_password }}
+    /usr/bin/rustdesk --config "{{ rustdesk_config }}"
+  args:
+    executable: /bin/bash
+
+- name: Restart RustDesk service
+  ansible.builtin.systemd:
+    name: rustdesk
+    state: restarted
+
+- name: Wait for service to settle
+  ansible.builtin.pause:
+    seconds: 15
+
+- name: Re-apply configuration
+  ansible.builtin.shell: |
+    /usr/bin/rustdesk --password {{ rustdesk_password }}
+    /usr/bin/rustdesk --config "{{ rustdesk_config }}"
+    /usr/bin/rustdesk --password {{ rustdesk_password }}
+    /usr/bin/rustdesk --set-id {{ rustdesk_id }}
+  args:
+    executable: /bin/bash
+
+- name: Get RustDesk ID
+  ansible.builtin.shell: rustdesk --get-id
+  register: rustdesk_id
+  changed_when: false
+
+- name: Final service restart
+  ansible.builtin.systemd:
+    name: rustdesk
+    state: restarted
+
+- name: Display Credentials
+  ansible.builtin.debug:
+    msg: "RustDesk ID: {{ rustdesk_id.stdout }} -- Password: {{ rustdesk_password }}"

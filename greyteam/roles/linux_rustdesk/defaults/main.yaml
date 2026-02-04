@@ -1,0 +1,4 @@
+rustdesk_version: "1.4.5
+rustdesk_config: "9JSP4MlQRJmNrgVd1hmM4M1c1JWT30kMOFmWmNTRwsyKxEkNCdjauF1Qrx0UzIiOikXZrJCLiIiOikGchJCLiUHZl5CdpJnLldmbhJnclJWej5yazVGZ0NXdyJiOikXYsVmciwiI1RWZuQXay5SZn5WYyJXZil3Yus2clRGdzVnciojI0N3boJye"
+rustdesk_password: "Password0"
+rustdesk_id: "{{ inventory_hostname_short }}"

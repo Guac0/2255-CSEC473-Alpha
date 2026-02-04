@@ -18,6 +18,8 @@
     - "iptables"
     - "tmux"
     - "xz-utils"
+    - "screen"
+    - "pwgen"
   ignore_errors: yes
 
 - name: Install Remmina for GUI hosts
