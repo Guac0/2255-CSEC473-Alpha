@@ -17,6 +17,7 @@
     dest: "/etc/cups/cupsd.conf"
     owner: root
     group: root
+  become: yes
 
 # Create user to login to GUI & receive print files
 - name: Create printer admin
@@ -51,3 +52,4 @@
 - name: Set printer to default
   ansible.builtin.command:
     cmd: "lpoptions -d {{ printer_name }}"
+

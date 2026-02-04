@@ -5,6 +5,9 @@ all:
       hosts:
         canterlot:
           ansible_host: "10.0.10.1"
+    dns: #alias dc to dns
+      children:
+        dc:
   
     mssql:
       hosts:
@@ -23,7 +26,7 @@ all:
     
     cups:
       hosts:
-        todo:
+        trotsylvania:
           ansible_host: "10.0.10.5"
 
     vsftpd:
@@ -98,8 +101,8 @@ all:
         mssql:
         iis:
         smb:
-        windows_wks1:
-        windows_wks2:
+        windows_wkst1:
+        windows_wkst2:
         apache2:
         mariadb:
         cups:
@@ -194,7 +197,7 @@ all:
         mssql:
         iis:
         smb:
-        windows_wks1:
+        windows_wkst1:
         windows_wkst2:
         cement: #maybe remove since no ansible
     # Hosts that are Linux

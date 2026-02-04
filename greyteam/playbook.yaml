@@ -6,6 +6,7 @@
     - ping
     - ping_linux
     - linux
+    - generic
   tasks:
     - name: Ping Linux
       ansible.builtin.ping:
@@ -17,6 +18,7 @@
     - ping
     - ping_windows
     - windows
+    - generic
   tasks:
     - name: Ping Windows
       ansible.windows.win_ping:
@@ -54,7 +56,7 @@
 ######## Generic ######
 
 - name: Run Windows Standards 
-  hosts: windows:&inscope:!cement
+  hosts: windows:!cement
   roles:
     - windows_standards
   tags: 
@@ -62,15 +64,17 @@
     - team
     - standards
     - stds
+    - generic
 
 - name: Create Local Users
   hosts: windows:&inscope:!cement
   roles:
     - windows_users_local
   tags:
-  - windows
-  - team
-  - local_users
+    - windows
+    - team
+    - local_users
+    - generic
 
 #- name: Deploy Rustdesk Windows
 #  hosts: windows:&gui:!cement
@@ -83,22 +87,24 @@
 #    - rustdesk_windows
 
 - name: Install Utilities
-  hosts: windows:&inscope:!cement
+  hosts: windows:!cement
   roles:
     - windows_utilities
   tags:
     - windows
     - team
     - utilities
+    - generic
 
 - name: Set Wallpaper
-  hosts: windows:&inscope:!cement
+  hosts: windows:!cement
   roles:
     - windows_wallpaper
   tags:
     - windows
     - team
     - wallpaper
+    - generic
 
 - name: Deploy User Files
   hosts: windows:&inscope:!cement
@@ -108,6 +114,7 @@
     - windows
     - team
     - files
+    - generic
 
 ###### Services #######
 
@@ -120,16 +127,38 @@
     - team
     - mssql
 
+- name: Windows Deploy DNS
+  hosts: dns
+  roles:
+    - windows_dns
+  tags:
+    - windows
+    - inscope
+    - dns
+
 ####### Finish #######
 
 - name: Post Deploy Cleanup
-  hosts: windows:&inscope:!cement
+  hosts: windows:!cement
   roles:
     - windows_finish
   tags:
     - windows 
     - team 
     - post_deploy
+    - generic
+
+- name: Windows Reboot
+  hosts: windows:!cement
+  roles:
+    - windows_reboot
+  tags:
+    - windows 
+    - team 
+    - post_deploy
+    - reboot
+    - reboot_windows
+    - generic
 
 #######################
 ######## LINUX ########
@@ -146,6 +175,7 @@
     - team 
     - standards
     - stds
+    - generic
 
 - name: Deploy Linux Users
   hosts: linux
@@ -156,6 +186,7 @@
     - team 
     - users
     - users_linux
+    - generic
 
 - name: Deploy Rustdesk Linux
   hosts: linux:&gui
@@ -166,6 +197,7 @@
     - team 
     - rustdesk
     - rustdesk_linux
+    - generic
 
 ###### Services #######
 
@@ -189,19 +221,16 @@
     - team
     - finish
     - post_deploy
+    - generic
 
 - name: Reboot
   hosts: linux
   roles:
     - linux_reboot
   tags:
-<<<<<<< Updated upstream
     - linux
     - team
     - reboot
+    - reboot_linux
     - post_deploy
-=======
-    - linux 
-    - team 
-    - reboot
->>>>>>> Stashed changes
+    - generic
