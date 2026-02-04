@@ -18,7 +18,7 @@
           - python3-pymysql
         state: present
         update_cache: yes
-
+      tags: mariadb
     - name: Ensure MariaDB service is running and enabled
       systemd:
         name: mariadb
