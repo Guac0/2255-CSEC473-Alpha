@@ -17,7 +17,6 @@
     dest: "/etc/cups/cupsd.conf"
     owner: root
     group: root
-  become: yes
 
 # Create user to login to GUI & receive print files
 - name: Create printer admin
@@ -42,6 +41,12 @@
     dest: "/etc/systemd/system/ippprinter.service"
   become: yes
 
+# If we changed the service file, it needs to be reloaded
+- name: Reload systemctl daemons
+  ansible.builtin.command:
+    cmd: "systemctl daemon-reload"
+  become: yes
+
 - name: Start printer service
   ansible.builtin.service:
     name: ippprinter
@@ -52,4 +57,5 @@
 - name: Set printer to default
   ansible.builtin.command:
     cmd: "lpoptions -d {{ printer_name }}"
+
 
