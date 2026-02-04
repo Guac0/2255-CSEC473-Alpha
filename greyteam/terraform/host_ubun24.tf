@@ -1,12 +1,8 @@
-resource "openstack_compute_instance_v2" "ubun22" {
+resource "openstack_compute_instance_v2" "ubun24" {
   depends_on = [openstack_networking_secgroup_v2.secgroup_blue]
-  
-  for_each = {
-    las-pegasus       = "10.0.30.3"
-    vanhoover         = "10.0.30.4"
-  }
+  for_each = var.ubun24
 
-  name        = each.key
+  name            = each.value.hostname
   flavor_name     = "medium"
   key_pair        = "cdt"
 
@@ -21,8 +17,8 @@ resource "openstack_compute_instance_v2" "ubun22" {
   }
 
   network {
-    uuid        = openstack_networking_network_v2.network_blue.id
-    fixed_ip_v4 = each.value
+    uuid        = each.value.network
+    fixed_ip_v4 = each.value.ip
   }
 
   security_groups = ["secgroup_blue"]

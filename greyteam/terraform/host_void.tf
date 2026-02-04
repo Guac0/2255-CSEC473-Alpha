@@ -16,7 +16,7 @@ resource "openstack_compute_instance_v2" "whinnyapolis" {
 
 
   network {
-    uuid        = openstack_networking_network_v2.network_blue.id
+    uuid        = openstack_networking_network_v2.network_internal.id
     fixed_ip_v4 = "10.0.30.5"
   }
 

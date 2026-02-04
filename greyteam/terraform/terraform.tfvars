@@ -32,23 +32,25 @@ scoringworker = {
   "scoring5" = { hostname = "scoring5", ip = "172.20.0.115" }
 }
 
-inscope = {
-  "canterlot" = { hostname = "canterlot", ip = "10.1.10.1"}
-  "appleloosa" = { hostname = "appleloosa", ip = "10.1.10.2"}
-  "ponyvile" = { hostname = "ponyvile", ip = "10.1.10.3"}
-  "seaddle" = { hostname = "seaddle", ip = "10.1.10.4"}
-  "todo" = { hostname = "todo", ip = "10.1.10.5"}
-  "crystal-empire" = { hostname = "crystal-empire", ip = "10.1.10.6"}
-
-  "cloudsdale" = { hostname = "cloudsdale", ip = "10.1.20.1"}
-  "manehatten" = { hostname = "manehatten", ip = "10.1.20.2"}
-  "everfree-forest" = { hostname = "everfree-forest", ip = "10.1.20.3"}
-  "griffonstone" = { hostname = "griffonstone", ip = "10.1.20.4"}
-
-  "baltamare" = { hostname = "baltamare", ip = "10.1.30.1"}
-  "neighara-falls" = { hostname = "neighara-falls", ip = "10.1.30.2"}
-  "las-pegasus" = { hostname = "las-pegasus", ip = "10.1.30.3"}
-  "vanhoover" = { hostname = "vanhoover", ip = "10.1.30.4"}
-  "whinnyapolis" = { hostname = "whinnyapolis", ip = "10.1.30.5"}
-  "fillydelphia" = { hostname = "fillydelphia", ip = "10.1.30.6"} 
+deb13 = {
+  "apache2" = { hostname = "ponyvile", ip = "10.1.10.3", network = openstack_networking_network_v2.network_core.id}
+  "mariadb" = { hostname = "seaddle", ip = "10.1.10.4", network = openstack_networking_network_v2.network_core.id}
+  "cups" = { hostname = "todo", ip = "10.1.10.5", network = openstack_networking_network_v2.network_core.id}
+  "vsftpd" = { hostname = "crystal-empire", ip = "10.1.10.6", network = openstack_networking_network_v2.network_core.id}
+  "irc" = { hostname = "everfree-forest", ip = "10.1.20.3", network = openstack_networking_network_v2.network_dmz.id}
+  "nginx" = { hostname = "griffonstone", ip = "10.1.20.4", network = openstack_networking_network_v2.network_dmz.id}
+}
+ubun24 = {
+  "linux_wkst1" = { hostname = "las-pegasus", ip = "10.1.30.3", network = openstack_networking_network_v2.network_internal.id}
+  "linux_wkst2" = { hostname = "vanhoover", ip = "10.1.30.4", network = openstack_networking_network_v2.network_internal.id}
+}
+win10 = {
+  "windows_wkst1" = { hostname = "baltamare", ip = "10.1.30.1", network = openstack_networking_network_v2.network_internal.id}
+  "windows_wkst2" = { hostname = "neighara-falls", ip = "10.1.30.2", network = openstack_networking_network_v2.network_internal.id}
+}
+winserv22 = {
+  "dc" = { hostname = "canterlot", ip = "10.1.10.1", network = openstack_networking_network_v2.network_core.id }
+  "mssql" = { hostname = "appleloosa", ip = "10.1.10.2", network = openstack_networking_network_v2.network_core.id}
+  "iis" = { hostname = "cloudsdale", ip = "10.1.20.1", network = openstack_networking_network_v2.network_dmz.id}
+  "smb" = { hostname = "manehatten", ip = "10.1.20.2", network = openstack_networking_network_v2.network_dmz.id}
 }
