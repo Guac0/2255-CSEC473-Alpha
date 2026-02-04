@@ -128,14 +128,7 @@
     - mssql
 
 - name: Windows Deploy DNS
-  hosts: 
-    canterlot 
-    appleloosa 
-    cloudsdale 
-    manehatten 
-    baltamare 
-    neighara-falls 
-    fillydelphia
+  hosts: dns
   roles:
     - windows_dns
   tags:
