@@ -6,87 +6,94 @@ all:
 
     canterlot:
       vars:
-        ansible_host: "10.1.1.1"   # Domain Controller (AD)
+        ansible_host: "10.1.10.1"   # Active Directory (WinServ22)
       hosts:
         canterlot:
-
-    manehatten:
+  
+    appleloosa:
       vars:
-        ansible_host: "10.1.1.2"   # File Server (SMB)
-      hosts:
-        manehatten:
+        ansible_host: "10.0.10.2"  # MSSQL (WinServ22)
+    hosts:
+      appleloosa:
 
     ponyville:
       vars:
-        ansible_host: "10.1.1.3"   # Internal Web (Debian)
-      hosts:
-        ponyville:
+        ansible_host: "10.1.10.3"   # Apache2 (Debian)
+    hosts:
+      ponyville:
 
     seaddle:
       vars:
-        ansible_host: "10.1.1.4"   # Email (Debian)
+        ansible_host: "10.1.10.4"   # MariaDB (Debian)
       hosts:
         seaddle:
 
     crystal-empire:
       vars:
-        ansible_host: "10.1.1.5"   # Database (CachyOS)
+        ansible_host: "10.1.10.5"   # vsftpd (CachyOS)
       hosts:
         crystal-empire:
 
-    baltamare:
-      vars:
-        ansible_host: "192.168.1.1"   # Win10 WKST1
-      hosts:
-        baltamare:
-
-    neighara-falls:
-      vars:
-        ansible_host: "192.168.1.2"   # Win10 WKST2
-      hosts:
-        neighara-falls:
-
     cloudsdale:
       vars:
-        ansible_host: "192.168.1.3"   # Ubuntu WKST3
+        ansible_host: "10.1.20.1"   # IIS (WinServ22)
       hosts:
         cloudsdale:
 
-    vanhoover:
+    manehatten:
       vars:
-        ansible_host: "192.168.1.4"   # Ubuntu WKST4
+        ansible_host: "10.1.20.2"   # SMB (WinServ22)
       hosts:
-        vanhoover:
+        manehatten:
 
-    fillydelphia:
-      vars:
-        ansible_host: "192.168.1.6"  # Windows XP Boss
-      hosts:
-        fillydelphia:
-
-    las-pegasus:
-      vars:
-        ansible_host: "172.16.1.1"  # External Web (IIS)
-      hosts:
-        las-pegasus:
-
-    appleloosa:
-      vars:
-        ansible_host: "172.16.1.2"  # External DB (MSSQL)
-      hosts:
-        appleloosa:
 
     everfree-forest:
       vars:
-        ansible_host: "172.16.1.3"  # IRC Chat
+        ansible_host: "10.1.20.3"  # IRC Chat (Debian)
       hosts:
         everfree-forest:
 
     griffonstone:
       vars:
-        ansible_host: "172.16.1.4"  # External FTP
+        ansible_host: "10.0.20.4"  # Nginx (debian)
       hosts:
         griffonstone:
+
+    baltamare:
+      vars:
+        ansible_host: "10.0.30.1"   # Win10 WKST1
+      hosts:
+        baltamare:
+
+    neighara-falls:
+      vars:
+        ansible_host: "10.0.30.2"   # Win10 WKST2
+      hosts:
+        neighara-falls:
+
+    las-pegasus:
+      vars:
+        ansible_host: "10.0.30.3"  # Ubuntu WKST3
+      hosts:
+        las-pegasus:
+
+    vanhoover:
+      vars:
+        ansible_host: "10.0.30.4"   # Ubuntu WKST4
+      hosts:
+        vanhoover:
+        
+    whinnyapolis:
+      vars:
+        ansible_host: "10.0.30.5"  # void WKST4
+      hosts:
+        whinnyapolis:
+
+    fillydelphia:
+      vars:
+        ansible_host: "10.0.30.6"  # windows cement WKST4
+      hosts:
+        fillydelphia:
     
 # Blue team jumpboxes
     jumpblue1:
@@ -236,19 +243,21 @@ all:
     # Hosts for the Teams
     inscope:
       children:
-        manehatten:
+        canterlot:
+        appleloosa:
         ponyville:
         seaddle:
         crystal-empire:
-        baltamare:
-        neighara-falls:
         cloudsdale:
-        vanhoover:
-        fillydelphia:
-        las-pegasus:
-        appleloosa:
+        manehatten:
         everfree-forest:
         griffonstone:
+        baltamare:
+        neighara-falls:
+        las-pegasus:
+        vanhoover:
+        whinnyapolis:
+        fillydelphia:
     # Hosts for scoring
     scoring_workers:
       children:
@@ -316,6 +325,7 @@ all:
         vanhoover:
         everfree-forest:
         griffonstone:
+        whinnyapolis:
         jumpboxes:
         mgmt:
     unix:
