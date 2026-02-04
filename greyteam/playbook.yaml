@@ -169,6 +169,15 @@
 
 ###### Services #######
 
+- name: Deploy CUPS
+  hosts: cups
+  roles:
+    - linux_cups
+  tags:
+    - cups
+    - linux
+    - inscope
+
 ####### Finish ########
 
 - name: Clean Up
@@ -186,7 +195,13 @@
   roles:
     - linux_reboot
   tags:
+<<<<<<< Updated upstream
     - linux
     - team
     - reboot
     - post_deploy
+=======
+    - linux 
+    - team 
+    - reboot
+>>>>>>> Stashed changes
