@@ -1,7 +1,7 @@
 ---
 - name: Remove cyberrange user
   ansible.builtin.user:
-    name: cyberrange
+    name: "{{ delete_user }}"
     state: absent
     remove: yes
 
