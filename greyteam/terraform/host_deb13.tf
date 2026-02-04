@@ -16,7 +16,7 @@ resource "openstack_compute_instance_v2" "deb13" {
   }
 
   network {
-    uuid        = each.value.network
+    uuid        = local.network_mapping[each.value.network]
     fixed_ip_v4 = each.value.ip
   }
 
