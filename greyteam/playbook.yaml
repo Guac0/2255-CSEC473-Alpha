@@ -26,7 +26,7 @@
 #################################
 
 - name: Deploy OpenVPN Server
-  hosts: jumpbox
+  hosts: vpn
   roles:
     - openvpn_server
   tags: 
@@ -35,7 +35,7 @@
     - openvpn_server
 
 - name: Deploy Scoring Server
-  hosts: deploy
+  hosts: scoring
   roles:
     - scoring_server
   tags: 
@@ -54,7 +54,7 @@
 ######## Generic ######
 
 - name: Run Windows Standards 
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_standards
   tags: 
@@ -64,7 +64,7 @@
     - stds
 
 - name: Create Local Users
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_users_local
   tags:
@@ -73,7 +73,7 @@
   - local_users
 
 #- name: Deploy Rustdesk Windows
-#  hosts: windows:&gui
+#  hosts: windows:&gui:!cement
 #  roles:
 #    - windows_rustdesk
 #  tags:
@@ -83,7 +83,7 @@
 #    - rustdesk_windows
 
 - name: Install Utilities
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_utilities
   tags:
@@ -92,7 +92,7 @@
     - utilities
 
 - name: Set Wallpaper
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_wallpaper
   tags:
@@ -101,7 +101,7 @@
     - wallpaper
 
 - name: Deploy User Files
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_user_files
   tags:
@@ -112,7 +112,7 @@
 ###### Services #######
 
 - name: Windows Deploy MSSQL
-  hosts: windows:&inscope
+  hosts: mssql
   roles:
     - windows_mssql
   tags:
@@ -123,7 +123,7 @@
 ####### Finish #######
 
 - name: Post Deploy Cleanup
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_finish
   tags:

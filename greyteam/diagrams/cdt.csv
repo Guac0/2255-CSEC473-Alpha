@@ -3,7 +3,8 @@
 10.0.10.0/24,10.0.10.2,appleloosa,Windows Server 2022,MSSQL
 10.0.10.0/24,10.0.10.3,ponyville,Debian 13,Apache2
 10.0.10.0/24,10.0.10.4,seaddle,Debian 13,MariaDB
-10.0.10.0/24,10.0.10.5,crystal-empire,CachyOS,vsftpd
+10.0.10.0/24,10.0.10.5,todo,Debian 13,cups
+10.0.10.0/24,10.0.10.6,crystal-empire,CachyOS,vsftpd
 10.0.20.0/24,10.0.20.1,cloudsdale,Windows Server 2022,IIS
 10.0.20.0/24,10.0.20.2,manehatten,Windows Server 2022,SMB
 10.0.20.0/24,10.0.20.3,everfree-forest,Debian 13,IRC

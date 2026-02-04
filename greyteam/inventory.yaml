@@ -1,299 +1,179 @@
 all:
-  vars:
-
   children:
     # Individual host groups
-
-    canterlot:
-      vars:
-        ansible_host: "10.1.10.1"   # Active Directory (WinServ22)
+    dc:
       hosts:
         canterlot:
+          ansible_host: "10.1.10.1"
   
-    appleloosa:
-      vars:
-        ansible_host: "10.0.10.2"  # MSSQL (WinServ22)
-    hosts:
-      appleloosa:
+    mssql:
+      hosts:
+        appleloosa:
+          ansible_host: "10.0.10.2"
 
-    ponyville:
-      vars:
-        ansible_host: "10.1.10.3"   # Apache2 (Debian)
-    hosts:
-      ponyville:
+    apache2:
+      hosts:
+        ponyville:
+          ansible_host: "10.1.10.3"
 
-    seaddle:
-      vars:
-        ansible_host: "10.1.10.4"   # MariaDB (Debian)
+    mariadb:
       hosts:
         seaddle:
+          ansible_host: "10.0.10.4"
+    
+    cups:
+      hosts:
+        todo:
+          ansible_host: "10.0.10.5"
 
-    crystal-empire:
-      vars:
-        ansible_host: "10.1.10.5"   # vsftpd (CachyOS)
+    vsftpd:
       hosts:
         crystal-empire:
-
-    cloudsdale:
-      vars:
-        ansible_host: "10.1.20.1"   # IIS (WinServ22)
+          ansible_host: "10.0.10.6"
+    
+    iis:
       hosts:
         cloudsdale:
+          ansible_host: "10.0.20.1"
 
-    manehatten:
-      vars:
-        ansible_host: "10.1.20.2"   # SMB (WinServ22)
+    smb:
       hosts:
-        manehatten:
+        manhatten:
+          ansible_host: "10.0.20.2"
 
-
-    everfree-forest:
-      vars:
-        ansible_host: "10.1.20.3"  # IRC Chat (Debian)
+    irc:
       hosts:
         everfree-forest:
+          ansible_host: "10.0.20.3"
 
-    griffonstone:
-      vars:
-        ansible_host: "10.0.20.4"  # Nginx (debian)
+    nginx:
       hosts:
         griffonstone:
+          ansible_host: "10.0.20.4"
 
-    baltamare:
-      vars:
-        ansible_host: "10.0.30.1"   # Win10 WKST1
+    windows_wkst1:
       hosts:
         baltamare:
+          ansible_host: "10.0.30.1"
 
-    neighara-falls:
-      vars:
-        ansible_host: "10.0.30.2"   # Win10 WKST2
+    windows_wkst2:
       hosts:
         neighara-falls:
+          ansible_host: "10.0.30.2"
 
-    las-pegasus:
-      vars:
-        ansible_host: "10.0.30.3"  # Ubuntu WKST3
+    linux_wkst1:
       hosts:
         las-pegasus:
+          ansible_host: "10.0.30.3"
 
-    vanhoover:
-      vars:
-        ansible_host: "10.0.30.4"   # Ubuntu WKST4
+    linux_wkst2:
       hosts:
         vanhoover:
-        
-    whinnyapolis:
-      vars:
-        ansible_host: "10.0.30.5"  # void WKST4
+          ansible_host: "10.0.30.4"
+    
+    void:
       hosts:
         whinnyapolis:
-
-    fillydelphia:
-      vars:
-        ansible_host: "10.0.30.6"  # windows cement WKST4
+          ansible_host: "10.0.30.5"
+    
+    cement:
       hosts:
         fillydelphia:
-    
-# Blue team jumpboxes
-    jumpblue1:
-      vars:
-        ansible_host: "172.20.0.41"
-      hosts:
-        jumpblue1:
-    jumpblue2:
-      vars:
-        ansible_host: "172.20.0.42"
-      hosts:
-        jumpblue2:
-    jumpblue3:
-      vars:
-        ansible_host: "172.20.0.43"
-      hosts:
-        jumpblue3:
-    jumpblue4:
-      vars:
-        ansible_host: "172.20.0.44"
-      hosts:
-        jumpblue4:
-    jumpblue5:
-      vars:
-        ansible_host: "172.20.0.45"
-      hosts:
-        jumpblue5:
-    jumpblue6:
-      vars:
-        ansible_host: "172.20.0.46"
-      hosts:
-        jumpblue6:
-    jumpblue7:
-      vars:
-        ansible_host: "172.20.0.47"
-      hosts:
-        jumpblue7:
-    jumpblue8:
-      vars:
-        ansible_host: "172.20.0.48"
-      hosts:
-        jumpblue8:
-    jumpblue9:
-      vars:
-        ansible_host: "172.20.0.49"
-      hosts:
-        jumpblue9:
-    jumpblue10:
-      vars:
-        ansible_host: "172.20.0.40"
-      hosts:
-        jumpblue10:
-
-# Grey team jumpboxes
-    jumpgrey1:
-      vars:
-        ansible_host: "172.20.0.71"
-      hosts:
-        jumpgrey1:
-    jumpgrey2:
-      vars:
-        ansible_host: "172.20.0.72"
-      hosts:
-        jumpgrey2:
-    jumpgrey3:
-      vars:
-        ansible_host: "172.20.0.73"
-      hosts:
-        jumpgrey3:
-    jumpgrey4:
-      vars:
-        ansible_host: "172.20.0.74"
-      hosts:
-        jumpgrey4:
-    jumpgrey5:
-      vars:
-        ansible_host: "172.20.0.75"
-      hosts:
-        jumpgrey5:
-    jumpgrey6:
-      vars:
-        ansible_host: "172.20.0.76"
-      hosts:
-        jumpgrey6:
-    jumpgrey7:
-      vars:
-        ansible_host: "172.20.0.77"
-      hosts:
-        jumpgrey7:
-    jumpgrey8:
-      vars:
-        ansible_host: "172.20.0.78"
-      hosts:
-        jumpgrey8:
-    jumpgrey9:
-      vars:
-        ansible_host: "172.20.0.79"
-      hosts:
-        jumpgrey9:
-    jumpgrey10:
-      vars:
-        ansible_host: "172.20.0.70"
-      hosts:
-        jumpgrey10:
-
-# Deploy
-    deploy:
-      vars:
-        ansible_host: "172.20.0.80"
-      hosts:
-        deploy:
-
-# Scoring
-    scoring:
-      vars:
-        ansible_host: "172.20.0.100"
-      hosts:
-        scoring:
-    scoring1:
-      vars:
-        ansible_host: "172.20.0.67"
-      hosts:
-        scoring1:
-    scoring2:
-      vars:
-        ansible_host: "172.20.0.82"
-      hosts:
-        scoring2:
-    scoring3:
-      vars:
-        ansible_host: "172.20.0.90"
-      hosts:
-        scoring3:
-    scoring4:
-      vars:
-        ansible_host: "172.20.0.106"
-      hosts:
-        scoring4:
-    scoring5:
-      vars:
-        ansible_host: "172.20.0.115"
-      hosts:
-        scoring5:
-
+          ansible_host: "10.0.30.6"
 
 # Groups
+    # Workstation Hosts
+    wksts:
+      children:
+        windows_wkst1:
+        windows_wkst2:
+        linux_wkst1:
+        linux_wkst2:
+        void:
+        cement:
     # Hosts for the Teams
     inscope:
       children:
-        canterlot:
-        appleloosa:
-        ponyville:
-        seaddle:
-        crystal-empire:
-        cloudsdale:
-        manehatten:
-        everfree-forest:
-        griffonstone:
-        baltamare:
-        neighara-falls:
-        las-pegasus:
-        vanhoover:
-        whinnyapolis:
-        fillydelphia:
+        dc:
+        mssql:
+        iis:
+        smb:
+        windows_wks1:
+        windows_wks2:
+        apache2:
+        mariadb:
+        cups:
+        vsftpd:
+        irc:
+        nginx:
+        linux_wkst1:
+        linux_wkst2:
+        cement:
+        void:
     # Hosts for scoring
     scoring_workers:
-      children:
+      hosts:
         scoring1:
+          ansible_host: "172.20.0.67"
         scoring2:
+          ansible_host: "172.20.0.82"
         scoring3:
+          ansible_host: "172.20.0.90"
         scoring4:
+          ansible_host: "172.20.0.106"
         scoring5:
+          ansible_host: "172.20.0.115"
     scoring_all:
       children:
         scoring_workers:
+      hosts:
         scoring:
+          ansible_host: "172.20.0.100"
+    # Hosts for jumpboxes
     jumpgrey:
-      children:
+      hosts:
         jumpgrey1:
+          ansible_host: "172.20.0.71"
         jumpgrey2:
+          ansible_host: "172.20.0.72"
         jumpgrey3:
+          ansible_host: "172.20.0.73"
         jumpgrey4:
+          ansible_host: "172.20.0.74"
         jumpgrey5:
+          ansible_host: "172.20.0.75"
         jumpgrey6:
+          ansible_host: "172.20.0.76"
         jumpgrey7:
+          ansible_host: "172.20.0.77"
         jumpgrey8:
+          ansible_host: "172.20.0.78"
         jumpgrey9:
+          ansible_host: "172.20.0.79"
         jumpgrey10:
+          ansible_host: "172.20.0.70"
     jumpblue:
-      children:
+      hosts:
         jumpblue1:
+          ansible_host: "172.20.0.41"
         jumpblue2:
+          ansible_host: "172.20.0.42"
         jumpblue3:
+          ansible_host: "172.20.0.43"
         jumpblue4:
+          ansible_host: "172.20.0.44"
         jumpblue5:
+          ansible_host: "172.20.0.45"
         jumpblue6:
+          ansible_host: "172.20.0.46"
         jumpblue7:
+          ansible_host: "172.20.0.47"
         jumpblue8:
+          ansible_host: "172.20.0.48"
         jumpblue9:
+          ansible_host: "172.20.0.49"
         jumpblue10:
+          ansible_host: "172.20.0.40"
     jumpboxes:
       children:
         jumpblue:
@@ -301,33 +181,36 @@ all:
     # Hosts for management
     mgmt:
       children:
-        deploy:
         scoring_all:
+      hosts:
+        deploy:
+          ansible_host: "172.20.0.80"
 
 # OS-based groups
     # Hosts that are Windows
     windows:
       children:
-        canterlot:
-        manehatten:
-        baltamare:
-        neighara-falls:
-        fillydelphia:
-        las-pegasus:
-        appleloosa:
+        dc:
+        mssql:
+        iis:
+        smb:
+        windows_wks1:
+        windows_wkst2:
+        cement: #maybe remove since no ansible
     # Hosts that are Linux
     linux:
       children:
-        ponyville:
-        seaddle:
-        crystal-empire:
-        cloudsdale:
-        vanhoover:
-        everfree-forest:
-        griffonstone:
-        whinnyapolis:
+        apache2:
+        mariadb:
+        cups:
+        vsftpd:
+        irc:
+        nginx:
+        linux_wkst1:
+        linux_wkst2:
         jumpboxes:
-        mgmt:
+        scoring_all:
+        deploy:
     unix:
       children:
         linux:
@@ -336,4 +219,6 @@ all:
       children:
         windows:
         jumpboxes:
-        #todo: team hosts
+        linux_wkst1:
+        linux_wkst2:
+        void:

@@ -1,7 +1,8 @@
 ---
 # For use with the "example" playbook
 - name: Execute Example Tasks #any string works
-  hosts: all # Considers all hosts in the "all" group in inventory.yaml to be valid destinations
+  #hosts: all # Considers all hosts in the "all" group in inventory.yaml to be valid destinations
+  hosts: hostname_or_groupname # Will only consider host(s) with the matching hostname or groupname from inventory.yaml to be valid destinations
   roles:
     - example # The role (folder name in roles/) to run
   tags: 
