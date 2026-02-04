@@ -11,7 +11,7 @@ resource "openstack_compute_instance_v2" "jumpblue" {
     #uuid                  = "6cccb629-50af-4068-81ff-2e41c109f095" #ubuntu2204desktop
     source_type           = "image"
     destination_type      = "volume"
-    volume_size           = 30
+    volume_size           = 40
     boot_index            = 0
     delete_on_termination = true
   }

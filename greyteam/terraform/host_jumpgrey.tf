@@ -10,7 +10,7 @@ resource "openstack_compute_instance_v2" "jumpgrey" {
     uuid                  = "1cde3ec3-03d3-4c17-a512-d3799ae92dad" #ubuntu2404desktop
     source_type           = "image"
     destination_type      = "volume"
-    volume_size           = 30
+    volume_size           = 25
     boot_index            = 0
     delete_on_termination = true
   }
