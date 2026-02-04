@@ -1,4 +1,21 @@
 ---
+- name: Ping Linux
+  hosts: all
+  tags:
+    - ping
+    - linux
+  tasks:
+    - name: Ping Linux
+      ansible.builtin.ping:
+
+- name: Ping Windows
+  hosts: all
+  tags: 
+    - ping
+    - windows
+  tasks:
+    - name: Ping Windows
+      ansible.windows.win_ping:
 
 #################################
 ########### Management ##########
