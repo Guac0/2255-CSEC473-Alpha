@@ -1,8 +1,10 @@
 ---
 - name: Ping Linux
   hosts: linux
+  gather_facts: no
   tags:
     - ping
+    - ping_linux
     - linux
   tasks:
     - name: Ping Linux
@@ -10,8 +12,10 @@
 
 - name: Ping Windows
   hosts: windows
+  gather_facts: no
   tags: 
     - ping
+    - ping_windows
     - windows
   tasks:
     - name: Ping Windows

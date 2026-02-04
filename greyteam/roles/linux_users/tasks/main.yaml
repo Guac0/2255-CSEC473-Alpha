@@ -11,4 +11,4 @@
 
 - name: Deploy Out of Scope Users
   ansible.builtin.include_tasks: users_blue.yaml
-  when: "'inscope' not in group_names"
+  when: "'jumpblue' in group_names"
