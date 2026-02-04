@@ -12,6 +12,3 @@
     name: ConsentPromptBehaviorAdmin
     data: 5  # 5 = Default UAC prompt for Admins
     type: dword
-
-- name: Reboot the machine with all defaults
-  ansible.windows.win_reboot:  

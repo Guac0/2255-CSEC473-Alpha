@@ -56,7 +56,7 @@
 ######## Generic ######
 
 - name: Run Windows Standards 
-  hosts: windows:&inscope:!cement
+  hosts: windows:!cement
   roles:
     - windows_standards
   tags: 
@@ -87,7 +87,7 @@
 #    - rustdesk_windows
 
 - name: Install Utilities
-  hosts: windows:&inscope:!cement
+  hosts: windows:!cement
   roles:
     - windows_utilities
   tags:
@@ -97,7 +97,7 @@
     - generic
 
 - name: Set Wallpaper
-  hosts: windows:&inscope:!cement
+  hosts: windows:!cement
   roles:
     - windows_wallpaper
   tags:
@@ -130,13 +130,25 @@
 ####### Finish #######
 
 - name: Post Deploy Cleanup
-  hosts: windows:&inscope:!cement
+  hosts: windows:!cement
   roles:
     - windows_finish
   tags:
     - windows 
     - team 
     - post_deploy
+    - generic
+
+- name: Windows Reboot
+  hosts: windows:!cement
+  roles:
+    - windows_reboot
+  tags:
+    - windows 
+    - team 
+    - post_deploy
+    - reboot
+    - reboot_windows
     - generic
 
 #######################
@@ -210,5 +222,6 @@
     - linux
     - team
     - reboot
+    - reboot_linux
     - post_deploy
     - generic

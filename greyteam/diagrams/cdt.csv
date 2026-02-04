@@ -3,7 +3,7 @@
 10.0.10.0/24,10.0.10.2,manehatten,Windows Server 2022,MSSQL
 10.0.10.0/24,10.0.10.3,ponyville,Debian 13,Apache2
 10.0.10.0/24,10.0.10.4,seaddle,Debian 13,MariaDB
-10.0.10.0/24,10.0.10.5,todo,Debian 13,cups
+10.0.10.0/24,10.0.10.5,trotsylvania,Debian 13,cups
 10.0.10.0/24,10.0.10.6,crystal-empire,CachyOS,vsftpd
 10.0.20.0/24,10.0.20.1,las-pegasus,Windows Server 2022,IIS
 10.0.20.0/24,10.0.20.2,appleloosa,Windows Server 2022,SMB
@@ -13,7 +13,7 @@
 10.0.30.0/24,10.0.30.2,neighara-falls,Windows 10,Workstation
 10.0.30.0/24,10.0.30.3,cloudsdale,Ubuntu 24.04,Workstation
 10.0.30.0/24,10.0.30.4,vanhoover,Ubuntu 24.04,Workstation
-10.0.30.0/24,10.0.30.5,todo,VoidOS,Workstation
+10.0.30.0/24,10.0.30.5,whinnyapolis,VoidOS,Workstation
 10.0.30.0/24,10.0.30.6,fillydelphia,Windows CEMeNT,Workstation
 172.20.0.32/27,172.20.0.41,bluejump1,Ubuntu 24.04,Jumpbox
 172.20.0.32/27,172.20.0.42,bluejump2,Ubuntu 24.04,Jumpbox

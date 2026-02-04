@@ -23,7 +23,7 @@ all:
     
     cups:
       hosts:
-        todo:
+        trotsylvania:
           ansible_host: "10.0.10.5"
 
     vsftpd:
