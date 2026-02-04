@@ -16,7 +16,6 @@
     owner: root
     group: root
     mode: '0444'
-  creates: '{{ working_dir }}/rustdesk-{{ rustdesk_version }}-x86_64.deb'
 
 - name: Install deb file
   ansible.builtin.apt:
@@ -49,7 +48,7 @@
 
 - name: Get RustDesk ID
   ansible.builtin.shell: rustdesk --get-id
-  register: rustdesk_id
+  register: rustdesk_id_applied
   changed_when: false
 
 - name: Final service restart
@@ -59,4 +58,4 @@
 
 - name: Display Credentials
   ansible.builtin.debug:
-    msg: "RustDesk ID: {{ rustdesk_id.stdout }} -- Password: {{ rustdesk_password }}"
+    msg: "RustDesk ID: {{ rustdesk_id_applied.stdout }} -- Password: {{ rustdesk_password }}"

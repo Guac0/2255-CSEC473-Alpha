@@ -3,7 +3,6 @@
   ansible.windows.win_copy: 
     src: files/rustdesk-1.4.5-x86_64.exe
     dest: "{{ working_dir }}\\rustdesk-1.4.5-x86_64.exe"
-  creates: "{{ working_dir }}\\rustdesk-1.4.5-x86_64.exe"
 
 - name: Execute installer file
   ansible.builtin.apt:
