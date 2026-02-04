@@ -142,7 +142,7 @@
 - name: Windows Reboot
   hosts: windows:!cement
   roles:
-    - windows_finish
+    - windows_reboot
   tags:
     - windows 
     - team 
