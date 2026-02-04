@@ -1,0 +1,25 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true
+
+- name: Install Linux client programs
+  ansible.builtin.apt;:
+    name:
+      - thunderbird
+      - libreoffice
+      - filezilla
+    state: present
+  become: true
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true
+
+- name: Install Linux client programs
+  ansible.builtin.apt:
+    name: "{{ linux_client_programs_packages }}"
+    state: present
+  become: true
