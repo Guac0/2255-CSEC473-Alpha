@@ -98,8 +98,8 @@ all:
         mssql:
         iis:
         smb:
-        windows_wks1:
-        windows_wks2:
+        windows_wkst1:
+        windows_wkst2:
         apache2:
         mariadb:
         cups:
@@ -194,7 +194,7 @@ all:
         mssql:
         iis:
         smb:
-        windows_wks1:
+        windows_wkst1:
         windows_wkst2:
         cement: #maybe remove since no ansible
     # Hosts that are Linux
