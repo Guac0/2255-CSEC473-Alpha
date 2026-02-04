@@ -47,7 +47,7 @@ inscope = {
 
   "baltamare" = { hostname = "baltamare", ip = "10.1.30.1"}
   "neighara-falls" = { hostname = "neighara-falls", ip = "10.1.30.2"}
-  "las-peagasus" = { hostname = "las-peagasus", ip = "10.1.30.3"}
+  "las-pegasus" = { hostname = "las-pegasus", ip = "10.1.30.3"}
   "vanhoover" = { hostname = "vanhoover", ip = "10.1.30.4"}
   "whinnyapolis" = { hostname = "whinnyapolis", ip = "10.1.30.5"}
   "fillydelphia" = { hostname = "fillydelphia", ip = "10.1.30.6"} 

@@ -2,7 +2,7 @@ resource "openstack_compute_instance_v2" "ubun22" {
   depends_on = [openstack_networking_secgroup_v2.secgroup_blue]
   
   for_each = {
-    las-peagasus       = "10.0.30.3"
+    las-pegasus       = "10.0.30.3"
     vanhoover         = "10.0.30.4"
   }
 
