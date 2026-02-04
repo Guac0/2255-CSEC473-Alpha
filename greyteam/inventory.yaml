@@ -8,7 +8,7 @@ all:
   
     mssql:
       hosts:
-        appleloosa:
+        manehatten:
           ansible_host: "10.0.10.2"
 
     apache2:
@@ -33,12 +33,12 @@ all:
     
     iis:
       hosts:
-        cloudsdale:
+        las-pegasus:
           ansible_host: "10.0.20.1"
 
     smb:
       hosts:
-        manhatten:
+        appleloosa:
           ansible_host: "10.0.20.2"
 
     irc:
@@ -63,7 +63,7 @@ all:
 
     linux_wkst1:
       hosts:
-        las-pegasus:
+        cloudsdale:
           ansible_host: "10.0.30.3"
 
     linux_wkst2:

@@ -41,7 +41,7 @@ deb13 = {
   "nginx" = { hostname = "griffonstone", ip = "10.1.20.4", network = openstack_networking_network_v2.network_dmz.id}
 }
 ubun24 = {
-  "linux_wkst1" = { hostname = "las-pegasus", ip = "10.1.30.3", network = openstack_networking_network_v2.network_internal.id}
+  "linux_wkst1" = { hostname = "cloudsdale", ip = "10.1.30.3", network = openstack_networking_network_v2.network_internal.id}
   "linux_wkst2" = { hostname = "vanhoover", ip = "10.1.30.4", network = openstack_networking_network_v2.network_internal.id}
 }
 win10 = {
@@ -50,7 +50,7 @@ win10 = {
 }
 winserv22 = {
   "dc" = { hostname = "canterlot", ip = "10.1.10.1", network = openstack_networking_network_v2.network_core.id }
-  "mssql" = { hostname = "appleloosa", ip = "10.1.10.2", network = openstack_networking_network_v2.network_core.id}
-  "iis" = { hostname = "cloudsdale", ip = "10.1.20.1", network = openstack_networking_network_v2.network_dmz.id}
-  "smb" = { hostname = "manehatten", ip = "10.1.20.2", network = openstack_networking_network_v2.network_dmz.id}
+  "mssql" = { hostname = "manehatten", ip = "10.1.10.2", network = openstack_networking_network_v2.network_core.id}
+  "iis" = { hostname = "las-pegasus", ip = "10.1.20.1", network = openstack_networking_network_v2.network_dmz.id}
+  "smb" = { hostname = "appleloosa", ip = "10.1.20.2", network = openstack_networking_network_v2.network_dmz.id}
 }
