@@ -195,13 +195,7 @@
   roles:
     - linux_reboot
   tags:
-<<<<<<< Updated upstream
     - linux
     - team
     - reboot
     - post_deploy
-=======
-    - linux 
-    - team 
-    - reboot
->>>>>>> Stashed changes
