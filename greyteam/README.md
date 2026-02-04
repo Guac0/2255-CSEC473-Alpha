@@ -4,7 +4,7 @@ curl https://raw.githubusercontent.com/Guac0/2255-CSEC473-Alpha/refs/heads/main/
 or:
 
 apt update
-apt install -y nano git python-is-python3 python3 python3-venv python3-pip sshpass pwgen openjdk-8-jdk
+apt install -y nano git python-is-python3 python3 python3-venv python3-pip sshpass pwgen #openjdk-8-jdk
 git clone https://github.com/Guac0/2255-CSEC473-Alpha/
 cd ./2255-CSEC473-Alpha/greyteam
 python -m venv venv
