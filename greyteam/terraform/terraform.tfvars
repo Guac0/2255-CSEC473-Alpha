@@ -37,7 +37,8 @@ inscope = {
   "appleloosa" = { hostname = "appleloosa", ip = "10.1.10.2"}
   "ponyvile" = { hostname = "ponyvile", ip = "10.1.10.3"}
   "seaddle" = { hostname = "seaddle", ip = "10.1.10.4"}
-  "crystal-empire" = { hostname = "crystal-empire", ip = "10.1.10.1"}
+  "todo" = { hostname = "todo", ip = "10.1.10.5"}
+  "crystal-empire" = { hostname = "crystal-empire", ip = "10.1.10.6"}
 
   "cloudsdale" = { hostname = "cloudsdale", ip = "10.1.20.1"}
   "manehatten" = { hostname = "manehatten", ip = "10.1.20.2"}

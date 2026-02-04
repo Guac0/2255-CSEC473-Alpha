@@ -4,6 +4,7 @@ resource "openstack_compute_instance_v2" "deb13" {
   for_each = {
     ponyville       = "10.0.10.3"
     seaddle         = "10.0.10.4"
+    todo            = "10.0.10.5"
     everfree-forest = "10.0.20.3"
     griffonstone    = "10.0.20.4"
   }
