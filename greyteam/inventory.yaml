@@ -4,7 +4,7 @@ all:
     dc:
       hosts:
         canterlot:
-          ansible_host: "10.1.10.1"
+          ansible_host: "10.0.10.1"
   
     mssql:
       hosts:
@@ -14,7 +14,7 @@ all:
     apache2:
       hosts:
         ponyville:
-          ansible_host: "10.1.10.3"
+          ansible_host: "10.0.10.3"
 
     mariadb:
       hosts:
