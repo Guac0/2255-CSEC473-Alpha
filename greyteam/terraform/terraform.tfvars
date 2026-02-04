@@ -31,3 +31,23 @@ scoringworker = {
   "scoring4" = { hostname = "scoring4", ip = "172.20.0.106" }
   "scoring5" = { hostname = "scoring5", ip = "172.20.0.115" }
 }
+
+inscope = {
+  "canterlot" = { hostname = "canterlot", ip = "10.1.10.1"}
+  "appleloosa" = { hostname = "appleloosa", ip = "10.1.10.2"}
+  "ponyvile" = { hostname = "ponyvile", ip = "10.1.10.3"}
+  "seaddle" = { hostname = "seaddle", ip = "10.1.10.4"}
+  "crystal-empire" = { hostname = "crystal-empire", ip = "10.1.10.1"}
+
+  "cloudsdale" = { hostname = "cloudsdale", ip = "10.1.20.1"}
+  "manehatten" = { hostname = "manehatten", ip = "10.1.20.2"}
+  "everfree-forest" = { hostname = "everfree-forest", ip = "10.1.20.3"}
+  "griffonstone" = { hostname = "griffonstone", ip = "10.1.20.4"}
+
+  "baltamare" = { hostname = "baltamare", ip = "10.1.30.1"}
+  "neighara-falls" = { hostname = "neighara-falls", ip = "10.1.30.2"}
+  "las-peagasus" = { hostname = "las-peagasus", ip = "10.1.30.3"}
+  "vanhoover" = { hostname = "vanhoover", ip = "10.1.30.4"}
+  "whinnyapolis" = { hostname = "whinnyapolis", ip = "10.1.30.5"}
+  "fillydelphia" = { hostname = "fillydelphia", ip = "10.1.30.6"} 
+}

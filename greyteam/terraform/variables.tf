@@ -28,3 +28,10 @@ variable "scoringworker" {
     ip       = string
   }))
 }
+
+variable "inscope" {
+  type = map(object({
+    hostname = string
+    ip       = string
+  }))
+}
