@@ -1,11 +1,11 @@
 ---
 - name: Deploy Generic Users
-  ansible.builtin.include_tasks: generic_users.yaml
+  ansible.builtin.include_tasks: users_generic.yaml
 
 - name: Deploy Inscope Users
-  ansible.builtin.include_tasks: team_users.yaml
+  ansible.builtin.include_tasks: users_inscope.yaml
   when: "'inscope' in group_names"
 
 - name: Deploy Out of Scope Users
-  ansible.builtin.include_tasks: blue_users.yaml
+  ansible.builtin.include_tasks: users_blue.yaml
   when: "'inscope' not in group_names"
