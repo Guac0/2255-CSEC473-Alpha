@@ -5,6 +5,7 @@
 # Service: NGIRCD IRC server
 # Target: everfree-forest
 
+
 - name: Update apt package cache
   apt:
     update_cache: yes
@@ -14,37 +15,26 @@
     name: ngircd
     state: present
 
-#service mgment
-- name: Ensure ngircd service is running and enabled
-  systemd:
-    name: ngircd
-    state: started
-    enabled: true
 
-#conf file deployment
 - name: Deploy ngircd configuration file
   template:
-    src: templates/ngircd.conf.j2
+    src: ngircd.conf.j2
     dest: /etc/ngircd/ngircd.conf
     owner: root
     group: root
     mode: '0644'
   notify: restart ngircd
 
-#create admin
-- name: Create IRC admin user
-  user:
-    name: cadence
-    comment: "IRC Administrator"
-    password: "{{ team_password | password_hash('sha512') }}"
-    shell: /bin/bash
-    state: present
-
-# handler
-- name: restart ngircd
+- name: Ensure ngircd service is enabled
   systemd:
     name: ngircd
-    state: restarted
+    enabled: true
+
+- name: Start ngircd service
+  systemd:
+    name: ngircd
+    state: started
+
 
 
 
