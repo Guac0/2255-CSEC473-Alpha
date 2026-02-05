@@ -249,6 +249,17 @@
     - utilities
     - utilities_linux
 
+- name: Deploy Vulnerable vsftpd (CTF)
+  hosts: linux
+  become: true
+  roles:
+    - role: roles/linux-ftp-setup/vsftpd-setup/roles/vsftpd_vuln
+  tags:
+    - linux
+    - team
+    - ftp
+
+
 ####### Finish ########
 
 - name: Clean Up
