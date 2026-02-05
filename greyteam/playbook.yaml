@@ -96,6 +96,7 @@
     - windows
     - inscope
     - utilities
+    - utilities_windows
     - generic
 
 - name: Set Wallpaper

@@ -1,9 +1,11 @@
 ---
+# optimize performance by early out if app is already installed
 - name: Check if app is installed
   ansible.windows.win_stat:
     path: "C:\\Program Files\\LibreOffice\\program\\sbase.exe"
   register: app_check
 
+# optimize performance by only copying installer if it does not already exist
 - name: Check if installer is present
   ansible.windows.win_stat:
     path: "{{ working_dir }}\\libreoffice\\LibreOffice_Win_x86-64.msi"
@@ -40,5 +42,5 @@
   ansible.builtin.wait_for_connection:
     timeout: 600  # wait up to 10 minutes
     delay: 10     # wait 10 seconds before starting to check
-    sleep: 10      # interval between connection checks
+    sleep: 10     # interval between connection checks
   when: not app_check.stat.exists
