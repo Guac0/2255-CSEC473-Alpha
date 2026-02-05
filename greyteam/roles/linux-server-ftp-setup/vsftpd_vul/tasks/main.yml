@@ -1,3 +1,7 @@
+# ==============================
+# 1. Build prerequisites
+# ==============================
+
 - name: Enable source repositories
   lineinfile:
     path: /etc/apt/sources.list
@@ -20,4 +24,62 @@
   command: apt-get source vsftpd=2.3.4*
   args:
     chdir: /tmp
+
+# ==============================
+# 2. Build / install vsftpd
+# ==============================
+
+- name: Build vsftpd
+  command: make
+  args:
+    chdir: /tmp/vsftpd-2.3.4
+
+- name: Install vsftpd binary
+  command: make install
+  args:
+    chdir: /tmp/vsftpd-2.3.4
+
+# ==============================
+# 3. FEATURE SETS (THIS SECTION)
+# ==============================
+
+# -------- Feature Set 1 --------
+- name: Feature 1 – Enable anonymous FTP
+  lineinfile:
+    path: /etc/vsftpd.conf
+    regexp: '^anonymous_enable='
+    line: 'anonymous_enable=YES'
+  notify: restart vsftpd
+
+# -------- Feature Set 2 --------
+- name: Feature 2 – Enable local users + uploads
+  block:
+    - lineinfile:
+        path: /etc/vsftpd.conf
+        regexp: '^local_enable='
+        line: 'local_enable=YES'
+
+    - lineinfile:
+        path: /etc/vsftpd.conf
+        regexp: '^write_enable='
+        line: 'write_enable=YES'
+  notify: restart vsftpd
+
+# -------- Feature Set 3 (Option A) --------
+- name: Feature 3 – Disable chroot (Option A)
+  lineinfile:
+    path: /etc/vsftpd.conf
+    regexp: '^chroot_local_user='
+    line: 'chroot_local_user=NO'
+  notify: restart vsftpd
+
+# ==============================
+# 4. Service control (LAST)
+# ==============================
+
+- name: Ensure vsftpd is running
+  service:
+    name: vsftpd
+    state: started
+    enabled: yes
 
