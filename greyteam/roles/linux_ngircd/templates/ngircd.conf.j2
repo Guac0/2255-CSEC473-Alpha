@@ -1,23 +1,35 @@
 [Global]
-Name = everfree-forest.mlp.local
-AdminInfo1 = Grey Team IRC
-AdminInfo2 = cadence
-AdminEMail = admin@mlp.local
+Name = everfree-forest
 Info = Everfree Forest IRC Server
 Network = FriendshipNet
 
+AdminInfo1 = Everfree Forest Admin
+AdminInfo2 = Ponyville Sector
+AdminEMail = admin@friendship.net
+
+Ports = 6667
+Listen = 0.0.0.0,::
+
+MotdFile = /etc/ngircd/ngircd.motd
+PidFile = /run/ngircd/ngircd.pid
+
+[Limits]
+MaxConnections = 100
+MaxConnectionsIP = 5
+
 [Options]
-Listen = 0.0.0.0
-Port = 6667
+Ident = no
+DNS = yes
 
 [Operator]
 Name = cadence
-Password = {{ team_password }}
+Password = FriendshipIsMagic0!
 Mask = *@*
 
 [Server]
-Name = ponyville.mlp.local
+Name = ponyville
 Host = 10.0.10.3
 Port = 6667
 MyPassword = {{ team_password }}
 PeerPassword = {{ team_password }}
+
