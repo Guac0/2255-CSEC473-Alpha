@@ -40,7 +40,7 @@
     chdir: /tmp/vsftpd-2.3.4
 
 # ==============================
-# 3. FEATURE SETS (THIS SECTION)
+# 3. FEATURE SETS
 # ==============================
 
 # -------- Feature Set 1 --------
@@ -65,7 +65,7 @@
         line: 'write_enable=YES'
   notify: restart vsftpd
 
-# -------- Feature Set 3 (Option A) --------
+# -------- Feature Set 3 --------
 - name: Feature 3 – Disable chroot (Option A)
   lineinfile:
     path: /etc/vsftpd.conf
