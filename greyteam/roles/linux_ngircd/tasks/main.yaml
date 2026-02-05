@@ -10,13 +10,13 @@
   apt:
     update_cache: yes
 
-- name: Install ngircd IRC server
+- name: Install ngircd IRC server  #installs server 
   apt:
     name: ngircd
     state: present
 
 
-- name: Deploy ngircd configuration file
+- name: Deploy ngircd configuration file #deploys config file
   template:
     src: ngircd.conf.j2
     dest: /etc/ngircd/ngircd.conf
@@ -25,12 +25,12 @@
     mode: '0644'
   notify: restart ngircd
 
-- name: Ensure ngircd service is enabled
+- name: Ensure ngircd service is enabled #checks if ngircd is enabled 
   systemd:
     name: ngircd
     enabled: true
 
-- name: Start ngircd service
+- name: Start ngircd service #starts the service
   systemd:
     name: ngircd
     state: started
