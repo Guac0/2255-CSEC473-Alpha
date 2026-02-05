@@ -1,2 +1,2 @@
 - name: SMB setup + content
-  ansible.builtin.import_tasks: smb.yml
+  ansible.builtin.include_tasks: smb.yaml
