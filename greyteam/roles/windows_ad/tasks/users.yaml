@@ -1,6 +1,6 @@
 ---
 - name: Create Domain Users
-  community.windows.win_domain_user:
+  microsoft.ad.user:
     name: "{{ item }}"
     password: "{{ team_password }}"
     state: present
@@ -12,7 +12,7 @@
   loop: "{{ domain_users }}"
 
 - name: Create Domain Admin Users
-  community.windows.win_domain_user:
+  microsoft.ad.user:
     name: "{{ item }}"
     password: "{{ team_password }}"
     state: present
