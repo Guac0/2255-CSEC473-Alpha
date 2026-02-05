@@ -99,6 +99,7 @@ all:
       children:
         dc:
         mssql:
+        dns:
         iis:
         smb:
         windows_wkst1:
@@ -195,6 +196,7 @@ all:
       children:
         dc:
         mssql:
+        dns:
         iis:
         smb:
         windows_wkst1:

@@ -220,12 +220,31 @@
     - linux
     - inscope
 
+- name: Deploy MariaDb
+  hosts: seaddle
+  become: true
+  roles:
+    - linux_mariadb
+  tags:
+    - mariadb
+    - linux
+    - inscope
+    
 - name: Deploy NGIRCD
   hosts: everfree-forest
   roles:
     - linux_ngircd
   tags:
     - ngircd
+    - linux
+    - inscope
+
+- name: Deploy Linux Client Programs
+  hosts: linux_users
+  roles:
+    - linux_client_programs
+  tags:
+    - client_programs
     - linux
     - inscope
 
