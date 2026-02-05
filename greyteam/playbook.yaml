@@ -210,7 +210,6 @@
     - linux
     - inscope
 
-
 - name: Deploy MariaDb
   hosts: seaddle
   become: true
@@ -227,6 +226,15 @@
     - linux_ngircd
   tags:
     - ngircd
+    - linux
+    - inscope
+
+- name: Deploy Linux Client Programs
+  hosts: linux_users
+  roles:
+    - linux_client_programs
+  tags:
+    - client_programs
     - linux
     - inscope
 
