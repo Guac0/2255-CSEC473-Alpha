@@ -15,3 +15,28 @@
   ansible.builtin.apt:
     update_cache: yes
   become: true
+
+- name: Verify FTP server is reachable from workstations
+  ansible.builtin.wait_for:
+    host: "{{ ftp_host }}"
+    port: "{{ ftp_port }}"
+    timeout: 10
+  register: ftp_reachable
+  failed_when: false
+  changed_when: false
+
+- name: Verify IRC server is reachable from workstations
+  ansible.builtin.wait_for:
+    host: "{{ irc_host }}"
+    port: "{{ irc_port }}"
+    timeout: 10
+  register: irc_reachable
+  failed_when: false
+  changed_when: false
+
+- name: Display connectivity results
+  ansible.builtin.debug:
+    msg: |
+      - "FTP server ({{ ftp_host }}:{{ ftp_port }}) reachable: {{ 'YES' if not ftp_reachable.failed else 'NO' }}"
+      - "IRC server ({{ irc_host }}:{{ irc_port }}) reachable: {{ 'YES' if not irc_reachable.failed else 'NO' }}"
+  changed_when: false

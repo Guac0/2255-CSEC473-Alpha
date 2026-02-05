@@ -5,6 +5,12 @@ ansible_become: yes
 ansible_become_method: sudo
 ansible_become_user: root
 
+ftp_host: "crystal-empire"
+ftp_port: 21
+
+irc_host: "everfree-forest"
+irc_port: 6667
+
 # Payload keying
 payload_key_location: '/greyteam_key'
 
