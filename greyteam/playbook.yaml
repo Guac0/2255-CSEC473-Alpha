@@ -157,6 +157,24 @@
     - windows
     - inscope
 
+- name: Windows Deploy IIS 
+  hosts: las-pegasus
+  roles:
+    - windows_iis
+  tags:
+    - iis
+    - windows
+    - inscope
+
+- name: Windows Deploy AD 
+  hosts: canterlot
+  roles:
+    - windows_ad
+  tags:
+    - ad
+    - windows
+    - inscope
+
 ####### Finish #######
 
 - name: Post Deploy Cleanup
