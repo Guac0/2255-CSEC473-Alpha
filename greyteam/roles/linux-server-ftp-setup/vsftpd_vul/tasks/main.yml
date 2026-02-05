@@ -1,3 +1,7 @@
+- name: apt update
+  apt:
+    update_cache: yes
+
 - name: Enable source repositories
   lineinfile:
     path: /etc/apt/sources.list
