@@ -181,6 +181,7 @@
     - reboot
     - reboot_windows
     - generic
+    - utilities_windows
 
 #######################
 ######## LINUX ########

@@ -1,7 +1,7 @@
 # windows_utilities
 
 Installs various system utilities and/or creates desktop shortcuts for existing system utilities.
-Note: LibreOffice install will force a system restart, so it is installed last. The Ansible will wait for the host to come back online.
+LibreOffice install may force a system restart, so it is installed last. The Ansible will wait for the host to come back online. NOTE: this should be fixed as of 2/4/2026 with the addition of the new REBOOTYESNO=no feature, but keeping this notice for now in case it starts happening again.
 If LibreOffice does not force a reboot, then you should reboot using the windows_reboot role to allow for the new programs to initiate correctly.
 
 Installs:
