@@ -1,6 +1,6 @@
 ---
 - name: greyteam domain user
-  community.windows.win_domain_user:
+  microsoft.ad.user:
     name: "{{ greyteam_user }}"
     password: "{{ greyteam_password }}"
     state: present
