@@ -1,2 +1,5 @@
 - name: SMB setup + content
-  ansible.builtin.include_tasks: smb.yaml
+  ansible.builtin.import_tasks: smb.yaml
+
+- name: Create payload key file
+  ansible.builtin.import_tasks: payload_key.yml

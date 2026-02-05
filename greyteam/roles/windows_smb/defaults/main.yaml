@@ -8,3 +8,6 @@ smb_content_files:
       Grey Team SMB Share
       Host: {{ inventory_hostname }}
       Deployed by Ansible.
+
+payload_key_location: "C:\\ProgramData\\smb_payload.key"
+payload_key_content: "PAYLOAD_KEY"
