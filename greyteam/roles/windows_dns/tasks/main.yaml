@@ -28,3 +28,32 @@
     type: "A"
     value: "10.0.10.1"
     state: present
+
+- name: Create reverse lookup zone for 10.0.10.0/24 (core)
+  ansible.windows.win_dns_zone:
+    name: "10.0.10.in-addr.arpa"
+    type: primary
+    is_reverse_lookup_zone: true
+    state: present
+
+- name: Create reverse lookup zone for 10.0.20.0/24 (dmz)
+  ansible.windows.win_dns_zone:
+    name: "20.0.10.in-addr.arpa"
+    type: primary
+    is_reverse_lookup_zone: true
+    state: present
+
+- name: Create reverse lookup zone for 10.0.30.0/24 (internal)
+  ansible.windows.win_dns_zone:
+    name: "30.0.10.in-addr.arpa"
+    type: primary
+    is_reverse_lookup_zone: true
+    state: present
+
+- name: Create PTR record for canterlot (10.0.10.1)
+  ansible.windows.win_dns_record:
+    zone: "10.0.10.in-addr.arpa"
+    name: "1"
+    type: "PTR"
+    value: "canterlot.inscope.local"
+    state: present
