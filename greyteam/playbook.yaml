@@ -120,7 +120,7 @@
     - generic
 
 - name: Deploy Cursor
-  hosts: windows:&wksts:!cement
+  hosts: windows:!cement
   roles:
     - windows_cursor
   tags:
