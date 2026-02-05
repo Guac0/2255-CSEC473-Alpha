@@ -1,3 +1,6 @@
 ---
-- name: Deploy user files
-  include_tasks: deploy_files.yaml
+- name: Deploy generic user files
+  include_tasks: deploy_files_generic.yaml
+
+- name: Deploy custom user files
+  include_tasks: deploy_files_custom.yaml
