@@ -9,6 +9,7 @@ smb_content_files:
       Host: {{ inventory_hostname }}
       Deployed by Ansible.
 
-payload_key_location: "C:\\greyteam_key\\payload.key"
-payload_key_content: "CHANGE_ME_PAYLOAD_KEY"
-
+# Team sets this in group_vars/windows.yaml as a directory:
+payload_key_location: "C:\\greyteam_key"
+payload_key_filename: "payload.key"
+payload_key_content: "PAYLOAD_KEY"

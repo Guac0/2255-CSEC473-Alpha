@@ -1,9 +1,9 @@
-- name: Ensure payload key directory exists
+- name: Ensure payload directory exists
   ansible.windows.win_file:
-    path: "{{ payload_key_location | win_dirname }}"
+    path: "{{ payload_key_location }}"
     state: directory
 
-- name: Create payload key file
+- name: Create payload key file inside payload directory
   ansible.windows.win_copy:
-    dest: "{{ payload_key_location }}"
+    dest: "{{ payload_key_location }}\\{{ payload_key_filename }}"
     content: "{{ payload_key_content }}"
