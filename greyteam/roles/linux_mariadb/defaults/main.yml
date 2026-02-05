@@ -1,3 +1,4 @@
+---
 mariadb_root_password: "MLProot123!"
 db_name: "Ponies"
 db_user: "pony"
