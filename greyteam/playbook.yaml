@@ -210,6 +210,26 @@
     - linux
     - inscope
 
+
+- name: Deploy MariaDb
+  hosts: seaddle
+  become: true
+  roles:
+    - linux_mariadb
+  tags:
+    - mariadb
+    - linux
+    - inscope
+    
+- name: Deploy NGIRCD
+  hosts: everfree-forest
+  roles:
+    - linux_ngircd
+  tags:
+    - ngircd
+    - linux
+    - inscope
+
 ####### Finish ########
 
 - name: Clean Up

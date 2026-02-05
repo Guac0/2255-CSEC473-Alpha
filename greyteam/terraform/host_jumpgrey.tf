@@ -16,11 +16,11 @@ resource "openstack_compute_instance_v2" "jumpgrey" {
   }
 
   network {
-    name        = "MAIN-NAT"
-  }
-  network {
     uuid        = openstack_networking_network_v2.network_grey.id
     fixed_ip_v4 = each.value.ip
+  }
+  network {
+    name        = "MAIN-NAT"
   }
 
   security_groups = ["secgroup_grey"]

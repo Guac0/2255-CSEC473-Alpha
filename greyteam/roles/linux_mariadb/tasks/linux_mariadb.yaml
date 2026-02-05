@@ -1,29 +1,101 @@
 ---
-# Note: this file is built for a Linux host.
-# Windows hosts have their own task versions (btw, they're called modules)
-# for example: ansible.windows.win_copy
+- name: Install MariaDB
+  apt:
+    name:
+      - mariadb-server
+      - python3-pymysql
+    state: present
+    update_cache: yes
+    
+- name: Ensure MariaDB service is running and enabled
+  systemd:
+    name: mariadb
+    state: started
+    enabled: true
+# My three features are Secureing MariaDB, configureing file with permissions, and Create a datab base and a user
+    # Secure MariaDB 
+- name: Set MariaDB root password
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: root
+    password: "{{ mariadb_root_password }}"
+    host_all: true
+    state: present
 
-- name: Copy file
-  ansible.builtin.copy:
-    src: 'files/filename1.txt'
-    dest: '/filename1.txt'
+- name: Remove anonymous MariaDB users
+  mysql_user:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: ''
+    host_all: true
+    state: absent
+
+- name: Remove test database
+  mysql_db:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: test
+    state: absent
+
+    # Configure MariaDB file with permisisions 
+- name: Deploy MariaDB configuration file
+  copy:
+    dest: "{{ mariadb_config_file }}"
+    content: |
+      [mysqld]
+      bind-address = 127.0.0.1
+      max_connections = 100
     owner: root
     group: root
-    mode: '0444'
+    mode: '0644'
+  notify: Restart MariaDB
 
-- name: Copy Template File
-  ansible.builtin.template:
-    src: templates/filename2.txt.j2
-    dest: "/filename2.txt"
-  # Example when condition
-  # Task only runs when the destination host is in the "inscope"
-  # group in inventory.yaml
-  when: "'inscope' in group_names"
+    # Create database and user
+- name: Create  database
+  mysql_db:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: "{{ db_name }}"
+    state: present
 
-# Execute arbitrary shell commands
-# See also ansible.builtin.command for a subtly different task
-- name: This command will change the working directory to somedir/ and will only run when somedir/somelog.txt doesn't exist and will log output to somelog.txt
-  ansible.builtin.shell: somescript.sh >> somelog.txt
-  args:
-    chdir: somedir/
-    creates: somelog.txt
+   # CREATE SQL FILE (THIS IS WHERE IT GOES)
+- name: Create ponies SQL data file
+  copy:
+    dest: /tmp/ponies.sql
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      CREATE TABLE IF NOT EXISTS ponies (
+       id INT AUTO_INCREMENT PRIMARY KEY,
+       name VARCHAR(50) NOT NULL,
+       type VARCHAR(50),
+       element_of_harmony VARCHAR(50)
+      );
+
+      INSERT INTO ponies (name, type, element_of_harmony) VALUES
+        ('Twilight Sparkle', 'Alicorn', 'Magic'),
+        ('Rainbow Dash', 'Pegasus', 'Loyalty'),
+        ('Pinkie Pie', 'Earth Pony', 'Laughter'),
+        ('Fluttershy', 'Pegasus', 'Kindness'),
+        ('Applejack', 'Earth Pony', 'Honesty'),
+        ('Rarity', 'Unicorn', 'Generosity');
+
+    # IMPORT SQL INTO DATABASE
+- name: Populate Ponies database
+  mysql_db:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: "{{ db_name }}"
+    state: import
+    target: /tmp/ponies.sql
+
+- name: Create database user
+  mysql_user:
+   login_user: root
+   login_password: "{{ mariadb_root_password }}"
+   name: "{{ db_user }}"
+   password: "{{ db_password }}"
+   priv: "{{ db_name }}.*:ALL"
+   state: present
+
