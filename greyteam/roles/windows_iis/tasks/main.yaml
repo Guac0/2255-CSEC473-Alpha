@@ -1,0 +1,15 @@
+---
+#Rose Standard lds9122@rit.edu
+-   name: Install IIS
+    ansible.builtin.include_tasks: iis.yaml
+
+-   name: Disable Firewall
+    ansible.builtin.include_tasks: disable_firewall.yaml
+
+-   name: Install Git
+    ansible.builtin.include_tasks: git.yaml
+
+-   name: Add a webpage
+    ansible.builtin.include_tasks: webpage.yaml
+
+
