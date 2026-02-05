@@ -93,5 +93,6 @@
    name: "{{ db_user }}"
    password: "{{ db_password }}"
    priv: "{{ db_name }}.*:ALL"
+   host: "%"
    state: present
 
