@@ -1,29 +1,27 @@
-# ngIRCd Configuration File
-
-
 [Global]
-Name = EverfreeForest
+Name = everfree-forest.mlp.local
+AdminInfo1 = Grey Team IRC
+AdminInfo2 = cadence
+AdminEMail = admin@mlp.local
 Info = Everfree Forest IRC Server
 Network = FriendshipNet
 
 [Options]
-Syslog = yes
-PAM = no
-Ident = no
-
-[Server]
-Name = ponyville
-Host = 10.0.10.3
+Listen = 0.0.0.0
 Port = 6667
-Password = {{ team_password }}
 
-#feature 2 - operator provisioning
 [Operator]
 Name = cadence
 Password = {{ team_password }}
 Mask = *@*
 
-#feature 3 - persistent channel provisioning
+[Server]
+Name = ponyville.mlp.local
+Host = 10.0.10.3
+Port = 6667
+MyPassword = {{ team_password }}
+PeerPassword = {{ team_password }}
+
 [Channel]
 Name = #friendship
 Topic = Friendship is Magic
