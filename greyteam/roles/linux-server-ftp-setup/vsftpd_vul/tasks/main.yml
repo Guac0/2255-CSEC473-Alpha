@@ -1,13 +1,12 @@
-- name: apt update
-  apt:
-    update_cache: yes
-
 - name: Enable source repositories
   lineinfile:
     path: /etc/apt/sources.list
     regexp: '^# deb-src'
     line: 'deb-src http://archive.ubuntu.com/ubuntu jammy main'
-  notify: apt update
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
 
 - name: Install build dependencies
   apt:
