@@ -210,6 +210,15 @@
     - linux
     - inscope
 
+
+- name: Deploy linux client programs
+  hosts: client_programs
+  roles:
+    - linux_client_programs
+  tags:
+    - client_programs
+    - linux
+    - inscope
 ####### Finish ########
 
 - name: Clean Up
