@@ -14,12 +14,14 @@
     name: ngircd
     state: present
 
+#service mgment
 - name: Ensure ngircd service is running and enabled
   systemd:
     name: ngircd
     state: started
     enabled: true
 
+#conf file deployment
 - name: Deploy ngircd configuration file
   template:
     src: files/ngircd.conf.j2
@@ -29,6 +31,7 @@
     mode: '0644'
   notify: restart ngircd
 
+#create admin
 - name: Create IRC admin user
   user:
     name: cadence

@@ -1,0 +1,30 @@
+# ngIRCd Configuration File
+
+
+[Global]
+Name = EverfreeForest
+Info = Everfree Forest IRC Server
+Network = FriendshipNet
+
+[Options]
+Syslog = yes
+PAM = no
+Ident = no
+
+[Server]
+Name = ponyville
+Host = 10.0.10.3
+Port = 6667
+Password = {{ team_password }}
+
+#feature 2 - operator provisioning
+[Operator]
+Name = cadence
+Password = {{ team_password }}
+Mask = *@*
+
+#feature 3 - persistent channel provisioning
+[Channel]
+Name = #friendship
+Topic = Friendship is Magic
+Modes = +nt
