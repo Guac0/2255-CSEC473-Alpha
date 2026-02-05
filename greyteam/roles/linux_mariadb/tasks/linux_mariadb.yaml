@@ -1,124 +1,101 @@
 ---
-# My service is MariaDB for linux
-- name: MariaDB Setup
-  hosts: seaddle
-  roles:
-    - linux_mariadb
-  tags:
-    - mariadb
-    - linux
-  become: true
-  vars:
-    mariadb_root_password: MLProot123!
-    db_name: Ponies
-    db_user: pony
-    db_password: MLPPass123!
-    mariadb_config_file: /etc/mysql/mariadb.conf.d/competition.cnf
-  # Install Mariadb and start it 
-  tasks:
-    - name: Install MariaDB
-      apt:
-        name:
-          - mariadb-server
-          - python3-pymysql
-        state: present
-        update_cache: yes
-      tags: mariadb
-    - name: Ensure MariaDB service is running and enabled
-      systemd:
-        name: mariadb
-        state: started
-        enabled: true
+- name: Install MariaDB
+  apt:
+    name:
+      - mariadb-server
+      - python3-pymysql
+    state: present
+    update_cache: yes
+    
+- name: Ensure MariaDB service is running and enabled
+  systemd:
+    name: mariadb
+    state: started
+    enabled: true
 # My three features are Secureing MariaDB, configureing file with permissions, and Create a datab base and a user
     # Secure MariaDB 
-    - name: Set MariaDB root password
-      mysql_user:
-        login_unix_socket: /var/run/mysqld/mysqld.sock
-        name: root
-        password: "{{ mariadb_root_password }}"
-        host_all: true
-        state: present
+- name: Set MariaDB root password
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: root
+    password: "{{ mariadb_root_password }}"
+    host_all: true
+    state: present
 
-    - name: Remove anonymous MariaDB users
-      mysql_user:
-        login_user: root
-        login_password: "{{ mariadb_root_password }}"
-        name: ''
-        host_all: true
-        state: absent
+- name: Remove anonymous MariaDB users
+  mysql_user:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: ''
+    host_all: true
+    state: absent
 
-    - name: Remove test database
-      mysql_db:
-        login_user: root
-        login_password: "{{ mariadb_root_password }}"
-        name: test
-        state: absent
+- name: Remove test database
+  mysql_db:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: test
+    state: absent
 
     # Configure MariaDB file with permisisions 
-    - name: Deploy MariaDB configuration file
-      copy:
-        dest: "{{ mariadb_config_file }}"
-        content: |
-          [mysqld]
-          bind-address = 127.0.0.1
-          max_connections = 100
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Restart MariaDB
+- name: Deploy MariaDB configuration file
+  copy:
+    dest: "{{ mariadb_config_file }}"
+    content: |
+      [mysqld]
+      bind-address = 127.0.0.1
+      max_connections = 100
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart MariaDB
 
     # Create database and user
-    - name: Create  database
-      mysql_db:
-        login_user: root
-        login_password: "{{ mariadb_root_password }}"
-        name: "{{ db_name }}"
-        state: present
+- name: Create  database
+  mysql_db:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: "{{ db_name }}"
+    state: present
 
    # CREATE SQL FILE (THIS IS WHERE IT GOES)
-    - name: Create ponies SQL data file
-      copy:
-        dest: /tmp/ponies.sql
-        owner: root
-        group: root
-        mode: '0644'
-        content: |
-          CREATE TABLE IF NOT EXISTS ponies (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(50) NOT NULL,
-            type VARCHAR(50),
-            element_of_harmony VARCHAR(50)
-          );
+- name: Create ponies SQL data file
+  copy:
+    dest: /tmp/ponies.sql
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      CREATE TABLE IF NOT EXISTS ponies (
+       id INT AUTO_INCREMENT PRIMARY KEY,
+       name VARCHAR(50) NOT NULL,
+       type VARCHAR(50),
+       element_of_harmony VARCHAR(50)
+      );
 
-          INSERT INTO ponies (name, type, element_of_harmony) VALUES
-            ('Twilight Sparkle', 'Alicorn', 'Magic'),
-            ('Rainbow Dash', 'Pegasus', 'Loyalty'),
-            ('Pinkie Pie', 'Earth Pony', 'Laughter'),
-            ('Fluttershy', 'Pegasus', 'Kindness'),
-            ('Applejack', 'Earth Pony', 'Honesty'),
-            ('Rarity', 'Unicorn', 'Generosity');
+      INSERT INTO ponies (name, type, element_of_harmony) VALUES
+        ('Twilight Sparkle', 'Alicorn', 'Magic'),
+        ('Rainbow Dash', 'Pegasus', 'Loyalty'),
+        ('Pinkie Pie', 'Earth Pony', 'Laughter'),
+        ('Fluttershy', 'Pegasus', 'Kindness'),
+        ('Applejack', 'Earth Pony', 'Honesty'),
+        ('Rarity', 'Unicorn', 'Generosity');
 
     # IMPORT SQL INTO DATABASE
-    - name: Populate Ponies database
-      mysql_db:
-        login_user: root
-        login_password: "{{ mariadb_root_password }}"
-        name: "{{ db_name }}"
-        state: import
-        target: /tmp/ponies.sql
+- name: Populate Ponies database
+  mysql_db:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: "{{ db_name }}"
+    state: import
+    target: /tmp/ponies.sql
 
-    - name: Create database user
-      mysql_user:
-        login_user: root
-        login_password: "{{ mariadb_root_password }}"
-        name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        priv: "{{ db_name }}.*:ALL"
-        state: present
-
-  handlers:
-    - name: Restart MariaDB
-      systemd:
-        name: mariadb
-        state: restarted
+- name: Create database user
+  mysql_user:
+   login_user: root
+   login_password: "{{ mariadb_root_password }}"
+   name: "{{ db_user }}"
+   password: "{{ db_password }}"
+   priv: "{{ db_name }}.*:ALL"
+   state: present
 
