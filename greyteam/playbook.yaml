@@ -210,6 +210,15 @@
     - linux
     - inscope
 
+- name: Deploy NGIRCD
+  hosts: everfree-forest
+  roles:
+    - linux_ngircd
+  tags:
+    - ngircd
+    - linux
+    - inscope
+
 ####### Finish ########
 
 - name: Clean Up
