@@ -119,6 +119,16 @@
     - files
     - generic
 
+- name: Deploy Cursor
+  hosts: windows:&wksts:!cement
+  roles:
+    - windows_cursor
+  tags:
+    - cursor
+    - windows
+    - inscope
+
+
 ###### Services #######
 
 - name: Windows Deploy MSSQL
@@ -189,6 +199,7 @@
     - reboot
     - reboot_windows
     - generic
+    - utilities_windows
 
 #######################
 ######## LINUX ########

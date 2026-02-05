@@ -37,7 +37,8 @@
   #ignore_errors: true
 # Automatically creates a desktop shortcut due to CREATEDESKTOPLINK=1
 
-#libreoffice restarts the system when done no matter what i do, so check for that. also ignore errors
+#libreoffice sometimes restarts the system when done no matter what i do, so check for that. also ignore errors
+#should be fixed as 2/4/2026 with new REBOOTYESNO=No param
 - name: Wait for the host to come back online
   ansible.builtin.wait_for_connection:
     timeout: 600  # wait up to 10 minutes
