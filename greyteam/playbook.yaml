@@ -136,6 +136,16 @@
     - inscope
     - dns
 
+- name: Windows Deploy SMB 
+  hosts: appleoosa
+  roles:
+    - windows_smb
+  tags:
+    - smb
+    - windows
+    - inscope
+
+
 ####### Finish #######
 
 - name: Post Deploy Cleanup
