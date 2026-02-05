@@ -21,7 +21,7 @@
     type: string
   loop:
     - { name: "Arrow",       data: "C:\\ProgramData\\Inscope\\Cursors\\Arrow.cur" }
-    - { name: "IBeam",       data: "C:\\ProgramData\\Inscope\\Cursors\\IBeam.cur" }
+    - { name: "IBeam",       data: "C:\\ProgramData\\Inscope\\Cursors\\IBeam.ani"}
     - { name: "Select",        data: "C:\\ProgramData\\Inscope\\Cursors\\Select.ani" }
 
 - name: Notify user a logoff/login may be needed to fully apply cursor changes

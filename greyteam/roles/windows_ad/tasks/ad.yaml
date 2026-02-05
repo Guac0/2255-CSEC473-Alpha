@@ -6,16 +6,16 @@
     include_sub_features: yes
     state: present
   register: result
-  delegate_to: '{{ 10.0.10.1 }}'
+  delegate_to: 10.0.10.1
 - name: Create Domain
-  win_domain: 
+  microsoft.ad.domain: 
     dns_domain_name: '{{ domain }}'
     safe_mode_password: '{{ greyteam_password }}'
   register: ad
-  delegate_to: "{{ 10.0.10.1 }}"
+  delegate_to: 10.0.10.1
 - name: reboot server
   win_reboot:
     msg: "Installing AD. Rebooting..."
     pre_reboot_delay: 15
   when: ad.changed
-  delegate_to: "{{ 10.0.10.1 }}"
+  delegate_to: 10.0.10.1
