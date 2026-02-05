@@ -230,13 +230,14 @@
     - inscope
 
 - name: Deploy Linux Client Programs
-  hosts: linux_users
+  hosts: linux:&wksts 
   roles:
     - linux_client_programs
   tags:
-    - client_programs
     - linux
     - inscope
+    - utilities
+    - utilities_linux
 
 ####### Finish ########
 
