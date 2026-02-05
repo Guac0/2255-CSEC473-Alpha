@@ -1,0 +1,96 @@
+- name: Install build dependencies
+  apt:
+    name:
+      - build-essential
+      - wget
+      - libssl-dev
+    state: present
+    update_cache: yes
+
+- name: Download vulnerable vsftpd 2.3.4
+  get_url:
+    url: https://security.appspot.com/downloads/vsftpd-2.3.4.tar.gz
+    dest: /tmp/vsftpd-2.3.4.tar.gz
+
+- name: Extract vsftpd source
+  unarchive:
+    src: /tmp/vsftpd-2.3.4.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Compile vulnerable vsftpd
+  make:
+    chdir: /tmp/vsftpd-2.3.4
+
+- name: Remove distro vsftpd if present
+  apt:
+    name: vsftpd
+    state: absent
+
+- name: Install vulnerable vsftpd binary
+  copy:
+    src: /tmp/vsftpd-2.3.4/vsftpd
+    dest: /usr/sbin/vsftpd
+    mode: '0755'
+
+- name: Deploy intentionally insecure config
+  copy:
+    dest: /etc/vsftpd.conf
+    content: |
+      listen=YES
+      listen_ipv6=NO
+      anonymous_enable=YES
+      anon_upload_enable=YES
+      anon_mkdir_write_enable=YES
+      local_enable=YES
+      write_enable=YES
+      chroot_local_user=NO
+      ftpd_banner=Welcome to Legacy Finance FTP Service
+      seccomp_sandbox=NO
+  notify: restart vsftpd
+
+- name: Create FTP root with weak permissions
+  file:
+    path: /srv/ftp
+    state: directory
+    mode: '0777'
+
+- name: Create weak local user
+  user:
+    name: testuser
+    password: "{{ 'password' | password_hash('sha512') }}"
+    shell: /bin/bash
+
+- name: Create writable vsftpd log (log poisoning)
+  file:
+    path: /var/log/vsftpd.log
+    state: touch
+    mode: '0666'
+
+- name: Add cron job (enterprise misconfig)
+  cron:
+    name: "Legacy FTP maintenance task"
+    minute: "*/10"
+    job: "echo 'FLAG{ftp_log_poisoning}' >> /var/log/vsftpd.log"
+
+- name: Create systemd service
+  copy:
+    dest: /etc/systemd/system/vsftpd.service
+    content: |
+      [Unit]
+      Description=Vulnerable vsftpd Service
+
+      [Service]
+      ExecStart=/usr/sbin/vsftpd /etc/vsftpd.conf
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart vsftpd
+
+- name: Enable and start vsftpd
+  systemd:
+    name: vsftpd
+    enabled: yes
+    state: started
+

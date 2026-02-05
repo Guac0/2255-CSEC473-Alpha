@@ -1,4 +1,8 @@
 ---
+# Alpha – Anny Hua
+# Service: Windows DNS Server
+# Description: Installs DNS, enables the service, and creates an internal DNS zone
+
 - name: Install DNS Server role
   ansible.windows.win_feature:
     name: DNS
@@ -11,8 +15,16 @@
     start_mode: auto
     state: started
 
-# - name: Create forward lookup DNS zone
-#   ansible.windows.win_dns_zone:
-#     name: "{{ dns_zone_name }}"
-#     type: primary
-#     dynamic_update: secure
+- name: Create forward lookup zone for inscope.local
+  ansible.windows.win_dns_zone:
+    name: "inscope.local"
+    type: primary
+    state: present
+
+- name: Ensure DNS server A record exists
+  ansible.windows.win_dns_record:
+    zone: "inscope.local"
+    name: "canterlot"
+    type: "A"
+    value: "10.0.10.1"
+    state: present
