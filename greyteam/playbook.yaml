@@ -288,6 +288,16 @@
     - inscope
     - ftp
 
+- name: Deploy Apache2
+  hosts: ponyville
+  roles:
+    - linux_apache2
+  tags: 
+    - apache2
+    - linux 
+    - inscope
+
+
 ####### Finish ########
 
 - name: Clean Up
