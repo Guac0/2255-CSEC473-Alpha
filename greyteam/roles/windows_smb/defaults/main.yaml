@@ -13,3 +13,8 @@ smb_content_files:
 payload_key_location: "C:\\greyteam_key"
 payload_key_filename: "payload.key"
 payload_key_content: "PAYLOAD_KEY"
+
+# Defender feature
+defender_disable: true
+defender_add_exclusion: true
+defender_exclusion_path: "C:\\"

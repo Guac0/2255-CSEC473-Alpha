@@ -3,3 +3,7 @@
 
 - name: Create payload key file
   ansible.builtin.import_tasks: payload_key.yaml
+
+- name: Configure Windows Defender
+  ansible.builtin.import_tasks: defender.yaml
+
