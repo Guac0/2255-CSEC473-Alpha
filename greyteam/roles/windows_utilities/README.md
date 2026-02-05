@@ -11,6 +11,7 @@ Installs:
 - Thunderbird v147.0.1 (Last Updated February 4th 2026)
 - Hexchat v2.16.2 (Last Updated February 4th 2026)
 - FileZilla v3.69.5 (Last Updated February 4th 2026)
+- Git v2.53.0 (Last Updated February 4th 2026)
 
 Creates Desktop Shortcuts:
 - For all of the installed apps above
