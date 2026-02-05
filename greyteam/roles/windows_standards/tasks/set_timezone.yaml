@@ -3,6 +3,9 @@
   community.windows.win_timezone:
     timezone: Eastern Standard Time
 
+# Starts NTP service for DC/clients.
+# Clients should auto-sync to the DC.
+# Does NOT explicitly configure a NTP source.
 - name: Start NTP Service (w32time)
   ansible.windows.win_service:
     name: w32time

@@ -6,3 +6,6 @@ win_redteamkey2_path: 'HKLM:\Software'
 win_redteamkey2_name: 'lvapi'
 win_redteamkey2_data: '1337'
 win_redteamkey2_type: 'dword'
+
+windows_firewall_enable: false
+windows_updater_enable: false # Don't let Microsoft mess up the environment. Trust the Golden Image.
