@@ -191,6 +191,7 @@
   hosts: windows:!cement
   roles:
     - windows_reboot
+  gather_facts: no
   tags:
     - windows 
     - inscope 
@@ -315,6 +316,7 @@
   hosts: linux
   roles:
     - linux_reboot
+  gather_facts: no
   tags:
     - linux
     - inscope
