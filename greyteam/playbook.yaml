@@ -128,7 +128,6 @@
     - windows
     - inscope
 
-
 ###### Services #######
 
 - name: Windows Deploy MSSQL
@@ -199,7 +198,6 @@
     - reboot
     - reboot_windows
     - generic
-    - utilities_windows
 
 #######################
 ######## LINUX ########
