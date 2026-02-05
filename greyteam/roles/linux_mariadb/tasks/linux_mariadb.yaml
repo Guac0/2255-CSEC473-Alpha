@@ -1,7 +1,12 @@
 ---
 # My service is MariaDB for linux
 - name: MariaDB Setup
-  hosts: all
+  hosts: seaddle
+  roles:
+    - linux_mariadb
+  tags:
+    - mariadb
+    - linux
   become: true
   vars:
     mariadb_root_password: MLProot123!
