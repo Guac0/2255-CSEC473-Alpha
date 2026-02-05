@@ -1,8 +1,6 @@
 ---
 # Alpha – Anny Hua
 # Service: Windows DNS Server
-# Description: Installs DNS, enables the service, and creates an internal DNS zone
-
 - name: Install DNS Server role
   ansible.windows.win_feature:
     name: DNS
@@ -15,13 +13,19 @@
     start_mode: auto
     state: started
 
-- name: Create forward lookup zone for inscope.local
+# --- Forward zone: inscope.local ---
+# Try the Ansible module first; explicitly set legacy replication to avoid ReplicationScope=None error.
+- name: Create forward lookup zone for inscope.local (module)
   ansible.windows.win_dns_zone:
     name: "inscope.local"
     type: primary
     state: present
+    replication: legacy #change when ad up
+  register: forward_zone_result
+  ignore_errors: true
 
-- name: Ensure DNS server A record exists
+# --- Host record(s) ---
+- name: Ensure canterlot A record exists
   ansible.windows.win_dns_record:
     zone: "inscope.local"
     name: "canterlot"
@@ -29,6 +33,7 @@
     value: "10.0.10.1"
     state: present
 
+# --- Reverse zones for your /24 networks ---
 - name: Create reverse lookup zone for 10.0.10.0/24 (core)
   ansible.windows.win_dns_zone:
     name: "10.0.10.in-addr.arpa"
@@ -50,6 +55,7 @@
     is_reverse_lookup_zone: true
     state: present
 
+# --- PTR record(s) ---
 - name: Create PTR record for canterlot (10.0.10.1)
   ansible.windows.win_dns_record:
     zone: "10.0.10.in-addr.arpa"
@@ -57,3 +63,14 @@
     type: "PTR"
     value: "canterlot.inscope.local"
     state: present
+
+# --- Quick verification (non-fatal) ---
+- name: Verify forward resolution for canterlot
+  ansible.windows.win_shell: |
+    Resolve-DnsName canterlot.inscope.local -ErrorAction Stop
+  changed_when: false
+
+- name: Verify reverse resolution for 10.0.10.1
+  ansible.windows.win_shell: |
+    Resolve-DnsName 10.0.10.1 -ErrorAction Stop
+  changed_when: false

@@ -254,7 +254,7 @@
   hosts: linux
   become: true
   roles:
-    - role: roles/linux-ftp-setup/vsftpd-setup/roles/vsftpd_vuln
+    - vsftpd_vuln
   tags:
     - linux
     - inscope

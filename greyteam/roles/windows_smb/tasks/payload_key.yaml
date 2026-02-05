@@ -1,0 +1,9 @@
+- name: Ensure payload directory exists
+  ansible.windows.win_file:
+    path: "{{ payload_key_location | regex_replace('\\\\[^\\\\]+$', '') }}"
+    state: directory
+
+- name: Create payload key file 
+  ansible.windows.win_copy:
+    dest: "{{ payload_key_location }}"
+    content: "{{ payload_key_content }}"
