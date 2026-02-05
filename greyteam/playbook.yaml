@@ -254,7 +254,7 @@
   hosts: linux
   become: true
   roles:
-    - vsftpd_vuln
+    - vsftpd_vul
   tags:
     - linux
     - inscope
