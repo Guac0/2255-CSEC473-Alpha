@@ -100,5 +100,5 @@
     name: "{{ db_user }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"
-    host: "localhost"
+    host: "%"
     state: present
