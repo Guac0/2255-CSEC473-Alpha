@@ -1,3 +1,55 @@
 ---
-- name: Set Wallpaper
-  ansible.builtin.include_tasks: set_wallpaper.yaml
+# Alpha – Anny Hua
+# Feature: Windows wallpaper theming 
+
+- name: Determine wallpaper filename for this host (prefer hostname.jpg)
+  ansible.builtin.set_fact:
+    wallpaper_host_file: "{{ inventory_hostname.split('.')[0] }}.jpg"
+    wallpaper_default_file: "wallpaper.jpg"
+
+- name: Check if hostname-specific wallpaper exists on controller
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ wallpaper_host_file }}"
+  register: wallpaper_check
+  delegate_to: localhost
+  run_once: false
+
+- name: Choose wallpaper source file (host-specific or default)
+  ansible.builtin.set_fact:
+    wallpaper_src: "{{ wallpaper_host_file if wallpaper_check.stat.exists else wallpaper_default_file }}"
+
+- name: Ensure wallpaper directory exists
+  ansible.windows.win_file:
+    path: "C:\\ProgramData\\Inscope\\Branding"
+    state: directory
+
+- name: Copy wallpaper to host
+  ansible.windows.win_copy:
+    src: "{{ wallpaper_src }}"
+    dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
+
+- name: Configure wallpaper registry values
+  ansible.windows.win_regedit:
+    path: HKCU:\Control Panel\Desktop
+    name: "{{ item.name }}"
+    data: "{{ item.data }}"
+    type: string
+  loop:
+    - { name: "Wallpaper",      data: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg" }
+    - { name: "WallpaperStyle", data: "10" }  # 10=Fill, 6=Fit, 2=Stretch, 0=Center
+    - { name: "TileWallpaper",  data: "0" }
+
+- name: Refresh desktop settings (apply wallpaper)
+  ansible.windows.win_shell: |
+    rundll32.exe user32.dll,UpdatePerUserSystemParameters
+  changed_when: false
+
+- name: Verify wallpaper registry points to expected file
+  ansible.windows.win_shell: |
+    (Get-ItemProperty "HKCU:\Control Panel\Desktop").Wallpaper
+  register: wallpaper_reg
+  changed_when: false
+
+- name: Show applied wallpaper path
+  ansible.builtin.debug:
+    msg: "Wallpaper set to: {{ wallpaper_reg.stdout | trim }}"
