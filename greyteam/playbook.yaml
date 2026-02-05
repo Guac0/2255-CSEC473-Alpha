@@ -137,7 +137,7 @@
     - dns
 
 - name: Windows Deploy SMB 
-  hosts: appleoosa
+  hosts: appleloosa
   roles:
     - windows_smb
   tags:
