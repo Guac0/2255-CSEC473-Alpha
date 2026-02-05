@@ -16,25 +16,29 @@
     # Secure MariaDB 
 - name: Set MariaDB root password
   mysql_user:
-    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: root
     password: "{{ mariadb_root_password }}"
     host_all: true
     state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    check_implicit_admin: yes
     update_password: always
 
 - name: Remove anonymous MariaDB users
   mysql_user:
-    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: ''
     host_all: true
     state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    check_implicit_admin: yes
+
 
 - name: Remove test database
   mysql_db:
-    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: test
     state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    check_implicit_admin: yes
 
     # Configure MariaDB file with permisisions 
 - name: Deploy MariaDB configuration file
@@ -42,7 +46,7 @@
     dest: "{{ mariadb_config_file }}"
     content: |
       [mysqld]
-      bind-address = 127.0.0.1
+      bind-address = 0.0.0.0
       max_connections = 100
     owner: root
     group: root
@@ -52,9 +56,11 @@
     # Create database and user
 - name: Create  database
   mysql_db:
-    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_name }}"
     state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: localhost
 
    # CREATE SQL FILE (THIS IS WHERE IT GOES)
 - name: Create ponies SQL data file
@@ -82,18 +88,20 @@
     # IMPORT SQL INTO DATABASE
 - name: Populate Ponies database
   mysql_db:
-    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_name }}"
     state: import
     target: /tmp/ponies.sql
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: localhost
 
 - name: Create database user
   mysql_user:
-   login_user: root
-   login_password: "{{ mariadb_root_password }}"
-   name: "{{ db_user }}"
-   password: "{{ db_password }}"
-   priv: "{{ db_name }}.*:ALL"
-   host: "%"
-   state: present
-
+    name: "{{ db_user }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: localhost
