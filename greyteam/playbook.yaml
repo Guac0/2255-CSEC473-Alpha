@@ -1,0 +1,275 @@
+---
+- name: Ping Linux
+  hosts: linux
+  gather_facts: no
+  tags:
+    - ping
+    - ping_linux
+    - linux
+    - generic
+  tasks:
+    - name: Ping Linux
+      ansible.builtin.ping:
+
+- name: Ping Windows
+  hosts: windows
+  gather_facts: no
+  tags: 
+    - ping
+    - ping_windows
+    - windows
+    - generic
+  tasks:
+    - name: Ping Windows
+      ansible.windows.win_ping:
+
+#################################
+########### Management ##########
+#################################
+
+- name: Deploy OpenVPN Server
+  hosts: vpn
+  roles:
+    - openvpn_server
+  tags: 
+    - mgmt
+    - openvpn
+    - openvpn_server
+
+- name: Deploy Scoring Server
+  hosts: scoring
+  roles:
+    - scoring_server
+  tags: 
+    - mgmt
+    - scoring
+    - scoring_server
+
+#################################
+########### Team Hosts ##########
+#################################
+
+#######################
+######## WINDOWS ######
+#######################
+
+######## Generic ######
+
+- name: Run Windows Standards 
+  hosts: windows:!cement
+  roles:
+    - windows_standards
+  tags: 
+    - windows
+    - team
+    - standards
+    - stds
+    - generic
+
+- name: Create Local Users
+  hosts: windows:&inscope:!cement
+  roles:
+    - windows_users_local
+  tags:
+    - windows
+    - team
+    - local_users
+    - generic
+
+#- name: Deploy Rustdesk Windows
+#  hosts: windows:&gui:!cement
+#  roles:
+#    - windows_rustdesk
+#  tags:
+#    - windows 
+#    - team 
+#    - rustdesk
+#    - rustdesk_windows
+
+- name: Install Utilities
+  hosts: windows:!cement
+  roles:
+    - windows_utilities
+  tags:
+    - windows
+    - team
+    - utilities
+    - generic
+
+- name: Set Wallpaper
+  hosts: windows:!cement
+  roles:
+    - windows_wallpaper
+  tags:
+    - windows
+    - team
+    - wallpaper
+    - generic
+
+- name: Deploy User Files
+  hosts: windows:&inscope:!cement
+  roles:
+    - windows_user_files
+  tags:
+    - windows
+    - team
+    - files
+    - generic
+
+###### Services #######
+
+- name: Windows Deploy MSSQL
+  hosts: mssql
+  roles:
+    - windows_mssql
+  tags:
+    - windows
+    - team
+    - mssql
+
+- name: Windows Deploy DNS
+  hosts: dns
+  roles:
+    - windows_dns
+  tags:
+    - windows
+    - inscope
+    - dns
+
+- name: Windows Deploy SMB 
+  hosts: appleoosa
+  roles:
+    - windows_smb
+  tags:
+    - smb
+    - windows
+    - inscope
+
+
+####### Finish #######
+
+- name: Post Deploy Cleanup
+  hosts: windows:!cement
+  roles:
+    - windows_finish
+  tags:
+    - windows 
+    - team 
+    - post_deploy
+    - generic
+
+- name: Windows Reboot
+  hosts: windows:!cement
+  roles:
+    - windows_reboot
+  tags:
+    - windows 
+    - team 
+    - post_deploy
+    - reboot
+    - reboot_windows
+    - generic
+
+#######################
+######## LINUX ########
+#######################
+
+####### Generic #######
+
+- name: Deploy Linux Standards
+  hosts: linux
+  roles:
+    - linux_standards
+  tags:
+    - linux 
+    - team 
+    - standards
+    - stds
+    - generic
+
+- name: Deploy Linux Users
+  hosts: linux
+  roles:
+    - linux_users
+  tags:
+    - linux 
+    - team 
+    - users
+    - users_linux
+    - generic
+
+- name: Deploy Rustdesk Linux
+  hosts: linux:&gui
+  roles:
+    - linux_rustdesk
+  tags:
+    - linux 
+    - team 
+    - rustdesk
+    - rustdesk_linux
+    - generic
+
+###### Services #######
+
+- name: Deploy CUPS
+  hosts: cups
+  roles:
+    - linux_cups
+  tags:
+    - cups
+    - linux
+    - inscope
+
+- name: Deploy MariaDb
+  hosts: seaddle
+  become: true
+  roles:
+    - linux_mariadb
+  tags:
+    - mariadb
+    - linux
+    - inscope
+    
+- name: Deploy NGIRCD
+  hosts: everfree-forest
+  roles:
+    - linux_ngircd
+  tags:
+    - ngircd
+    - linux
+    - inscope
+
+- name: Deploy Linux Client Programs
+  hosts: linux:&wksts 
+  roles:
+    - linux_client_programs
+  tags:
+    - linux
+    - inscope
+    - utilities
+    - utilities_linux
+
+####### Finish ########
+
+- name: Clean Up
+  hosts: linux
+  roles:
+    - linux_finish
+  tags:
+    - linux 
+    - team
+    - finish
+    - post_deploy
+    - generic
+
+- name: Reboot
+  hosts: linux
+  roles:
+    - linux_reboot
+  tags:
+    - linux
+    - team
+    - reboot
+    - reboot_linux
+    - post_deploy
+    - generic

@@ -1,0 +1,16 @@
+---
+# MSSQL requires that system does not have any pending restarts when it is installed
+- name: Reboot if Required
+  ansible.builtin.include_tasks: reboot.yaml
+
+- name: Install MSSQL
+  ansible.builtin.include_tasks: install.yaml
+
+- name: Configure Firewall for MSSQL
+  ansible.builtin.include_tasks: firewall.yaml
+
+- name: Add MSSQL Data
+  ansible.builtin.include_tasks: data.yaml
+
+- name: Reboot if Required
+  ansible.builtin.include_tasks: reboot.yaml

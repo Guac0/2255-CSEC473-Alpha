@@ -1,0 +1,6 @@
+---
+- name: Deploy Standards
+  ansible.builtin.include_tasks: standards.yaml
+
+- name: Install Common Packages
+  ansible.builtin.include_tasks: packages.yaml

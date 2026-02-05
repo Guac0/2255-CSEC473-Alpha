@@ -1,0 +1,38 @@
+---
+- name: make sure app readiness service is disabled
+  ansible.windows.win_service:
+    name: appreadiness
+    start_mode: disabled
+    state: stopped
+  when: ansible_distribution_major_version|int > 6
+  ignore_errors: true
+
+- name: make sure windows update service is disabled
+  ansible.windows.win_service:
+    name: wuauserv
+    start_mode: disabled
+    state: stopped
+  ignore_errors: true
+
+- name: make sure windows update orchestrator service is disabled
+  ansible.windows.win_service:
+    name: UsoSvc
+    start_mode: disabled
+    state: stopped   
+  ignore_errors: true
+
+- name: make sure windows update medic service is disabled
+  ansible.windows.win_service:
+    name: WaaSMedicSvc
+    start_mode: disabled
+    state: stopped  
+  ignore_errors: true      
+
+- name: Disable windows automatic updates via registry
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU
+    name: NoAutoUpdate
+    data: 1
+    type: dword
+    state: present    
+  ignore_errors: true

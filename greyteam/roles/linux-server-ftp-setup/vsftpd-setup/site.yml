@@ -1,0 +1,6 @@
+- name: Deploy vulnerable FTP CTF environment
+  hosts: ftp_servers
+  become: true
+  roles:
+    - vsftpd_vuln
+

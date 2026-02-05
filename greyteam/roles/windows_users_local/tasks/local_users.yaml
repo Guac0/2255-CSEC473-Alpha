@@ -1,0 +1,39 @@
+---
+- name: Set Administrator/Admin Users
+  ansible.windows.win_user:
+    name: "{{ item }}"
+    state: present
+    password: "{{ team_password }}"
+    update_password: always
+    groups:
+      - Users
+      - Administrators
+      - Remote Desktop Users
+  loop:
+    - Administrator
+    - Admin
+
+- name: Add Local Administrative Users
+  ansible.windows.win_user:
+    name: "{{ item }}"
+    state: present
+    password: "{{ team_password }}"
+    update_password: always
+    groups:
+      - Users
+      - Administrators
+      - Remote Desktop Users
+  loop:
+    "{{ local_admins }}"
+
+- name: Add Local Users
+  ansible.windows.win_user:
+    name: "{{ item }}"
+    state: present
+    password: "{{ team_password }}"
+    update_password: always
+    groups:
+      - Users
+      - Remote Desktop Users
+  loop: 
+    "{{ local_admins }}"

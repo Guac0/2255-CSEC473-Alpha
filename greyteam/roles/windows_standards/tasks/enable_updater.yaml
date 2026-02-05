@@ -1,0 +1,31 @@
+---
+- name: make sure windows update service is running
+  ansible.windows.win_service:
+    name: wuauserv
+    start_mode: auto
+    state: started
+
+- name: make sure app readiness service is running
+  ansible.windows.win_service:
+    name: appreadiness
+    start_mode: auto
+    state: started
+  when: ansible_distribution_major_version|int > 6
+
+- name: make sure remoteregistry service is running
+  ansible.windows.win_service:
+    name: remoteregistry
+    start_mode: auto
+    state: started
+
+- name: make sure bits service is running
+  ansible.windows.win_service:
+    name: bits
+    start_mode: auto
+    state: started
+
+- name: make sure cryptsvc service is running
+  ansible.windows.win_service:
+    name: cryptsvc
+    start_mode: auto
+    state: started

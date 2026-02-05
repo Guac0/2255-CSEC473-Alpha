@@ -1,0 +1,45 @@
+---
+- name: Create Working Directory
+  ansible.builtin.include_tasks: set_working_dir.yaml
+
+- name: Set Mgmt DNS
+  ansible.builtin.include_tasks: set_dns.yaml   
+
+- name: Enable Script Execution
+  ansible.builtin.include_tasks: enable_script_execution.yaml
+
+- name: Expand Disk
+  ansible.builtin.include_tasks: enable_script_execution.yaml
+
+#- name: Ensure windows update service is running
+#  ansible.builtin.include_tasks: enable_updater.yaml
+
+- name: Disable Firewall
+  ansible.builtin.include_tasks: disable_firewall.yaml
+
+- name: Enable Firewall
+  ansible.builtin.include_tasks: enable_firewall.yaml
+
+- name: Enable ICMP
+  ansible.builtin.include_tasks: allow_icmp.yaml
+
+- name: Enable RDP
+  ansible.builtin.include_tasks: allow_rdp.yaml
+
+- name: Set Timezone
+  ansible.builtin.include_tasks: set_timezone.yaml
+
+- name: Set Hostname
+  ansible.builtin.include_tasks: set_hostname.yaml
+
+#- name: Remove unattend.xml
+#  ansible.builtin.include_tasks: remove_unattend.yaml
+
+- name: Disable Autologin
+  ansible.builtin.include_tasks: disable_auto_login.yaml
+
+- name: Enable WinRM via HTTP 
+  ansible.builtin.include_tasks: set_winrm_http.yaml
+
+- name: Add reg team registry keys for payload keying
+  ansible.builtin.include_tasks: add_payload_regkey.yaml

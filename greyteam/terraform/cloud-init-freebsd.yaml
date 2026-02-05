@@ -1,0 +1,23 @@
+#cloud-config
+users:
+  - name: greyteam
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFmv5bHeXcqyTWcXr3kCu9ZKJlRxLxEaZjY9bYsCl+J6 Guac@Zelus
+    gecos: greyteam user
+    groups: [wheel]
+    shell: /usr/local/bin/bash
+    passwd: "$6$jeJs9UoPK5F.wuci$aEVEUNP.CfSwwrTotDg/TMTspooPUQX4TulkQD7CQINFeUrB7i1qdjvxX92vZAjgSU3hrl.9Vzc7lnjAOOELB."
+    lock_passwd: false
+
+timezone: US/Eastern
+ssh_pwauth: yes
+
+chpasswd:
+  list: |
+    greyteam:ponyuploc0!
+  expire: false
+
+runcmd:
+  - pw unlock greyteam
+  - pkg update -f
+  - pkg upgrade -y

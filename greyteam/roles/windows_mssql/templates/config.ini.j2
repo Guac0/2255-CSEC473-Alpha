@@ -1,0 +1,42 @@
+; Config file for MSSQL2025 Express
+; See: https://learn.microsoft.com/en-us/sql/database-engine/install-windows/install-sql-server-from-the-command-prompt?view=sql-server-ver17
+[OPTIONS]
+
+; Suppress output and GUIs
+QUIET="True"
+
+; REQUIRED - legal stuff
+IACCEPTSQLSERVERLICENSETERMS="True"
+
+; REQUIRED - Install the server
+ACTION="Install"
+
+; REQUIRED - Only install basic SQL server, no extra stuff
+FEATURES=SQL
+
+; REQUIRED - Specifies a SQL Server Database Engine instance name
+INSTANCENAME="{{ mssql_instancename }}"
+
+; REQUIRED - Specifies the startup account for the SQL Server service.
+SQLSVCACCOUNT="{{ mssql_sqlsvcaccount }}"
+
+; Password for SQLSVCACCOUNT
+SQLSVCPASSWORD="{{ mssql_sqlsvcpassword }}"
+
+; REQUIRED (well, basically) - Use this parameter to provision logins to be members of the sysadmin role.
+SQLSYSADMINACCOUNTS="{{ mssql_sqlsysadminaccounts }}"
+
+; REQUIRED - Specifies the account for the SQL Server Agent service.
+AGTSVCACCOUNT="{{ mssql_agtsvcaccount }}"
+
+; Specifies the password for SQL Server Agent service account. This parameter can be omitted when using a managed service account, virtual account, or built-in account.
+;AGTSVCPASSWORD=""
+
+; Specifies the startup mode for the SQL Server Agent service.
+AGTSVCSTARTUPTYPE="Automatic"
+
+; Enables instant file initialization for SQL Server service account. For security and performance considerations, see Database instant file initialization.
+SQLSVCINSTANTFILEINIT="True"
+
+; Specify whether SQL Server Setup should discover and include product updates. The valid values are True and False or 1 and 0. By default, SQL Server Setup includes updates that are found.
+UpdateEnabled="False"

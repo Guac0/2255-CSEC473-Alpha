@@ -1,0 +1,229 @@
+all:
+  children:
+    # Individual host groups
+    dc:
+      hosts:
+        canterlot:
+          ansible_host: "10.0.10.1"
+    dns: #alias dc to dns
+      children:
+        dc:
+  
+    mssql:
+      hosts:
+        manehatten:
+          ansible_host: "10.0.10.2"
+
+    apache2:
+      hosts:
+        ponyville:
+          ansible_host: "10.0.10.3"
+
+    mariadb:
+      hosts:
+        seaddle:
+          ansible_host: "10.0.10.4"
+    
+    cups:
+      hosts:
+        trotsylvania:
+          ansible_host: "10.0.10.5"
+
+    vsftpd:
+      hosts:
+        crystal-empire:
+          ansible_host: "10.0.10.6"
+    
+    iis:
+      hosts:
+        las-pegasus:
+          ansible_host: "10.0.20.1"
+
+    smb:
+      hosts:
+        appleloosa:
+          ansible_host: "10.0.20.2"
+
+    irc:
+      hosts:
+        everfree-forest:
+          ansible_host: "10.0.20.3"
+
+    nginx:
+      hosts:
+        griffonstone:
+          ansible_host: "10.0.20.4"
+
+    windows_wkst1:
+      hosts:
+        baltamare:
+          ansible_host: "10.0.30.1"
+
+    windows_wkst2:
+      hosts:
+        neighara-falls:
+          ansible_host: "10.0.30.2"
+
+    linux_wkst1:
+      hosts:
+        cloudsdale:
+          ansible_host: "10.0.30.3"
+
+    linux_wkst2:
+      hosts:
+        vanhoover:
+          ansible_host: "10.0.30.4"
+    
+    void:
+      hosts:
+        whinnyapolis:
+          ansible_host: "10.0.30.5"
+    
+    cement:
+      hosts:
+        fillydelphia:
+          ansible_host: "10.0.30.6"
+
+# Groups
+    # Workstation Hosts
+    wksts:
+      children:
+        windows_wkst1:
+        windows_wkst2:
+        linux_wkst1:
+        linux_wkst2:
+        void:
+        cement:
+    # Hosts for the Teams
+    inscope:
+      children:
+        dc:
+        mssql:
+        dns:
+        iis:
+        smb:
+        windows_wkst1:
+        windows_wkst2:
+        apache2:
+        mariadb:
+        cups:
+        vsftpd:
+        irc:
+        nginx:
+        linux_wkst1:
+        linux_wkst2:
+        cement:
+        void:
+    # Hosts for scoring
+    scoring_workers:
+      hosts:
+        scoring1:
+          ansible_host: "172.20.0.67"
+        scoring2:
+          ansible_host: "172.20.0.82"
+        scoring3:
+          ansible_host: "172.20.0.90"
+        scoring4:
+          ansible_host: "172.20.0.106"
+        scoring5:
+          ansible_host: "172.20.0.115"
+    scoring_all:
+      children:
+        scoring_workers:
+      hosts:
+        scoring:
+          ansible_host: "172.20.0.100"
+    # Hosts for jumpboxes
+    jumpgrey:
+      hosts:
+        jumpgrey1:
+          ansible_host: "172.20.0.71"
+        jumpgrey2:
+          ansible_host: "172.20.0.72"
+        jumpgrey3:
+          ansible_host: "172.20.0.73"
+        jumpgrey4:
+          ansible_host: "172.20.0.74"
+        jumpgrey5:
+          ansible_host: "172.20.0.75"
+        jumpgrey6:
+          ansible_host: "172.20.0.76"
+        jumpgrey7:
+          ansible_host: "172.20.0.77"
+        jumpgrey8:
+          ansible_host: "172.20.0.78"
+        jumpgrey9:
+          ansible_host: "172.20.0.79"
+        jumpgrey10:
+          ansible_host: "172.20.0.70"
+    jumpblue:
+      hosts:
+        jumpblue1:
+          ansible_host: "172.20.0.41"
+        jumpblue2:
+          ansible_host: "172.20.0.42"
+        jumpblue3:
+          ansible_host: "172.20.0.43"
+        jumpblue4:
+          ansible_host: "172.20.0.44"
+        jumpblue5:
+          ansible_host: "172.20.0.45"
+        jumpblue6:
+          ansible_host: "172.20.0.46"
+        jumpblue7:
+          ansible_host: "172.20.0.47"
+        jumpblue8:
+          ansible_host: "172.20.0.48"
+        jumpblue9:
+          ansible_host: "172.20.0.49"
+        jumpblue10:
+          ansible_host: "172.20.0.40"
+    jumpboxes:
+      children:
+        jumpblue:
+        jumpgrey:
+    # Hosts for management
+    mgmt:
+      children:
+        scoring_all:
+      hosts:
+        deploy:
+          ansible_host: "172.20.0.80"
+
+# OS-based groups
+    # Hosts that are Windows
+    windows:
+      children:
+        dc:
+        mssql:
+        dns:
+        iis:
+        smb:
+        windows_wkst1:
+        windows_wkst2:
+        cement: #maybe remove since no ansible
+    # Hosts that are Linux
+    linux:
+      children:
+        apache2:
+        mariadb:
+        cups:
+        vsftpd:
+        irc:
+        nginx:
+        linux_wkst1:
+        linux_wkst2:
+        jumpboxes:
+        scoring_all:
+        deploy:
+    unix:
+      children:
+        linux:
+    
+    gui:
+      children:
+        windows:
+        jumpboxes:
+        linux_wkst1:
+        linux_wkst2:
+        void:

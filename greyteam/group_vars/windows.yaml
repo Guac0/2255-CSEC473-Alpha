@@ -1,0 +1,25 @@
+---
+# Variables that apply to all Windows hosts.
+
+#ansible_user: localuser
+#ansible_password: password
+
+#ansible_become: yes
+#ansible_become_user: SYSTEM
+#ansible_become_method: runas
+
+ansible_connection: winrm
+ansible_winrm_server_cert_validation: ignore
+#ansible_winrm_transport: ntlm
+#ansible_port: 5985
+
+# PSRP
+#ansible_connection: psrp
+#ansible_psrp_cert_validation: ignore
+#ansible_psrp_protocol: https
+#ansible_psrp_auth: ntlm
+#ansible_psrp_credssp_auth_mechanism: ntlm
+
+#ansible_python_interpreter: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+payload_key_location: 'C:\\greyteam_key'
+working_dir: C:\\tmp\\ansible

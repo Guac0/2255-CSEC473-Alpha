@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Stabvest Homepage</title>
+<style>
+:root{
+  --bg:#0b1220;
+  --card:#0f1a2b;
+  --muted:#a0b0c0;
+  --text:#ffffff;
+  --accent:#4aa3ff;
+  --accent-2:#2e6fb6;
+  --row-hover:#0e2a45;
+  --border: rgba(255,255,255,0.04);
+  --bool-dark:#888888;
+  --danger:#ff6b6b;
+  --success:#4caf50;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg), #071020);color:var(--text);}
+.container{max-width:1200px;margin:14px auto;padding:20px;}
+
+header{display:flex;align-items:center;gap:16px;margin-bottom:0px;flex-wrap:wrap;}
+header h1{margin:0;font-size:28px;}
+header p.lead{margin:0;color:var(--muted);font-size:14px;}
+
+.dashboard-links{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:32px;}
+.dashboard-links a{
+  flex:1 1 180px;
+  text-align:center;
+  padding:14px 18px;
+  border-radius:10px;
+  text-decoration:none;
+  background:linear-gradient(180deg,var(--accent),var(--accent-2));
+  color:#042033;
+  font-weight:600;
+  transition:transform 0.2s;
+}
+.dashboard-links a:hover{transform:scale(1.05);}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;}
+.stat-card{background:var(--card);padding:20px;border-radius:12px;border:1px solid var(--border);box-shadow:0 6px 20px rgba(10,15,25,0.6); display: flex; flex-direction: column;}
+.stat-card h3{margin-top:0;margin-bottom:8px;font-size:18px;color:var(--accent);text-transform: uppercase; letter-spacing: 1px;}
+.stat-card p.desc{margin:0 0 8px 0;color:var(--muted);font-size:13px; line-height: 1.4;}
+.stat-card p.value{margin:0;font-size:28px;font-weight:600; padding-bottom: 5px;}
+
+.bool-dark{color:var(--bool-dark);}
+.false-red{color:var(--danger);font-weight:bold;}
+.true-green{color:var(--success);font-weight:bold;}
+
+.globals-list { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; }
+.global-item { display: flex; justify-content: space-between; padding: 2px 0; }
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--accent);color:#042033;padding:12px 18px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);opacity:0;transition:opacity 0.3s ease;z-index:100}
+.toast.show{opacity:1;}
+
+.site-footer { background-color: #042033; text-align: center; padding: 15px 0; font-size: 0.9rem; color: #555; margin-top: 40px;}
+.site-footer a { color: #007bff; text-decoration: none; font-weight: 500; }
+.site-footer a:hover { text-decoration: underline; }
+
+.header-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.header-container h1 { margin: 0; }
+.header-icon { width: 40px; height: 40px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-container">
+      <img src="../static/favicon.ico" alt="RIT Tiger" class="header-icon">
+      <h1>Stabvest Homepage</h1>
+      <p class="lead">Central Monitoring & Management Hub</p>
+    </div>
+  </header>
+
+  <section class="dashboard-links">
+    <a href="incidents">Incidents Dashboard</a>
+    <a href="configmgmt">Config Mgmt</a>
+    <a href="authrecords">Auth Records</a>
+    <a href="authconfig">Auth Config</a>
+    <a href="agents">Agents</a>
+    <a href="messages">Messages</a>
+    <a href="deployment">Deployment</a>
+    <a href="management">Management</a>
+  </section>
+
+  <section class="stats-grid">
+    <div class="stat-card">
+      <h3>Agents</h3>
+      <p class="desc">Active and stale agents reporting to the server.</p>
+      <p class="value" id="agentsCount">...</p>
+      <p class="desc">Active: <span id="agentsActive">...</span> | Stale: <span id="agentsStale">...</span></p>
+      <p class="desc">Paused Agents: <span id="agentsPaused" class="bool-dark">...</span></p>
+    </div>
+
+    <div class="stat-card">
+      <h3>Auth Records</h3>
+      <p class="desc">Total login attempts across all managed endpoints.</p>
+      <p class="value" id="authTotal">...</p>
+      <p class="desc">15m Fails: <span id="authRecentFail" class="false-red">...</span> | 15m OK: <span id="authRecentOk" class="true-green">...</span></p>
+      <p class="desc" style="font-size: 11px;">Types: <span id="authSubtypes">...</span></p>
+    </div>
+
+    <div class="stat-card">
+      <h3>Auth Configs</h3>
+      <p class="desc">Defined identities and global enforcement status.</p>
+      <p class="value" id="authEntityCounts">...</p>
+      <div id="authGlobalsList" class="globals-list"></div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Incidents</h3>
+      <p class="desc">Security events categorized by lifecycle stage.</p>
+      <p class="value" id="incidentsTotal">...</p>
+      <p class="desc">New: <span id="incidentsNew">...</span> | Active: <span id="incidentsActive">...</span> | Closed: <span id="incidentsClosed">...</span></p>
+    </div>
+
+    <div class="stat-card">
+      <h3>System Queues</h3>
+      <p class="desc">Pending messages and outbound notifications.</p>
+      <p class="value" id="webhookCount">Webhooks: ...</p>
+      <p class="value" id="ansibleCount">Ansible: ...</p>
+      <p class="desc">Total Messages: <span id="messagesTotal">...</span></p>
+      <p class="desc">Activity (5m): <span id="messagesLast5">...</span></p>
+    </div>
+
+    <div class="stat-card">
+      <h3>Platform Users</h3>
+      <p class="desc">Registered web interface accounts and roles.</p>
+      <p class="value" id="usersTotal">...</p>
+      <p class="desc" id="usersRoles">...</p>
+      <p class="desc">Active Tokens: <span id="tokensTotal">...</span></p>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast">Server statistics updated successfully</div>
+
+<footer class="site-footer">
+  <p>
+    Made by the 
+    <a href="https://github.com/CCDC-RIT" target="_blank" rel="noopener noreferrer">
+      Rochester Institute of Technology Collegiate Cyber Defense Team
+    </a>
+  </p>
+</footer>
+
+<script>
+const DASHBOARD_API = '/dashboard_summary';
+const toastEl = document.getElementById('toast');
+
+async function postJSON(url, payload){
+  try{
+    const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    if(!res.ok){const txt=await res.text();throw new Error(`HTTP ${res.status}: ${txt}`);}
+    return res.json();
+  }catch(err){console.error('Request failed:', err); throw err;}
+}
+
+function showToast(){toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),3000);}
+function updateStatsElement(id,value){const el=document.getElementById(id); if(el) el.innerHTML=value;}
+
+async function verifyClientContext() {
+    const _0x_auth = "Made by the Rochester Institute of Technology Collegiate Cyber Defense Team";
+    const _0x_meta = document.querySelector('.site-footer');
+    const _0x_img = document.querySelector('.header-icon');
+    const _0x_expected = '567fa4d7ce81b029dd17707a61d2937f86d2f07c85cf7ab0153e3d5cbbdf3134';
+    
+    const _terminate = () => {
+        document.body.innerHTML = `<div style="padding:50px; text-align:center; color:#ff6b6b; font-family:sans-serif;">
+            <h2>Error integrity_failure</h2>
+            <p>Integrity checks suggest that critical data has been corrupted during transit. Try restarting the server.</p>
+        </div>`;
+        throw new Error("Integrity violation");
+    };
+
+    if (!_0x_meta || !_0x_meta.innerText.includes(_0x_auth)) _terminate();
+    if (!_0x_img) _terminate();
+    if (!_0x_img.complete) await new Promise((resolve) => { _0x_img.onload = resolve; _0x_img.onerror = _terminate; });
+    if (_0x_img.naturalWidth === 0) _terminate();
+
+    try {
+        const _canv = document.createElement('canvas');
+        const _ctx = _canv.getContext('2d');
+        _canv.width = _0x_img.naturalWidth;
+        _canv.height = _0x_img.naturalHeight;
+        _ctx.drawImage(_0x_img, 0, 0);
+        const _data = _ctx.getImageData(0, 0, _canv.width, _canv.height).data;
+        const _buffer = await crypto.subtle.digest('SHA-256', _data);
+        const _actual = Array.from(new Uint8Array(_buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        if (_actual !== _0x_expected) _terminate();
+    } catch (e) { _terminate(); }
+}
+
+async function fetchStats(){
+  try{
+    const data = await postJSON(DASHBOARD_API, {});
+    if (!data || data.error) {
+        console.error("Backend error:", data?.error);
+        return;
+    }
+    await verifyClientContext();
+
+    // Use ?. to prevent "Cannot read properties of undefined"
+    updateStatsElement('agentsCount', data.agents?.total ?? 0);
+    updateStatsElement('agentsActive', data.agents?.active ?? 0);
+    updateStatsElement('agentsStale', data.agents?.stale ?? 0);
+    updateStatsElement('agentsPaused', data.agents?.paused ?? 0);
+    updateStatsElement('webhookCount', `Webhooks: ${data.webhooks?.queue_count ?? 0}`);
+    updateStatsElement('ansibleCount', `Ansible: ${data.webhooks?.ansible_count ?? 0}`);
+
+    // 2. Auth Records
+    updateStatsElement('authTotal', data.auth_records.total);
+    updateStatsElement('authRecentFail', data.auth_records.recent_failed);
+    updateStatsElement('authRecentOk', data.auth_records.recent_success);
+    const typeStr = Object.entries(data.auth_records.by_type).map(([k,v])=>`${k}:${v}`).join(', ');
+    updateStatsElement('authSubtypes', typeStr);
+
+    // 3. Auth Globals & Entity Counts
+    const entStr = Object.entries(data.auth_configs).map(([k,v])=>`${v} ${k}s`).join(' | ');
+    updateStatsElement('authEntityCounts', entStr || '0 Entries');
+    
+    const globalDiv = document.getElementById('authGlobalsList');
+    globalDiv.innerHTML = Object.entries(data.auth_globals)
+        .map(([k,v]) => `<div class="global-item">
+            <span>${k}</span> <span style="color:${v ? 'var(--accent)' : 'var(--bool-dark)'}">${v ? 'ON' : 'OFF'}</span>
+        </div>`).join('');
+
+    // 4. Incidents
+    updateStatsElement('incidentsTotal', data.incidents.total);
+    updateStatsElement('incidentsNew', data.incidents.new);
+    updateStatsElement('incidentsActive', data.incidents.active);
+    updateStatsElement('incidentsClosed', data.incidents.closed);
+
+    // 5. Messages
+    updateStatsElement('messagesTotal', data.messages.total);
+    updateStatsElement('messagesLast5', data.messages.recent);
+
+    // 6. Users
+    updateStatsElement('usersTotal', data.users.total);
+    const roleStr = Object.entries(data.users.roles).map(([k,v])=>`${k}: ${v}`).join(', ');
+    updateStatsElement('usersRoles', roleStr);
+    updateStatsElement('tokensTotal', data.tokens);
+
+    showToast();
+  }catch(err){console.error("Dashboard Refresh Failed:", err);}
+}
+
+fetchStats();
+setInterval(fetchStats, 60000);
+</script>
+</body>
+</html>

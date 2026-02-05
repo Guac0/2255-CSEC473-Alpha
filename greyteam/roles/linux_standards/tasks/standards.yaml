@@ -1,0 +1,45 @@
+---
+- name: Create working dir
+  ansible.builtin.file:
+    path: "{{ working_dir }}"
+    state: directory
+    mode: '0777'
+    owner: root
+    group: root
+
+- name: Set timezone to US Eastern (October time)
+  ansible.builtin.command: timedatectl set-timezone America/New_York
+
+- name: Set hostname to inventory name
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Set FQDN in /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s+'
+    #line: "127.0.1.1 {{ inventory_hostname }}.{{ domain }} {{ inventory_hostname }}" #TODO
+    line: "127.0.1.1 {{ inventory_hostname }}.{{ domain }} {{ inventory_hostname }}"
+    state: present
+
+#- name: Configure static DNS resolvers
+#  ansible.builtin.copy:
+#    dest: /etc/netplan/01-dns.yaml
+#    content: |
+#      network:
+#        version: 2
+#        ethernets:
+#          eth0:
+#            dhcp4: true
+#            nameservers:
+#              addresses: [{{ dns_primary }}, {{ dns_secondary }}]
+#  notify: Apply netplan # runs netplan apply to save changes
+
+- name: Create payload keying file
+  ansible.builtin.copy:
+    dest: '{{ payload_key_location }}'
+    content: '{{ payload_key_content }}'
+    owner: root
+    group: root
+    mode: '0444'
+  when: "'inscope' in group_names"

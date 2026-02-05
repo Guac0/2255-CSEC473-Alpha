@@ -1,0 +1,9 @@
+#roles:
+#  - trfore.mongodb_install
+collections:
+  - name: community.windows
+    #version: '1.13.0'
+  - name: community.general
+  - name: ansible.windows
+  #- name: microsoft.sql
+  #- name: community.mysql

@@ -1,0 +1,41 @@
+---
+- name: Check if app is installed
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\Microsoft SQL Server\\"
+  register: app_check
+  ignore_errors: true
+
+# If app is installed, nothing below this line will execute
+
+# Optimize file transfer by skipping transfer if installer is already present
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ working_dir }}\\mssql"
+  register: installer_check
+  when: not app_check.stat.exists
+
+- name: Create Directory
+  ansible.windows.win_file:
+    path: "{{ working_dir }}\\mssql"
+    state: directory
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Copy over installer file
+  ansible.windows.win_copy: 
+    src: files/SQL2025-SSEI-Expr.exe
+    dest: "{{ working_dir }}\\mssql\\installer.exe"
+  when: not app_check.stat.exists
+
+- name: Copy over config file
+  ansible.builtin.template:
+    src: "templates/config.ini.j2"
+    dest: "{{ working_dir }}\\mssql\\config.ini"
+  when: not app_check.stat.exists
+
+- name: Install MSSQL
+  ansible.windows.win_command: './installer.exe /ConfigurationFile={{ working_dir }}\\config.ini {{ sa_password_switch }}'
+  args:
+    chdir: "{{ working_dir }}\\mssql"
+  when: not app_check.stat.exists

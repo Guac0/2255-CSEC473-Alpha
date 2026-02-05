@@ -1,0 +1,44 @@
+---
+# Only works on Enterprise/Education versions
+# Modeled after a Powershell script by u/Bearsgoroar at https://www.reddit.com/r/PowerShell/comments/yen3lk/setting_the_desktop_background_on_1011/ 
+- name: Set Lock Screen Status Regkey
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP
+    name: LockScreenImageStatus
+    type: "dword"
+    data: 1
+
+- name: Set Desktop Screen Status Regkey
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP
+    name: DesktopImageStatus
+    type: "dword"
+    data: 1
+
+- name: Set Desktop Screen Path Regkey
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP
+    name: DesktopImagePath
+    type: "string"
+    data: "C:\\wallpaper\\Wallpaper.jpg"
+
+- name: Set Desktop Screen URL Regkey
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP
+    name: DesktopImageUrl
+    type: "string"
+    data: "C:\\wallpaper\\Wallpaper.jpg"
+
+- name: Set Lock Screen Path Regkey
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP
+    name: LockScreenImagePath
+    type: "string"
+    data: "C:\\wallpaper\\Wallpaper.jpg"
+
+- name: Set Lock Screen URL Regkey
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP
+    name: LockScreenImageUrl
+    type: "string"
+    data: "C:\\wallpaper\\Wallpaper.jpg"

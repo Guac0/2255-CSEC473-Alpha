@@ -1,0 +1,47 @@
+---
+- name: Update the package cache and all packages (Debian/Ubuntu)
+  ansible.builtin.apt:
+    update_cache: yes # Equivalent of "apt-get update"
+    # name: "*"
+    # state: latest # Update all packages to their latest version
+
+- name: Install Common Packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "curl"
+    - "python3"
+    - "python3-pip"
+    - "python3-venv"
+    - "python-is-python3"
+    #- "python3-pymysql"
+    - "git"
+    - "iptables"
+    - "tmux"
+    - "xz-utils"
+    - "screen"
+    - "pwgen"
+  ignore_errors: yes
+
+- name: Install Remmina for GUI hosts
+  package:
+    name: remmina
+    state: present
+  when: "'gui' in group_names"
+
+#- name: Install python packages
+#  ansible.builtin.pip:
+#    name: "{{ item }}"
+#  with_items:
+#    - "mysqlclient"
+#    - "argcomplete"
+#    - "pymysql"
+  #break_system_packages: yes
+#  extra_args: --no-cache-dir
+#  ignore_errors: yes
+
+#- name: Enable global argcomplete
+#  command: activate-global-python-argcomplete
+#  args:
+#    creates: /etc/bash_completion.d/python-argcomplete.sh

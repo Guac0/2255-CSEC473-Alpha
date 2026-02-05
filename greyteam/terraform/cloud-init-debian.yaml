@@ -1,0 +1,33 @@
+#cloud-config
+users:
+  - name: greyteam
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFmv5bHeXcqyTWcXr3kCu9ZKJlRxLxEaZjY9bYsCl+J6 Guac@Zelus
+    gecos: greyteam user
+    groups: [adm, sudo]
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    shell: /bin/bash
+    passwd: "$6$jeJs9UoPK5F.wuci$aEVEUNP.CfSwwrTotDg/TMTspooPUQX4TulkQD7CQINFeUrB7i1qdjvxX92vZAjgSU3hrl.9Vzc7lnjAOOELB."
+    lock_passwd: false
+timezone: US/Eastern
+ssh_pwauth: yes
+package_update: true
+package_upgrade: true
+
+chpasswd:
+  list: |
+    greyteam:ponyuploc0!
+  expire: false
+
+package_update: true
+#package_upgrade: true
+#packages:
+#  - git
+
+runcmd:
+  # Unlock user in case PAM or cloud-init locked it
+  - passwd -u greyteam
+  # Ensure account isn't expired
+  - chage -E -1 -M 99999 greyteam
+  # Delete golden image user
+  - userdel -f -r cyberrange

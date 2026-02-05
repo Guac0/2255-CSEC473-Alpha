@@ -1,0 +1,46 @@
+---
+- name: Check if app is installed
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\Notepad++\\notepad++.exe"
+  register: app_check
+
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ working_dir }}\\npp\\npp.Installer.x64.exe"
+  register: installer_check
+  when: not app_check.stat.exists
+
+- name: Create Directory
+  ansible.windows.win_file:
+    path: "{{ working_dir }}\\npp"
+    state: directory
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Copy over file
+  ansible.windows.win_copy: 
+    src: files/npp.Installer.x64.exe
+    dest: "{{ working_dir }}\\npp"
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Install Npp
+  ansible.windows.win_command: 'npp.Installer.x64.exe /S'
+  args:
+    chdir: "{{ working_dir }}\\npp"
+  when: not app_check.stat.exists
+
+- name: Add Npp shortcut to Desktop
+  community.windows.win_shortcut:
+    src: "C:\\Program Files\\Notepad++\\notepad++.exe"
+    #dest: "C:\\Users\\{{ item.item }}\\Desktop\\Notepad++.lnk"
+    dest: "C:\\Users\\{{ item }}\\Desktop\\Notepad++.lnk"
+    #description: "Shortcut to C:\\Windows\\System32\\cmd.exe"
+    #icon: "C:\\Windows\\System32\\cmd.exe"
+  #ignore_errors: true
+  #loop: "{{ desktop_check.results }}"
+  #when: item.stat.exists and not app_check.stat.exists
+  loop: ['Public']
+  when: not app_check.stat.exists

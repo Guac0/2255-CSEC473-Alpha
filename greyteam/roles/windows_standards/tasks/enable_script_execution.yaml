@@ -1,0 +1,10 @@
+---
+- name: Enable Powershell Script Execution
+  win_shell: Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force
+
+- name: Disable UAC for Administrators Only
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: ConsentPromptBehaviorAdmin
+    data: 0  # 0 = Elevate without prompting for Admins
+    type: dword

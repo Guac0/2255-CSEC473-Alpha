@@ -1,0 +1,38 @@
+---
+- name: Copy over installer file
+  ansible.windows.win_copy: 
+    src: files/rustdesk-1.4.5-x86_64.exe
+    dest: "{{ working_dir }}\\rustdesk-1.4.5-x86_64.exe"
+
+- name: Execute installer file
+  ansible.builtin.apt:
+    deb: "{{ working_dir }}\\rustdesk-1.4.5-x86_64.exe"
+
+- name: Get all user profile folders
+  ansible.windows.win_powershell:
+    script: |
+      Get-ChildItem -Path "C:\\Users" -Force | Where-Object { $_.PSIsContainer } | Select-Object -ExpandProperty Name
+  register: user_folders
+
+- name: Ensure dir exists
+  ansible.windows.win_file:
+    path: 'C:\\Users\\{{ item }}\\AppData\\Roaming\\RustDesk\\config'
+    state: directory
+  loop: "{{ user_folders.output }}"
+  when: item not in ['Public', 'All Users']
+
+- name: Copy config file 1
+  ansible.windows.win_copy:
+    src: files/RustDesk.toml
+    dest: 'C:\\Users\\{{ item }}\\AppData\\Roaming\\RustDesk\\config\\RustDesk.toml'
+    force: yes
+  loop: "{{ user_folders.output }}"
+  when: item not in ['Public', 'All Users']
+
+- name: Copy config file 2
+  ansible.windows.win_copy:
+    src: files/RustDesk2.toml
+    dest: 'C:\\Users\\{{ item }}\\AppData\\Roaming\\RustDesk\\config\\RustDesk2.toml'
+    force: yes
+  loop: "{{ user_folders.output }}"
+  when: item not in ['Public', 'All Users']
