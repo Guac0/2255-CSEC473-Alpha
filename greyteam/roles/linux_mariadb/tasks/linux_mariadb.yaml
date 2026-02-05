@@ -21,19 +21,18 @@
     password: "{{ mariadb_root_password }}"
     host_all: true
     state: present
+    update_password: always
 
 - name: Remove anonymous MariaDB users
   mysql_user:
-    login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: ''
     host_all: true
     state: absent
 
 - name: Remove test database
   mysql_db:
-    login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: test
     state: absent
 
@@ -53,8 +52,7 @@
     # Create database and user
 - name: Create  database
   mysql_db:
-    login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_name }}"
     state: present
 
@@ -84,16 +82,14 @@
     # IMPORT SQL INTO DATABASE
 - name: Populate Ponies database
   mysql_db:
-    login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_name }}"
     state: import
     target: /tmp/ponies.sql
 
 - name: Create database user
   mysql_user:
-   login_user: root
-   login_password: "{{ mariadb_root_password }}"
+   login_unix_socket: /var/run/mysqld/mysqld.sock
    name: "{{ db_user }}"
    password: "{{ db_password }}"
    priv: "{{ db_name }}.*:ALL"
