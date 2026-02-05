@@ -7,6 +7,7 @@
     - ping_linux
     - linux
     - generic
+    - inscope
   tasks:
     - name: Ping Linux
       ansible.builtin.ping:
@@ -19,6 +20,7 @@
     - ping_windows
     - windows
     - generic
+    - inscope
   tasks:
     - name: Ping Windows
       ansible.windows.win_ping:
@@ -61,7 +63,7 @@
     - windows_standards
   tags: 
     - windows
-    - team
+    - inscope
     - standards
     - stds
     - generic
@@ -72,7 +74,7 @@
     - windows_users_local
   tags:
     - windows
-    - team
+    - inscope
     - local_users
     - generic
 
@@ -82,7 +84,7 @@
 #    - windows_rustdesk
 #  tags:
 #    - windows 
-#    - team 
+#    - inscope 
 #    - rustdesk
 #    - rustdesk_windows
 
@@ -92,7 +94,7 @@
     - windows_utilities
   tags:
     - windows
-    - team
+    - inscope
     - utilities
     - generic
 
@@ -102,7 +104,7 @@
     - windows_wallpaper
   tags:
     - windows
-    - team
+    - inscope
     - wallpaper
     - generic
 
@@ -112,7 +114,7 @@
     - windows_user_files
   tags:
     - windows
-    - team
+    - inscope
     - files
     - generic
 
@@ -124,7 +126,7 @@
     - windows_mssql
   tags:
     - windows
-    - team
+    - inscope
     - mssql
 
 - name: Windows Deploy DNS
@@ -145,7 +147,6 @@
     - windows
     - inscope
 
-
 ####### Finish #######
 
 - name: Post Deploy Cleanup
@@ -154,7 +155,7 @@
     - windows_finish
   tags:
     - windows 
-    - team 
+    - inscope 
     - post_deploy
     - generic
 
@@ -164,7 +165,7 @@
     - windows_reboot
   tags:
     - windows 
-    - team 
+    - inscope 
     - post_deploy
     - reboot
     - reboot_windows
@@ -182,7 +183,7 @@
     - linux_standards
   tags:
     - linux 
-    - team 
+    - inscope 
     - standards
     - stds
     - generic
@@ -193,7 +194,7 @@
     - linux_users
   tags:
     - linux 
-    - team 
+    - inscope 
     - users
     - users_linux
     - generic
@@ -204,7 +205,7 @@
     - linux_rustdesk
   tags:
     - linux 
-    - team 
+    - inscope 
     - rustdesk
     - rustdesk_linux
     - generic
@@ -256,9 +257,8 @@
     - role: roles/linux-ftp-setup/vsftpd-setup/roles/vsftpd_vuln
   tags:
     - linux
-    - team
+    - inscope
     - ftp
-
 
 ####### Finish ########
 
@@ -268,7 +268,7 @@
     - linux_finish
   tags:
     - linux 
-    - team
+    - inscope
     - finish
     - post_deploy
     - generic
@@ -279,7 +279,7 @@
     - linux_reboot
   tags:
     - linux
-    - team
+    - inscope
     - reboot
     - reboot_linux
     - post_deploy
