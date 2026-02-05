@@ -1,0 +1,3 @@
+---
+- name: Execute Example Tasks
+  ansible.builtin.include_tasks: apache2_setup.yaml

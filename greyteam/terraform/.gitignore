@@ -3,5 +3,3 @@ aan8745-openrc.sh
 clouds*
 old*
 .terraform*
-terraform.tfstate
-terraform.tfstate.backup

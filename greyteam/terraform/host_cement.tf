@@ -6,7 +6,7 @@ resource "openstack_compute_instance_v2" "fillydelphia" {
   key_pair        = "cdt"
 
   block_device {
-    uuid                  = "1cde3ec3-03d3-4c17-a512-d3799ae92dad" #ubuntu2404desktop need to change to cement
+    uuid                  = "f848941a-64d7-41b4-9c3d-bbddf657ef51" #windows 10, need to change to cement
     source_type           = "image"
     destination_type      = "volume"
     volume_size           = 60
@@ -16,7 +16,7 @@ resource "openstack_compute_instance_v2" "fillydelphia" {
 
 
   network {
-    uuid        = openstack_networking_network_v2.network_blue.id
+    uuid        = openstack_networking_network_v2.network_internal.id
     fixed_ip_v4 = "10.0.30.6"
   }
 

@@ -1,20 +1,14 @@
 resource "openstack_compute_instance_v2" "deb13" {
   depends_on = [openstack_networking_secgroup_v2.secgroup_blue]
-  
-  for_each = {
-    ponyville       = "10.0.10.3"
-    seaddle         = "10.0.10.4"
-    todo            = "10.0.10.5"
-    everfree-forest = "10.0.20.3"
-    griffonstone    = "10.0.20.4"
-  }
+  for_each = var.deb13
 
-  name        = each.key
+  name        = each.value.hostname
   flavor_name     = "medium"
   key_pair        = "cdt"
 
   block_device {
-    uuid                  = "865d8624-6139-4447-bc34-312399c9d929" #debian-trixie-13
+    uuid                  = "70de79be-69be-45dc-b956-f15dbe194ccd" #debian-trixie-server
+    #uuid                  = "865d8624-6139-4447-bc34-312399c9d929" #debian-trixie-13
     source_type           = "image"
     destination_type      = "volume"
     volume_size           = 40
@@ -23,8 +17,8 @@ resource "openstack_compute_instance_v2" "deb13" {
   }
 
   network {
-    uuid        = openstack_networking_network_v2.network_blue.id
-    fixed_ip_v4 = each.value
+    uuid        = local.network_mapping[each.value.network]
+    fixed_ip_v4 = each.value.ip
   }
 
   security_groups = ["secgroup_blue"]

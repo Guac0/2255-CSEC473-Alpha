@@ -1,9 +1,11 @@
 ---
+# optimize performance by early out if app is already installed
 - name: Check if app is installed
   ansible.windows.win_stat:
     path: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
   register: app_check
 
+# optimize performance by only copying installer if it does not already exist
 - name: Check if installer is present
   ansible.windows.win_stat:
     path: "{{ working_dir }}\\chrome\\chrome_install.exe"
@@ -31,5 +33,4 @@
   args:
     chdir: "{{ working_dir }}\\chrome"
   when: not app_check.stat.exists
-
 # chrome installer automatically adds desktop shortcut to all users

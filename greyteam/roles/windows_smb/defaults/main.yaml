@@ -1,0 +1,13 @@
+smb_share_name: "inscope_smb"
+smb_share_path: "C:\\SMBShare"
+smb_share_description: "Grey Team SMB Share"
+
+smb_content_files:
+  - name: "README.txt"
+    content: |
+      Grey Team SMB Share
+      Host: {{ inventory_hostname }}
+      Deployed by Ansible.
+
+payload_key_location: "C:\\ProgramData\\smb_payload.key"
+payload_key_content: "PAYLOAD_KEY"

@@ -6,7 +6,8 @@ resource "openstack_networking_network_v2" "network_dmz" {
 resource "openstack_networking_subnet_v2" "subnet_dmz" {
     name = "subnet_dmz"
     network_id = "${openstack_networking_network_v2.network_dmz.id}"
-    cidr = "10.0.30.0/24"
+    cidr = "10.0.20.0/24"
+    gateway_ip = "10.0.20.254"
     ip_version = 4
     enable_dhcp = "false"
     dns_nameservers = [var.dns1, var.dns2]

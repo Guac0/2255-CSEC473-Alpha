@@ -1,12 +1,8 @@
 resource "openstack_compute_instance_v2" "win10" {
   depends_on = [openstack_networking_secgroup_v2.secgroup_inscope]
-  
-  for_each = {
-    baltimare       = "10.0.30.1"
-    neighara-falls  = "10.0.30.2"
-  }
+  for_each = var.win10
 
-  name        = each.key
+  name        = each.value.hostname
   flavor_name = "medium"
   key_pair    = "cdt"
 
@@ -21,8 +17,8 @@ resource "openstack_compute_instance_v2" "win10" {
 
 
   network {
-    uuid        = openstack_networking_network_v2.network_blue.id
-    fixed_ip_v4 = each.value
+    uuid        = local.network_mapping[each.value.network]
+    fixed_ip_v4 = each.value.ip
   }
 
   security_groups = ["secgroup_inscope"]

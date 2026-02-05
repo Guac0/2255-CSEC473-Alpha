@@ -2,41 +2,20 @@
 - name: Add cmd shortcut to Desktop
   community.windows.win_shortcut:
     src: "C:\\Windows\\System32\\cmd.exe"
-    #dest: "C:\\Users\\{{ item.item }}\\Desktop\\CommandPrompt.lnk"
     dest: "C:\\Users\\{{ item }}\\Desktop\\CommandPrompt.lnk"
-    #description: "Shortcut to C:\\Windows\\System32\\cmd.exe"
-    #icon: "C:\\Windows\\System32\\cmd.exe"
-  #ignore_errors: true
-  #loop: "{{ desktop_check.results }}"
-  #when: item.stat.exists
-  loop: ['Public']
+  loop: ['Public'] # Public will set it on all users' desktops automatically
 
 - name: Add powershell shortcut to Desktop
   community.windows.win_shortcut:
     src: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
-    #dest: "C:\\Users\\{{ item.item }}\\Desktop\\Powershell.lnk"
     dest: "C:\\Users\\{{ item }}\\Desktop\\Powershell.lnk"
-    #description: "Shortcut to C:\\Windows\\System32\\cmd.exe"
-    #icon: "C:\\Windows\\System32\\cmd.exe"
-  #ignore_errors: true
-  #loop: "{{ desktop_check.results }}"
-  #when: item.stat.exists
   loop: ['Public']
 
 - name: Add run shortcut to Desktop
   community.windows.win_shortcut:
     src: "C:\\Windows\\explorer.exe"
     arguments: "shell:::{2559a1f3-21d7-11d4-bdaf-00c04f60b9f0}" #lol this is so cursed. Run doesnt have its own binary so use this.
-    #dest: "C:\\Users\\{{ item.item }}\\Desktop\\Run.lnk"
     dest: "C:\\Users\\{{ item }}\\Desktop\\Run.lnk"
     description: "Run Menu Shortcut"
     icon: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" # steal powershell's icon as idk where the run one is and otherwise it will use powershell
-  #ignore_errors: true # Ignore users that may not exist due to not domain joined or on DC
-  #loop: "{{ desktop_check.results }}"
-  #when: item.stat.exists
   loop: ['Public']
-
-#- name: Shortcut debug
-#  ansible.builtin.debug:
-#    msg: "{{ item }}"
-#  loop: "{{ domain_admins + domain_users + local_admins + local_users + ['whiteteam'] }}"

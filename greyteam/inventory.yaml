@@ -4,17 +4,20 @@ all:
     dc:
       hosts:
         canterlot:
-          ansible_host: "10.1.10.1"
+          ansible_host: "10.0.10.1"
+    dns: #alias dc to dns
+      children:
+        dc:
   
     mssql:
       hosts:
-        appleloosa:
+        manehatten:
           ansible_host: "10.0.10.2"
 
     apache2:
       hosts:
         ponyville:
-          ansible_host: "10.1.10.3"
+          ansible_host: "10.0.10.3"
 
     mariadb:
       hosts:
@@ -23,7 +26,7 @@ all:
     
     cups:
       hosts:
-        todo:
+        trotsylvania:
           ansible_host: "10.0.10.5"
 
     vsftpd:
@@ -33,12 +36,12 @@ all:
     
     iis:
       hosts:
-        cloudsdale:
+        las-pegasus:
           ansible_host: "10.0.20.1"
 
     smb:
       hosts:
-        manhatten:
+        appleloosa:
           ansible_host: "10.0.20.2"
 
     irc:
@@ -63,7 +66,7 @@ all:
 
     linux_wkst1:
       hosts:
-        las-pegasus:
+        cloudsdale:
           ansible_host: "10.0.30.3"
 
     linux_wkst2:
@@ -96,10 +99,11 @@ all:
       children:
         dc:
         mssql:
+        dns:
         iis:
         smb:
-        windows_wks1:
-        windows_wks2:
+        windows_wkst1:
+        windows_wkst2:
         apache2:
         mariadb:
         cups:
@@ -192,9 +196,10 @@ all:
       children:
         dc:
         mssql:
+        dns:
         iis:
         smb:
-        windows_wks1:
+        windows_wkst1:
         windows_wkst2:
         cement: #maybe remove since no ansible
     # Hosts that are Linux

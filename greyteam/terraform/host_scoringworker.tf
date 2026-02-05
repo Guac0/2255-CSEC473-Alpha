@@ -7,7 +7,7 @@ resource "openstack_compute_instance_v2" "scoringworker" {
   key_pair        = "cdt"
 
   block_device {
-    uuid                  = "612bfbe6-7404-4e77-9d2a-0c7705e6b539" #debian-trixie-server
+    uuid                  = "70de79be-69be-45dc-b956-f15dbe194ccd" #debian-trixie-server
     source_type           = "image"
     destination_type      = "volume"
     volume_size           = 30

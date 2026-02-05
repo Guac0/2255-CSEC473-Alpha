@@ -1,0 +1,31 @@
+---
+# Alpha – Anny Hua
+# Service: Windows DNS Server
+- name: Install DNS Server role
+  ansible.windows.win_feature:
+    name: DNS
+    state: present
+    include_management_tools: true
+
+- name: Ensure DNS service is running and enabled
+  ansible.windows.win_service:
+    name: DNS
+    start_mode: auto
+    state: started
+
+- name: Ensure DNS server A record exists
+  ansible.windows.win_dns_record:
+    zone: "inscope.local"
+    name: "canterlot"
+    type: "A"
+    value: "10.0.10.1"
+    state: present
+
+- name: Create NS record for inscope.local
+  ansible.windows.win_dns_record:
+    zone: "inscope.local"
+    name: "@"
+    type: "NS"
+    values:
+      - "canterlot.inscope.local"
+    state: present

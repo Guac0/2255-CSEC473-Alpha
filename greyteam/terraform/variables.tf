@@ -29,9 +29,31 @@ variable "scoringworker" {
   }))
 }
 
-variable "inscope" {
+variable "deb13" {
   type = map(object({
     hostname = string
     ip       = string
+    network  = string
+  }))
+}
+variable "ubun24" {
+  type = map(object({
+    hostname = string
+    ip       = string
+    network  = string
+  }))
+}
+variable "win10" {
+  type = map(object({
+    hostname = string
+    ip       = string
+    network  = string
+  }))
+}
+variable "winserv22" {
+  type = map(object({
+    hostname = string
+    ip       = string
+    network  = string
   }))
 }
