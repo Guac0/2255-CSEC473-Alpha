@@ -24,7 +24,7 @@
 #conf file deployment
 - name: Deploy ngircd configuration file
   template:
-    src: files/ngircd.conf.j2
+    src: ngircd.conf.j2
     dest: /etc/ngircd/ngircd.conf
     owner: root
     group: root
