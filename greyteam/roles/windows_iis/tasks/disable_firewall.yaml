@@ -1,0 +1,10 @@
+---
+#Rose Standard lds9122@rit.edu
+- name: Disable firewall for Domain, Public and Private profiles
+  ansible.windows.win_firewall:
+    state: disabled
+    profiles:
+      - Domain
+      - Private
+      - Public
+  tags: disable_firewall

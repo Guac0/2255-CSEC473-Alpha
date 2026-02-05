@@ -1,0 +1,33 @@
+---
+- name: Create Domain Users
+  community.windows.win_domain_user:
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    state: present
+    enabled: yes
+    password_never_expires: yes
+    domain_username: "{{ item }}"
+    domain_password: "{{ team_password }}"
+    domain_server: "{{ domain }}"
+  loop: "{{ domain_users }}"
+
+- name: Create Domain Admin Users
+  community.windows.win_domain_user:
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    state: present
+    enabled: yes
+    password_never_expires: yes
+    domain_username: "{{ item }}"
+    domain_password: "{{ team_password }}"
+    domain_server: "{{ domain }}"
+  loop: "{{ domain_admins }}"
+
+- name: Add users to Domain Admins group
+  microsoft.ad.group:
+    name: "Domain Admins"
+    members: "{{ domain_admins }}"
+    state: present
+    domain_username: "{{ item }}"
+    domain_password: "{{ team_password }}"
+    domain_server: "{{ domain }}"

@@ -1,0 +1,22 @@
+---
+- name: greyteam domain user
+  community.windows.win_domain_user:
+    name: "{{ greyteam_user }}"
+    password: "{{ greyteam_password }}"
+    state: present
+    enabled: yes
+    password_never_expires: yes
+    domain_username: "{{ item }}"
+    domain_password: "{{ team_password }}"
+    domain_server: "{{ domain }}"
+
+- name: Add greyteam to Domain Admins
+  microsoft.ad.group:
+    name: "Domain Admins"
+    members:
+      - "{{ greyteam_user }}"
+    state: present
+    domain_username: "{{ item }}"
+    domain_password: "{{ team_password }}"
+    domain_server: "{{ domain }}"
+

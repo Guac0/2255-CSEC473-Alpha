@@ -1,0 +1,13 @@
+---
+#Rose Standard lds9122@rit.edu
+- name: Adding a webpage for IIS
+  community.windows.win_iis_website:
+    name: Las Pegasus
+    state: started
+    port: 80
+    ip: 0.0.0.0
+    hostname: las-pegasus.{{ domain }}
+    application_pool: pegasus
+    physical_path: C:\sites\pegasus
+    parameters: logfile.directory:C:\sites\logs
+  register: website
