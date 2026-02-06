@@ -10,7 +10,7 @@ This Ansible role installs and configures the NGIRCD IRC server on a Linux Host.
 
 ## Usage
 
-- Add role to `playbook.yaml` under the Linux services section:
+- Added role to playbook:
 ```yaml
 - name: Deploy NGIRCD IRC Server
   hosts: everfree-forest
