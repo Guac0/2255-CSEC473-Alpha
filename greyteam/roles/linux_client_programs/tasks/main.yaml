@@ -1,21 +1,31 @@
 ---
+#Author: Darius Flontas (daf2478)
+
+# 1) Package installation
+
+# Refresh apt package
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
   become: true
 
+# Install the required workstation applications from linux_client_programs/defaults/main.yaml
 - name: Install Linux client programs
   ansible.builtin.apt:
     name: "{{ linux_client_programs_packages }}"
     state: present
   become: true
 
+# Safety refresh
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: yes
   become: true
 
+# 2) Connectivity checks (FTP & IRC)
+
+# Tries to open a TCP connection to the FTP server/port from the workstation
 - name: Verify FTP server is reachable from workstations
   ansible.builtin.wait_for:
     host: "{{ ftp_host }}"
@@ -25,6 +35,7 @@
   failed_when: false
   changed_when: false
 
+# Same idea as above, but for IRC (ngircd) TCP port
 - name: Verify IRC server is reachable from workstations
   ansible.builtin.wait_for:
     host: "{{ irc_host }}"
@@ -34,6 +45,7 @@
   failed_when: false
   changed_when: false
 
+# Print a clean YES/NO so we can quickly see if services are reachable
 - name: Display connectivity results
   ansible.builtin.debug:
     msg: |
@@ -41,6 +53,9 @@
       - "IRC server ({{ irc_host }}:{{ irc_port }}) reachable: {{ 'YES' if not irc_reachable.failed else 'NO' }}"
   changed_when: false
 
+# 3) Desktop shortcuts for installed applications
+
+# Create /etc/skel/Desktop so any future users created on the box inherit these shortcuts (might delete once all users are finalized)
 - name: Fix desktop skeleton path
   ansible.builtin.file:
     path: /etc/skel/Desktop
@@ -48,11 +63,14 @@
     mode: "0755"
   become: true
 
+# Pulls /etc/passwd into ansible_facts.getent_passwd so we can verify usernames exist
+# also prevents errors when looping over non-existent users
 - name: Load passwd entries (so we can check users exist)
   ansible.builtin.getent:
     database: passwd
   become: true
 
+# Creates /usr/skel/Desktop (default on path on ubuntu)
 - name: Ensure desktop exsists for all users
   ansible.builtin.file:
     path: /usr/skel/Desktop
@@ -60,6 +78,7 @@
     mode: '0755'
   become: true
 
+# Make sure each target user has a Desktop folder so we can drop shortcuts there
 - name: Ensure desktop exisits for existing users
   ansible.builtin.file:
     path: "/home/{{ item }}/Desktop"
@@ -70,6 +89,7 @@
   loop: "{{ linux_desktop_users }}"
   become: true
 
+# Create simple .desktop launchers that run each program by name
 - name: Create app launchers in /etc/skel/Desktop
   ansible.builtin.copy:
     dest: "/etc/skel/Desktop/{{ item.filename }}"
@@ -87,6 +107,8 @@
     - { name: "HexChat", filename: "HexChat.desktop", exec: "hexchat" }
   become: true
 
+# Copies the launcher templates from /etc/skel/Desktop into every existing user’s Desktop folder
+# Uses product() so we do each user times each launcher without writing 4 separate tasks
 - name: Copy launchers to each user Desktop
   ansible.builtin.copy:
     remote_src: true
