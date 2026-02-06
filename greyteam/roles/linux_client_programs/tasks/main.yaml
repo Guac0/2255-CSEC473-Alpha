@@ -97,7 +97,7 @@
 - name: Copy Thunderbird shortcut to /etc/skel/Desktop
   ansible.builtin.copy:
     remote_src: true
-    src: "{{ tb_desktop.files[0].path }}"
+    src: "{{ thunderbird_desktop.files[0].path }}"
     dest: /etc/skel/Desktop/Thunderbird.desktop
     mode: "0755"
   when: thunderbird_desktop.matched | int > 0
