@@ -19,9 +19,9 @@
     login_unix_socket: /var/run/mysqld/mysqld.sock
     check_implicit_admin: true
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     user: root
-    password: "{{ mariadb_root_password }}"
+    password: "{{ team_password }}"
     host_all: true
     state: present
     update_password: always
@@ -29,7 +29,7 @@
 - name: Remove anonymous MariaDB users
   mysql_user:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     name: ''
     host_all: true
     state: absent
@@ -38,7 +38,7 @@
 - name: Remove test database
   mysql_db:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     name: test
     state: absent
     
@@ -61,7 +61,7 @@
 - name: Create  database
   mysql_db:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     name: "{{ db_name }}"
     state: present
     
@@ -92,7 +92,7 @@
 - name: Populate Ponies database
   mysql_db:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     name: "{{ db_name }}"
     state: import
     target: /tmp/ponies.sql
@@ -100,7 +100,7 @@
 - name: Create database user
   mysql_user:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     name: "{{ db_user }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"
