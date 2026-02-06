@@ -115,7 +115,7 @@
     priv: "{{ db_name }}.*:ALL"
     host: "%"
     state: present
-  loop: "{{ local_users }}",
+  loop: "{{ local_users }}"
 
 - name: Create database users for local_admins
   mysql_user:
