@@ -130,8 +130,6 @@
   when: hexchat_desktop.matched | int > 0
   become: true
 
--- Copy shortcuts to existing users
-
 - name: Copy Thunderbird shortcut to each user Desktop
   ansible.builtin.copy:
     remote_src: true
