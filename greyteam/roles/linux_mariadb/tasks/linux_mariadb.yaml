@@ -51,6 +51,7 @@
       [mysqld]
       bind-address = 0.0.0.0
       max_connections = 100
+      skip-networking = 0
     owner: root
     group: root
     mode: '0644'
@@ -105,3 +106,24 @@
     priv: "{{ db_name }}.*:ALL"
     host: "%"
     state: present
+- name: Create database users for local_users
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+  loop: "{{ local_users }}",
+
+- name: Create database users for local_admins
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+  loop: "{{ local_admins }}"
