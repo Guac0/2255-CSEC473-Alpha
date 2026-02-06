@@ -11,6 +11,19 @@ ftp_port: 21
 irc_host: "everfree-forest"
 irc_port: 6667
 
+linux_desktop_user:
+  - "twilight"
+  - "applejack"
+  - "rarity"
+  - "fluttershy"
+  - "pinkiepie"
+  - "rainbowdash"
+  - "bigmac"
+  - "candence"
+  - "mayormare"
+  - "shiningarmor"
+
+
 # Payload keying
 payload_key_location: '/greyteam_key'
 
