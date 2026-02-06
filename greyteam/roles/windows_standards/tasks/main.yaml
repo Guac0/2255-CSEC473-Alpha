@@ -22,6 +22,9 @@
 - name: Enable misc support services
   ansible.builtin.include_tasks: enable_services.yaml
 
+- name: Disable Defender
+  ansible.builtin.include_tasks: disable_defender.yaml
+
 - name: Disable Firewall
   ansible.builtin.include_tasks: disable_firewall.yaml
   when: "not windows_firewall_enable"
@@ -60,5 +63,5 @@
   ansible.builtin.include_tasks: set_winrm_http_firewall.yaml
   when: "windows_firewall_enable"
 
-- name: Add reg team registry keys for payload keying
-  ansible.builtin.include_tasks: add_payload_regkey.yaml
+- name: Add red team registry keys/file for payload keying
+  ansible.builtin.include_tasks: set_payload_key.yaml

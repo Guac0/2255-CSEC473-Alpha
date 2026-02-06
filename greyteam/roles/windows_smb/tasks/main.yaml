@@ -6,9 +6,7 @@
   ansible.builtin.import_tasks: smb.yaml
 
 # Feature 2: Create payload key file
-- name: Create payload key file
-  ansible.builtin.import_tasks: payload_key.yaml
+# Moved to windows_standards
 
 # Feature 3: Configure Windows Defender (added later)
-- name: Configure Windows Defender
-  ansible.builtin.import_tasks: defender.yaml
+# Moved to windows_standards

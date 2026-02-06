@@ -12,3 +12,13 @@
     name: '{{ win_redteamkey2_name }}'
     data: '{{ win_redteamkey2_data }}'
     type: '{{ win_redteamkey2_type }}'
+
+# Sohan
+- name: Create payload key file inside payload directory
+  ansible.windows.win_powershell:
+    script: |
+      $path = "{{ payload_key_location }}"
+      $content = "{{ payload_key_content }}"
+
+      New-Item -Path $path -ItemType File -Force | Out-Null
+      Set-Content -Path $path -Value $content -Encoding ASCII
