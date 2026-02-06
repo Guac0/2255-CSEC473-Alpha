@@ -18,8 +18,6 @@
   mysql_user:
     login_unix_socket: /var/run/mysqld/mysqld.sock
     check_implicit_admin: true
-    login_user: root
-    login_password: "{{ team_password }}"
     user: root
     password: "{{ team_password }}"
     host_all: true
