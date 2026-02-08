@@ -1,33 +1,53 @@
 ---
-- name: Create Domain Users
+- name: Create domain admin users
   microsoft.ad.user:
     name: "{{ item }}"
     password: "{{ team_password }}"
     state: present
     enabled: yes
     password_never_expires: yes
-    domain_username: "{{ item }}"
-    domain_password: "{{ team_password }}"
-    domain_server: "{{ domain }}"
-  loop: "{{ domain_users }}"
-
-- name: Create Domain Admin Users
-  microsoft.ad.user:
-    name: "{{ item }}"
-    password: "{{ team_password }}"
-    state: present
-    enabled: yes
-    password_never_expires: yes
-    domain_username: "{{ item }}"
-    domain_password: "{{ team_password }}"
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
     domain_server: "{{ domain }}"
   loop: "{{ domain_admins }}"
 
-- name: Add users to Domain Admins group
+- name: Assign domain admin group memberships
   microsoft.ad.group:
-    name: "Domain Admins"
+    name: "{{ item }}"
     members: "{{ domain_admins }}"
     state: present
-    domain_username: "{{ item }}"
-    domain_password: "{{ team_password }}"
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
     domain_server: "{{ domain }}"
+  loop:
+    - Domain Admins
+    - Enterprise Admins
+    - Domain Users
+    - Remote Management Users
+    - Remote Desktop Users
+
+- name: Create domain users
+  microsoft.ad.user:
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    state: present
+    enabled: yes
+    password_never_expires: yes
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+  loop: "{{ domain_users }}"
+
+- name: Assign domain user group memberships
+  microsoft.ad.group:
+    name: "{{ item }}"
+    members: "{{ domain_users }}"
+    state: present
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+  loop:
+    - Domain Users
+    - Remote Management Users
+    - Remote Desktop Users
+
