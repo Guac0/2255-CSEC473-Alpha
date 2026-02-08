@@ -16,7 +16,7 @@
     members:
       - "{{ greyteam_user }}"
     state: present
-    domain_username: "{{ item }}"
-    domain_password: "{{ team_password }}"
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
     domain_server: "{{ domain }}"
 
