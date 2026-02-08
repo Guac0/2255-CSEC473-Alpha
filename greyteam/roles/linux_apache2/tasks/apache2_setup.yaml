@@ -32,16 +32,11 @@
 
 #Feature #2: Download and setup DokuWiki
 
-# Install Wget for downloading DokuWiki
--  name: Install Wget
-   apt:
-      name: wget
-      update_cache: yes
-   become: yes
+
 
 # Install the latest stable version of DokuWiki
 -  name: Install DokuWiki
-   wget:
+   ansible.builtin.get_url:
       url: https://download.dokuwiki.org/src/dokuwiki/dokuwiki-stable.tgz
       dest: /tmp/dokuwiki-stable.tgz
    become: yes
