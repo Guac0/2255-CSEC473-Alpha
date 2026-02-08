@@ -6,7 +6,7 @@
     state: started
     port: 80
     ip: 0.0.0.0
-    hostname: {{ inventory_hostname_short }}
+    hostname: "{{ inventory_hostname_short }}"
     application_pool: pegasus
     physical_path: C:\sites\pegasus
     parameters: logfile.directory:C:\sites\logs
