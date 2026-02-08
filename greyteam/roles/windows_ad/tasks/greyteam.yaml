@@ -6,8 +6,8 @@
     state: present
     enabled: yes
     password_never_expires: yes
-    domain_username: "{{ item }}"
-    domain_password: "{{ team_password }}"
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
     domain_server: "{{ domain }}"
 
 - name: Add greyteam to Domain Admins
