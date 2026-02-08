@@ -1,5 +1,10 @@
 ---
 #Rose Standard lds9122@rit.edu
+- name: Create a new folder on Windows
+  ansible.windows.win_file:
+    path: C:\sites
+    state: directory
+
 - name: Adding a webpage for IIS
   community.windows.win_iis_website:
     name: Las Pegasus
