@@ -14,7 +14,8 @@
 - name: Assign domain admin group memberships
   microsoft.ad.group:
     name: "{{ item }}"
-    members: "{{ domain_admins }}"
+    members: 
+      add: "{{ domain_admins }}"
     state: present
     domain_username: "{{ greyteam_user }}"
     domain_password: "{{ greyteam_password }}"
@@ -41,7 +42,8 @@
 - name: Assign domain user group memberships
   microsoft.ad.group:
     name: "{{ item }}"
-    members: "{{ domain_users }}"
+    members: 
+      add: "{{ domain_users }}"
     state: present
     domain_username: "{{ greyteam_user }}"
     domain_password: "{{ greyteam_password }}"
