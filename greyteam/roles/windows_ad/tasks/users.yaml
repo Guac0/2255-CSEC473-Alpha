@@ -21,7 +21,6 @@
     domain_password: "{{ greyteam_password }}"
     domain_server: "{{ domain }}"
   loop:
-    - Domain Admins
     - Enterprise Admins
     - Domain Users
     - Remote Management Users
@@ -49,7 +48,6 @@
     domain_password: "{{ greyteam_password }}"
     domain_server: "{{ domain }}"
   loop:
-    - Domain Users
     - Remote Management Users
     - Remote Desktop Users
 
