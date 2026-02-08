@@ -7,7 +7,7 @@
    apt:
     name: apache2 
     update_cache: yes
-    become: yes 
+
 
 
 # Feature #1: Install php modules for DokuWiki
@@ -27,8 +27,7 @@
       - php-gd
       - php-intl
       - php-sqlite3
-   become: yes
-
+   
 
 #Feature #2: Download and setup DokuWiki
 
@@ -39,7 +38,7 @@
    ansible.builtin.get_url:
       url: https://download.dokuwiki.org/src/dokuwiki/dokuwiki-stable.tgz
       dest: /tmp/dokuwiki-stable.tgz
-   become: yes
+   
 
 # Feature #3: Create web root with vulnerable permissions
 - name: Create web root with vulnerable permissions
@@ -56,7 +55,7 @@
       src: /tmp/dokuwiki-stable.tgz
       dest: /var/www/html/
       remote_src: yes
-   become: yes
+
    
 # Set ownership of the DokuWiki directory to the Apache user
 -  name: Set ownership of DokuWiki directory
@@ -65,14 +64,14 @@
       owner: www-data
       group: www-data
       recurse: yes
-   become: yes
+
 
 # Restart Apache to apply changes
 -  name: Restart Apache2
    service:
       name: apache2
       state: restarted
-   become: yes
+
 
 # Create a Dokuwiki Virtual Host Configuration File
 - name: Create Dokuwiki Virtual Host Configuration File
@@ -88,23 +87,23 @@
                Require all granted
             </Directory>
       </VirtualHost>
-  become: yes
+
 
 # Enable the Dokuwiki Site
 - name: Enable the Dokuwiki Site
   command: a2ensite dokuwiki.conf
-  become: yes
+
 
 # Disable the Default Apache Site
 - name: Disable the Default Apache Site
   command: a2dissite 000-default.conf
-  become: yes
+
 
 # Reload Apache to Apply Changes
 - name: Reload Apache to Apply Changes
   service:
     name: apache2
     state: reloaded
-  become: yes
+
 
 
