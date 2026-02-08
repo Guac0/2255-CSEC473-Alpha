@@ -1,8 +1,13 @@
 ---
 #Rose Standard lds9122@rit.edu
+- name: Create nested folders on Windows
+  ansible.windows.win_file:
+    path: C:\sites\pegasus
+    state: directory
+
 - name: Create a new folder on Windows
   ansible.windows.win_file:
-    path: C:\sites
+    path: C:\sites\logs
     state: directory
 
 - name: Adding a webpage for IIS
