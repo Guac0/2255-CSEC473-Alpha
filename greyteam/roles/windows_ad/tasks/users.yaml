@@ -22,7 +22,6 @@
     domain_server: "{{ domain }}"
   loop:
     - Enterprise Admins
-    - Domain Users
     - Remote Management Users
     - Remote Desktop Users
 
