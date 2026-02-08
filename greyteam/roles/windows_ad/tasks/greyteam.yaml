@@ -14,7 +14,8 @@
   microsoft.ad.group:
     name: "Domain Admins"
     members:
-      - name: "{{ greyteam_user }}"
+      add:
+        - "{{ greyteam_user }}"
     state: present
     domain_username: "{{ greyteam_user }}"
     domain_password: "{{ greyteam_password }}"
