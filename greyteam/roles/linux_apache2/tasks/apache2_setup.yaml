@@ -53,7 +53,7 @@
 -  name: Unpack DokuWiki
    unarchive:
       src: /tmp/dokuwiki-stable.tgz
-      dest: /var/www/html/
+      dest: /var/www/html/dokuwiki
       remote_src: yes
 
    
