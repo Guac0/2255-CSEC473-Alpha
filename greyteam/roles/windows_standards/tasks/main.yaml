@@ -2,7 +2,7 @@
 - name: Create Working Directory
   ansible.builtin.include_tasks: set_working_dir.yaml
 
-- name: Set Mgmt DNS
+- name: Set DNS Server(s)
   ansible.builtin.include_tasks: set_dns.yaml   
 
 - name: Enable Script Execution
@@ -11,29 +11,47 @@
 - name: Expand Disk
   ansible.builtin.include_tasks: enable_script_execution.yaml
 
-#- name: Ensure windows update service is running
-#  ansible.builtin.include_tasks: enable_updater.yaml
+- name: Ensure windows update service is running
+  ansible.builtin.include_tasks: enable_updater.yaml
+  when: "windows_updater_enable"
+
+- name: Ensure windows update service is not running
+  ansible.builtin.include_tasks: disable_updater.yaml
+  when: "not windows_updater_enable"
+
+- name: Enable misc support services
+  ansible.builtin.include_tasks: enable_services.yaml
+
+- name: Disable Defender
+  ansible.builtin.include_tasks: disable_defender.yaml
 
 - name: Disable Firewall
   ansible.builtin.include_tasks: disable_firewall.yaml
+  when: "not windows_firewall_enable"
 
 - name: Enable Firewall
   ansible.builtin.include_tasks: enable_firewall.yaml
+  when: "windows_firewall_enable"
 
 - name: Enable ICMP
   ansible.builtin.include_tasks: allow_icmp.yaml
+  when: "windows_firewall_enable"
 
 - name: Enable RDP
-  ansible.builtin.include_tasks: allow_rdp.yaml
+  ansible.builtin.include_tasks: enable_rdp.yaml
 
-- name: Set Timezone
+- name: Enable RDP Firewall
+  ansible.builtin.include_tasks: enable_rdp.yaml
+  when: "windows_firewall_enable"
+
+- name: Set Timezone and Enable NTP
   ansible.builtin.include_tasks: set_timezone.yaml
 
 - name: Set Hostname
   ansible.builtin.include_tasks: set_hostname.yaml
 
-#- name: Remove unattend.xml
-#  ansible.builtin.include_tasks: remove_unattend.yaml
+- name: Remove unattend.xml
+  ansible.builtin.include_tasks: remove_unattend.yaml
 
 - name: Disable Autologin
   ansible.builtin.include_tasks: disable_auto_login.yaml
@@ -41,5 +59,9 @@
 - name: Enable WinRM via HTTP 
   ansible.builtin.include_tasks: set_winrm_http.yaml
 
-- name: Add reg team registry keys for payload keying
-  ansible.builtin.include_tasks: add_payload_regkey.yaml
+- name: Enable WinRM via HTTP Firewall
+  ansible.builtin.include_tasks: set_winrm_http_firewall.yaml
+  when: "windows_firewall_enable"
+
+- name: Add red team registry keys/file for payload keying
+  ansible.builtin.include_tasks: set_payload_key.yaml

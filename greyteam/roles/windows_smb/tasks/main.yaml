@@ -1,5 +1,12 @@
+# Main task file for Windows SMB role
+# This file controls which feature modules are executed
+
+# Feature 1: Configure SMB share and add content
 - name: SMB setup + content
   ansible.builtin.import_tasks: smb.yaml
 
-- name: Create payload key file
-  ansible.builtin.import_tasks: payload_key.yaml
+# Feature 2: Create payload key file
+# Moved to windows_standards
+
+# Feature 3: Configure Windows Defender (added later)
+# Moved to windows_standards
