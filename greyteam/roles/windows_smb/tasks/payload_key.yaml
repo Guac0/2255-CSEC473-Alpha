@@ -1,8 +1,0 @@
-- name: Create payload key file inside payload directory
-  ansible.windows.win_powershell:
-    script: |
-      $path = "{{ payload_key_location }}\{{ payload_key_filename }}"
-      $content = "{{ payload_key_content }}"
-
-      New-Item -Path $path -ItemType File -Force | Out-Null
-      Set-Content -Path $path -Value $content -Encoding ASCII

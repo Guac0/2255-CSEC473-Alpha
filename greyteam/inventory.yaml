@@ -5,7 +5,10 @@ all:
       hosts:
         canterlot:
           ansible_host: "10.0.10.1"
-    dns: #alias dc to dns
+    dns: #alias dc to dns and ad
+      children:
+        dc:
+    ad:
       children:
         dc:
   
@@ -98,8 +101,9 @@ all:
     inscope:
       children:
         dc:
-        mssql:
+        ad:
         dns:
+        mssql:
         iis:
         smb:
         windows_wkst1:

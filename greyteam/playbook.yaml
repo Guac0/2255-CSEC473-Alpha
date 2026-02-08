@@ -120,7 +120,7 @@
     - generic
 
 - name: Deploy Cursor
-  hosts: windows:&wksts:!cement
+  hosts: windows:!cement
   roles:
     - windows_cursor
   tags:
@@ -149,7 +149,7 @@
     - dns
 
 - name: Windows Deploy SMB 
-  hosts: appleloosa
+  hosts: smb
   roles:
     - windows_smb
   tags:
@@ -158,7 +158,7 @@
     - inscope
 
 - name: Windows Deploy IIS 
-  hosts: las-pegasus
+  hosts: iis
   roles:
     - windows_iis
   tags:
@@ -167,7 +167,7 @@
     - inscope
 
 - name: Windows Deploy AD 
-  hosts: canterlot
+  hosts: dc
   roles:
     - windows_ad
   tags:
@@ -191,6 +191,7 @@
   hosts: windows:!cement
   roles:
     - windows_reboot
+  gather_facts: no
   tags:
     - windows 
     - inscope 
@@ -250,7 +251,7 @@
     - inscope
 
 - name: Deploy MariaDb
-  hosts: seaddle
+  hosts: mariadb
   become: true
   roles:
     - linux_mariadb
@@ -260,7 +261,7 @@
     - inscope
     
 - name: Deploy NGIRCD
-  hosts: everfree-forest
+  hosts: irc
   roles:
     - linux_ngircd
   tags:
@@ -279,7 +280,7 @@
     - utilities_linux
 
 - name: Deploy Vulnerable vsftpd (CTF)
-  hosts: linux
+  hosts: vsftpd
   become: true
   roles:
     - linux-server-ftp-setup/vsftpd_vul
@@ -289,11 +290,20 @@
     - ftp
 
 - name: Deploy Apache2
-  hosts: ponyville
+  hosts: apache2
   roles:
     - linux_apache2
   tags: 
     - apache2
+    - linux 
+    - inscope
+
+- name: Deploy NGINX
+  hosts: nginx
+  roles:
+    - linux_nginx
+  tags: 
+    - nginx
     - linux 
     - inscope
 
@@ -315,6 +325,7 @@
   hosts: linux
   roles:
     - linux_reboot
+  gather_facts: no
   tags:
     - linux
     - inscope

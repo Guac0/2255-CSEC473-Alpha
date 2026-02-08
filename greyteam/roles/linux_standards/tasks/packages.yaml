@@ -22,6 +22,7 @@
     - "xz-utils"
     - "screen"
     - "pwgen"
+    - "mariadb-client-compat"
   ignore_errors: yes
 
 - name: Install Remmina for GUI hosts

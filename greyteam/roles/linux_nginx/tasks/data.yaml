@@ -1,0 +1,17 @@
+---
+- name: Copy in website files and overwrite existing
+  ansible.builtin.copy:
+    src: /files/
+    dest: /var/www/html
+
+-  name: Set ownership of html directory
+   ansible.builtin.file:
+      path: /var/www/html
+      owner: www-data
+      group: www-data
+      recurse: yes
+
+- name: Ensure NGINX service is restarted
+  ansible.builtin.service:
+    name: nginx
+    state: restarted

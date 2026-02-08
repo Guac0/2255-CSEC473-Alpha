@@ -17,9 +17,8 @@
 - name: Set FQDN in /etc/hosts
   ansible.builtin.lineinfile:
     path: /etc/hosts
-    regexp: '^127\.0\.1\.1\s+'
-    #line: "127.0.1.1 {{ inventory_hostname }}.{{ domain }} {{ inventory_hostname }}" #TODO
-    line: "127.0.1.1 {{ inventory_hostname }}.{{ domain }} {{ inventory_hostname }}"
+    regexp: '^127\.0\.0\.1\s+'
+    line: "127.0.0.1 {{ inventory_hostname_short }}.{{ domain }} {{ inventory_hostname_short }}"
     state: present
 
 #- name: Configure static DNS resolvers
