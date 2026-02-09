@@ -51,3 +51,17 @@
 - name: Show applied wallpaper path
   ansible.builtin.debug:
     msg: "Wallpaper set to: {{ wallpaper_reg.stdout | trim }}"
+
+- name: Active Setup – apply wallpaper once per user
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Active Setup\Installed Components\InscopeWallpaper
+    name: "{{ item.name }}"
+    data: "{{ item.data }}"
+    type: string
+  loop:
+    - { name: "Version", data: "1" }
+    - { name: "StubPath", data: >
+        powershell -command
+        "Set-ItemProperty 'HKCU:\Control Panel\Desktop'
+         -Name Wallpaper
+         -Value 'C:\ProgramData\Inscope\Branding\wallpaper.jpg'" }
