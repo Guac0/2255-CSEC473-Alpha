@@ -8,7 +8,7 @@
 - name: Copy files to staging folder
   ansible.windows.win_copy:
     src: files/generic
-    dest: "{{ working_dir }}\\user_files\\generic"
+    dest: "{{ working_dir }}\\user_files\\"
     #force: yes
 
 # Failsafe to avoid errors when user doesn't exist yet
@@ -16,7 +16,7 @@
   ansible.windows.win_stat:
     path: "C:\\Users\\{{ username }}"
   register: user_check
-  loop: "{{ local_admins + local_admins + domain_users + domain_admins }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
+  loop: "{{ local_admins + local_admins + domain_users + domain_admins + ['greyteam'] }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
   loop_control:
     loop_var: username
 

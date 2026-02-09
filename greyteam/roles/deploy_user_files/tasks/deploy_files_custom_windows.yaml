@@ -9,7 +9,7 @@
     path: "{{ role_path }}/files/{{ username }}" # needs role_path due to delegation
   register: controller_check
   delegate_to: localhost
-  loop: "{{ local_users + local_admins + domain_users + domain_admins }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
+  loop: "{{ local_users + local_admins + domain_users + domain_admins + ['greyteam']  }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
   loop_control:
     loop_var: username #item aliased to username
 
@@ -27,7 +27,7 @@
 - name: Copy files to staging folder
   ansible.windows.win_copy:
     src: "files/{{ target_result.ctrl_result.username }}"
-    dest: "{{ working_dir }}\\user_files\\{{ target_result.ctrl_result.username }}"
+    dest: "{{ working_dir }}\\user_files\\"
     #force: yes
   loop: "{{ dest_check.results }}"
   loop_control:

@@ -7,8 +7,8 @@
 
 - name: Copy files to staging folder
   ansible.builtin.copy:
-    src: files/generic/
-    dest: "{{ working_dir }}/user_files/generic"
+    src: files/generic
+    dest: "{{ working_dir }}/user_files/"
     mode: '0644'
 
 # Check if the user's home directory exists on the Linux target
@@ -16,7 +16,7 @@
   ansible.builtin.stat:
     path: "/home/{{ username }}"
   register: user_profile_check
-  loop: "{{ local_admins + domain_users + domain_admins }}"
+  loop: "{{ local_users + local_admins + ['greyteam'] }}"
   loop_control:
     loop_var: username
 

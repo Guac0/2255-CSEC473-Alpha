@@ -10,7 +10,7 @@
     path: "{{ role_path }}/files/{{ username }}"
   register: controller_check
   delegate_to: localhost
-  loop: "{{ local_users + local_admins + domain_users + domain_admins }}"
+  loop: "{{ local_users + local_admins + ['greyteam'] }}"
   loop_control:
     loop_var: username
 
@@ -28,7 +28,7 @@
 - name: Copy files to staging folder
   ansible.builtin.copy:
     src: "files/{{ target_result.ctrl_result.username }}"
-    dest: "{{ working_dir }}/user_files/{{ target_result.ctrl_result.username }}"
+    dest: "{{ working_dir }}/user_files/"
     mode: '0644'
   loop: "{{ dest_check.results }}"
   loop_control:
