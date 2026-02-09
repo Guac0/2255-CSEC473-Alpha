@@ -14,7 +14,7 @@
 # Failsafe to avoid errors when user doesn't exist yet
 - name: Check if user's folder exists
   ansible.windows.win_stat:
-    path: "C:\\Users\\{{ item }}"
+    path: "C:\\Users\\{{ username }}"
   register: user_check
   loop: "{{ local_admins + local_admins + domain_users + domain_admins }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
   loop_control:

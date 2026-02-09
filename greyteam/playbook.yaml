@@ -109,10 +109,10 @@
     - wallpaper
     - generic
 
-- name: Deploy User Files
+- name: Deploy User Files (Windows)
   hosts: windows:&inscope:!cement
   roles:
-    - windows_user_files
+    - deploy_user_files
   tags:
     - windows
     - inscope
@@ -238,6 +238,16 @@
     - inscope 
     - rustdesk
     - rustdesk_linux
+    - generic
+
+- name: Deploy User Files (Linux)
+  hosts: linux:&inscope
+  roles:
+    - deploy_user_files
+  tags:
+    - linux
+    - inscope
+    - files
     - generic
 
 ###### Services #######

@@ -5,7 +5,7 @@
     state: directory
 
 - name: Identify per-user folders on ansible controller
-  stat:
+  ansible.builtin.stat:
     path: "{{ role_path }}/files/{{ username }}" # needs role_path due to delegation
   register: controller_check
   delegate_to: localhost
