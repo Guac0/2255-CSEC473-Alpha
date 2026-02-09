@@ -217,6 +217,7 @@ all:
         nginx:
         linux_wkst1:
         linux_wkst2:
+        void:
         jumpboxes:
         scoring_all:
         deploy:
