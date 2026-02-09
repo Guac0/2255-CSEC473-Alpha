@@ -36,4 +36,4 @@
       - Users
       - Remote Desktop Users
   loop: 
-    "{{ local_admins }}"
+    "{{ local_users }}"
