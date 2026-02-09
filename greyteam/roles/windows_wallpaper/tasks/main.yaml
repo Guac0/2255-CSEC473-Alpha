@@ -28,6 +28,14 @@
     src: "{{ wallpaper_src }}"
     dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
 
+- name: Ensure all users can read wallpaper
+  ansible.windows.win_acl:
+    path: C:\ProgramData\Inscope\Branding\wallpaper.jpg
+    user: Users
+    rights: Read
+    type: allow
+    state: present
+
 - name: Configure wallpaper registry values
   ansible.windows.win_regedit:
     path: HKLM:\Software\Policies\Microsoft\Windows\Personalization
