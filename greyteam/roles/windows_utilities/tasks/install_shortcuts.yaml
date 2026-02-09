@@ -19,3 +19,9 @@
     description: "Run Menu Shortcut"
     icon: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" # steal powershell's icon as idk where the run one is and otherwise it will use powershell
   loop: ['Public']
+
+- name: Add explorer shortcut to Desktop
+  community.windows.win_shortcut:
+    src: "C:\\Windows\\explorer.exe"
+    dest: "C:\\Users\\{{ item }}\\Desktop\\Explorer.lnk"
+  loop: ['Public']
