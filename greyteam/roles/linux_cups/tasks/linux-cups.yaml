@@ -59,5 +59,11 @@
   ansible.builtin.command:
     cmd: "lpoptions -d {{ printer_name }}"
 
+# Share this printer with the subnet
+- name: Set server to share printers
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cupsctl --share-printers"
 
-
+- name: Tag this printer as sharable
+  ansible.builtin.command:
+    cmd: "/usr/sbin/lpadmin -p {{ printer_name }} -o printer-is-shared=true"
