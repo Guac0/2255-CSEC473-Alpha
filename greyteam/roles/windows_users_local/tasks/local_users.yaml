@@ -37,3 +37,10 @@
       - Remote Desktop Users
   loop: 
     "{{ local_users }}"
+
+- name: Create Local Account Profiles
+  ansible.windows.win_user_profile:
+    username: "{{ item }}"
+    state: present
+  loop:
+    "{{ local_users + local_admins }}"
