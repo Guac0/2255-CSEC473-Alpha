@@ -4,9 +4,10 @@
 #ansible_user: localuser
 #ansible_password: password
 
-ansible_become: yes
-ansible_become_user: SYSTEM
-ansible_become_method: runas
+# Breaks execution policy
+#ansible_become: yes
+#ansible_become_user: SYSTEM
+#ansible_become_method: runas
 
 ansible_connection: winrm
 ansible_winrm_server_cert_validation: ignore
