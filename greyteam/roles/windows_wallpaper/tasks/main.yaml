@@ -60,8 +60,8 @@
     type: string
   loop:
     - { name: "Version", data: "1" }
-    - { name: "StubPath", data: >
-        powershell -command
-        "Set-ItemProperty 'HKCU:\Control Panel\Desktop'
-         -Name Wallpaper
-         -Value 'C:\ProgramData\Inscope\Branding\wallpaper.jpg'" }
+    - name: "StubPath"
+      data: >
+        powershell -NoProfile -ExecutionPolicy Bypass -Command
+        "Set-ItemProperty 'HKCU:\Control Panel\Desktop' -Name Wallpaper -Value 'C:\ProgramData\Inscope\Branding\wallpaper.jpg';
+         rundll32.exe user32.dll,UpdatePerUserSystemParameters"
