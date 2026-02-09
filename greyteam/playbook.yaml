@@ -230,7 +230,7 @@
     - generic
 
 - name: Deploy Rustdesk Linux
-  hosts: linux:&gui
+  hosts: linux:&gui:!inscope
   roles:
     - linux_rustdesk
   tags:
