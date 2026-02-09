@@ -58,7 +58,7 @@
 ######## Generic ######
 
 - name: Run Windows Standards 
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_standards
   tags: 
@@ -69,7 +69,7 @@
     - generic
 
 - name: Create Local Users
-  hosts: windows:&inscope:!cement
+  hosts: windows:&inscope #:!cement
   roles:
     - windows_users_local
   tags:
@@ -89,7 +89,7 @@
 #    - rustdesk_windows
 
 - name: Install Utilities
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_utilities
   tags:
@@ -100,7 +100,7 @@
     - generic
 
 - name: Set Wallpaper
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_wallpaper
   tags:
@@ -110,7 +110,7 @@
     - generic
 
 - name: Deploy User Files (Windows)
-  hosts: windows:&inscope:!cement
+  hosts: windows:&inscope #:!cement
   roles:
     - deploy_user_files
   tags:
@@ -120,7 +120,7 @@
     - generic
 
 - name: Deploy Cursor
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_cursor
   tags:
@@ -179,7 +179,7 @@
 ####### Finish #######
 
 - name: Post Deploy Cleanup
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_finish
   tags:
@@ -189,7 +189,7 @@
     #- generic
 
 - name: Windows Reboot
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_reboot
   gather_facts: no
