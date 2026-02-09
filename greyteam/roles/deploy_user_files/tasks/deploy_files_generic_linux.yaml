@@ -16,7 +16,7 @@
   ansible.builtin.stat:
     path: "/home/{{ username }}"
   register: user_profile_check
-  loop: "{{ local_users + local_admins + ['greyteam'] }}"
+  loop: "{{ local_users + local_admins + ['greyteam','Admin','Administrator'] }}"
   loop_control:
     loop_var: username
 

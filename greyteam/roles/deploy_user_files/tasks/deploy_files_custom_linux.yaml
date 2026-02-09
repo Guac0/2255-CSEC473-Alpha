@@ -10,7 +10,7 @@
     path: "{{ role_path }}/files/{{ username }}"
   register: controller_check
   delegate_to: localhost
-  loop: "{{ local_users + local_admins + ['greyteam'] }}"
+  loop: "{{ local_users + local_admins + ['greyteam','Admin','Administrator'] }}"
   loop_control:
     loop_var: username
 

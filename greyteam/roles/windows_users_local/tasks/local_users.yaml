@@ -43,4 +43,4 @@
     username: "{{ item }}"
     state: present
   loop:
-    "{{ local_users + local_admins }}"
+    "{{ local_users + local_admins + ['Admin']}}"
