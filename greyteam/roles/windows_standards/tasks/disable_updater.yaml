@@ -26,6 +26,9 @@
     name: WaaSMedicSvc
     start_mode: disabled
     state: stopped  
+  become: yes #experimental
+  become_user: SYSTEM
+  become_method: runas
   ignore_errors: true      
 
 - name: Disable windows automatic updates via registry

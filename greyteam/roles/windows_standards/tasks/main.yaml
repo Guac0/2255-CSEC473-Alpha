@@ -9,7 +9,7 @@
   ansible.builtin.include_tasks: enable_script_execution.yaml
 
 - name: Expand Disk
-  ansible.builtin.include_tasks: enable_script_execution.yaml
+  ansible.builtin.include_tasks: set_disk_max.yaml
 
 - name: Ensure windows update service is running
   ansible.builtin.include_tasks: enable_updater.yaml
