@@ -127,6 +127,7 @@
     - cursor
     - windows
     - inscope
+    - generic
 
 ###### Services #######
 
@@ -185,7 +186,7 @@
     - windows 
     - inscope 
     - post_deploy
-    - generic
+    #- generic
 
 - name: Windows Reboot
   hosts: windows:!cement
@@ -288,6 +289,7 @@
     - linux
     - inscope
     - ftp
+    - vsftpd
 
 - name: Deploy Apache2
   hosts: apache2
@@ -319,7 +321,7 @@
     - inscope
     - finish
     - post_deploy
-    - generic
+    #- generic
 
 - name: Reboot
   hosts: linux
