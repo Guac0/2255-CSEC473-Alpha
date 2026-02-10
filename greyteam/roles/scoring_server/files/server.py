@@ -7,7 +7,6 @@ import time
 import re
 import os
 import random
-import atexit, signal, sys
 import threading, time
 import json
 from collections import deque
@@ -16,92 +15,19 @@ from urllib.parse import urlparse, unquote_plus
 import urllib.request
 import urllib.error
 import math
-import logging
-from concurrent_log_handler import ConcurrentRotatingFileHandler
-from logging.handlers import RotatingFileHandler
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import class_mapper
 from sqlalchemy import func, event
-import subprocess
-from pathlib import Path
-import platform
-from flask_session import Session
 
-CONFIG_DEFAULTS = {
-    "HOST": "0.0.0.0",
-    "PORT": 8080,
-    "PUBLIC_URL": "https://{HOST}:{PORT}",
-    "LOGFILE": "log_{timestamp}.txt",
-    "SAVEFILE": "save_{timestamp}.db",
-    "SECRET_KEY": "changemeplease",
-    "STALE_TIME": 300,
-    "DEFAULT_WEBHOOK_SLEEP_TIME": 0.25,
-    "MAX_WEBHOOK_MSG_PER_MINUTE": 50,
-    "WEBHOOK_URL": "",
-    "AGENT_AUTH_TOKENS": {
-        "testtoken": { 
-            "added_by": "default"
-        }
-    },
-    "WEBGUI_USERS": {
-        "admin": {"password": "admin", "role": "admin"},
-        "analyst": {"password": "analyst", "role": "analyst"},
-        "guest": {"password": "guest", "role": "guest"}
-    }
-}
-
-def load_config(path):
-    config = CONFIG_DEFAULTS.copy()
-    badPath = False
-
-    if os.path.exists(path):
-        with open(path, "r") as f:
-            config.update(json.load(f))
-    else:
-        badPath = True
-
-    # Generate timestamp once
-    now = datetime.now()
-
-    # 2. Round up to the start of the next minute
-    # (Adds 1 minute and zeros out the seconds/microseconds)
-    next_minute = (now + timedelta(minutes=1)).replace(second=0, microsecond=0)
-
-    # 3. Generate the timestamp string
-    timestamp = next_minute.strftime("%Y-%m-%d_%H-%M-00")
-
-    # Replace placeholders in strings
-    for key, value in config.items():
-        if isinstance(value, str):
-            config[key] = value.format(
-                HOST=config.get("HOST"),
-                PORT=config.get("PORT"),
-                timestamp=timestamp
-            )
-
-    if badPath:
-        print(f"[-] {timestamp} load_config(): config file path not found: {path}")
-        with open(config.get("LOGFILE"), "a") as f: # intentionally not the correct logfile format
-            f.write(f"[{timestamp}] CRITICAL - load_config(): config file path not found: {path}")
-
-    #config["PUBLIC_URL"] = f"http://{config['HOST']}:{config['PORT']}"
-    #config["LOGFILE"] = f"log_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
-    #config["SAVEFILE"] = f"save_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
-
-    return config
-
-CONFIG = load_config("config.json") # relative to cwd!
-HOST = CONFIG["HOST"]
-PORT = CONFIG["PORT"]
-PUBLIC_URL = CONFIG["PUBLIC_URL"]
-LOGFILE = CONFIG["LOGFILE"]
-SAVEFILE = CONFIG["SAVEFILE"]
-DEFAULT_WEBHOOK_SLEEP_TIME = CONFIG["DEFAULT_WEBHOOK_SLEEP_TIME"]
-MAX_WEBHOOK_MSG_PER_MINUTE = CONFIG["MAX_WEBHOOK_MSG_PER_MINUTE"]
-WEBHOOK_URL = CONFIG["WEBHOOK_URL"]
-INITIAL_AGENT_AUTH_TOKENS = CONFIG["AGENT_AUTH_TOKENS"]
-INITIAL_WEBGUI_USERS = CONFIG["WEBGUI_USERS"]
-SECRET_KEY = CONFIG["SECRET_KEY"]
+from shared import (
+CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE,
+DEFAULT_WEBHOOK_SLEEP_TIME, MAX_WEBHOOK_MSG_PER_MINUTE, WEBHOOK_URL,
+INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, SECRET_KEY, 
+setup_logging)
+from models import (
+db, AuthToken, WebUser, WebhookQueue, Host,
+ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria
+)
 
 # =================================
 # ==== INITIALIZE VARS/SETTINGS ===
@@ -112,7 +38,7 @@ SQLALCHEMY_DATABASE_URI = f'sqlite:///{SAVEFILE}'
 app = Flask(__name__)
 app.config['SECRET_KEY'] = CONFIG["SECRET_KEY"]
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-db = SQLAlchemy(app) # Initialize SQLAlchemy
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Silence the deprecation warning
 app.config.update(
     SESSION_COOKIE_SECURE=True, # Forces the session cookie to be sent only over HTTPS.
     SESSION_COOKIE_HTTPONLY=True, # Prevents JavaScript from accessing the session cookie
@@ -127,8 +53,6 @@ app.config.update(
     SESSION_PERMANENT=True,
     SESSION_USE_SIGNER=True # Protects the session cookie from tampering
 )
-# Silence the deprecation warning
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Enable write ahead logging
 @event.listens_for(db.engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -151,229 +75,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # redirect to login page if not authenticated
 
-# === DATABASE SETUP ===
-
-class AuthToken(db.Model):
-    __tablename__ = 'auth_tokens'
-    
-    token = db.Column(db.String(128), primary_key=True, nullable=False) # The token string itself
-    timestamp = db.Column(db.Integer, default=lambda: int(time.time()), nullable=False)
-    added_by = db.Column(db.String(128))
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-    def __repr__(self):
-        return f"<AuthToken {self.token[:8]}...>"
-
-class WebUser(db.Model):
-    __tablename__ = 'web_users'
-    
-    username = db.Column(db.String(64), primary_key=True, nullable=False)
-    password = db.Column(db.String(64), nullable=False) 
-    role = db.Column(db.String(20), nullable=False) # "admin", "analyst", or "guest"
-
-    def __repr__(self):
-        return f"<WebUser {self.username} (Role: {self.role})>"
-
-class WebhookQueue(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    incident_id = db.Column(db.Integer, db.ForeignKey('incidents.incident_id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Host(db.Model):
-    """
-    Records each host in the network that has scored service(s) on them.
-    
-    Relationships:
-    one:many with scoringusers
-    one:many with services
-    one:many with scoringcriteria
-    """
-    __tablename__ = 'hosts'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    hostname = db.Column(db.String(64), unique=True, nullable=False)
-    ip = db.Column(db.String(50), unique=True, nullable=False)
-    os = db.Column(db.String(32), nullable=False)
-
-    scoringusers = db.relationship('ScoringUser', backref='host')
-    services = db.relationship('Service', backref='host')
-    scoringcriteria = db.relationship('ScoringCriteria', backref='host')
-
-    def __repr__(self):
-        return f"<Host {self.hostname}, IP {self.ip}, OS {self.os}>"
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-class ScoringUser(db.Model):
-    """
-    Records each user:password combo for each host
-    Each host has a unique set of users, although some may same usernames/passwords between hosts
-    
-    Relationships:
-    many:one with hosts
-    many:many with scoringuserlists
-    """
-    __tablename__ = 'scoring_users'
-
-    id = db.Column(db.Integer, primary_key=True)
-    host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'), nullable=False)
-    username = db.Column(db.String(64), nullable=False)
-    password = db.Column(db.String(64))
-
-    scoringuserlists = db.relationship('ScoringUserList', backref='scoringuser')
-
-    def __repr__(self):
-        return f"<ScoringUser {self.username}@{self.hostname}>"
-    def to_dict(self):
-        #return {"hostname": self.hostname,"username": self.username} # no password
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-class ScoringUserList(db.Model):
-    """
-    Maps several ScoringUsers to one ScoringCriteria instance.
-    Each entry has one ScoringUser and one ScoringCriteria, but ScoringCriteria has several entries in ScoringUserList.
-    
-    Relationships:
-    one:one with ScoringUser
-    many:one with ScoringCriteria
-    """
-    __tablename__ = 'scoring_user_lists'
-
-    id = db.Column(db.Integer, primary_key=True)
-    criteria_id = db.Column(db.Integer, db.ForeignKey('scoring_criterias.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('scoring_users.id'), nullable=False)
-
-    def __repr__(self):
-        return f"<ScoringUserList Index: {self.index}, User: {self.username}>"
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-class Service(db.Model):
-    """
-    Records each Service that is scored.
-    Scoring criteria(s) is recorded in ScoringCriteria, and results in ScoringHistory.
-
-    Relationships:
-    one:one with ScoringHistory
-    one:many with ScoringCriteria
-    """
-    __tablename__ = 'services'
-    id = db.Column(db.Integer, primary_key=True)
-    scorecheck_name = db.Column(db.String(64), index=True, nullable=False)
-    host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'), nullable=False)
-    
-    scoringhistories = db.relationship('ScoringHistory', backref='service')
-    scoringcriterias = db.relationship('ScoringCriteria', backref='service')
-
-    def __repr__(self):
-        return f"<Service Scorecheck: {self.scorecheck_name}>"
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-class ScoringHistory(db.Model):
-    """
-    Records the scoring state for each round. One round occurs every minute.
-    During each round, the scoring worker assesses the state of each scorecheck (online or offline)
-    using the criteria in ScoringCriteria and loads each service's result into a separate entry in ScoringHistory.
-    
-    Relationships:
-    many:one with Services
-    """
-    __tablename__ = 'scoring_histories'
-
-    id = db.Column(db.Integer, primary_key=True)
-    service_id = db.Column(db.Integer, db.ForeignKey('services.id'), index=True, nullable=False)
-    host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'), index=True, nullable=False)
-    round = db.Column(db.Integer, index=True, nullable=False)
-    value = db.Column(db.Integer, nullable=False)
-    message = db.Column(db.String(128), nullable=False)
-
-    __table_args__ = (
-        # Optimizes 'Get all services for one round'
-        db.Index('idx_round_service', 'round', 'service_id'),
-    )
-
-    def __repr__(self):
-        return f"<ScoringHistory Round: {self.round}, Service_id: {self.service_id}, Value: {self.value}>"
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-class ScoringCriteria(db.Model):
-    """
-    Records the scoring criteria for a particular service.
-    A service may have multiple scoring criterias; only one needs to be satisfied for the scorecheck to succeed.
-
-    Relationships:
-    many:one with hosts
-    many:one with services
-    one:many with user lists
-    """
-    __tablename__ = 'scoring_criterias'
-
-    id = db.Column(db.Integer, primary_key=True)
-    host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'))
-    service_id = db.Column(db.Integer, db.ForeignKey('services.id'))
-    #userlist_index = db.Column(db.Integer, index=True, nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    location = db.Column(db.String(128), nullable=False)
-    team = db.Column(db.Integer, nullable=False)
-
-    scoringuserlist = db.relationship('ScoringUserList', backref='scoringcriteria')
-
-    def __repr__(self):
-        return f"<ScoringCriteria Host: {self.host_id}, Scorecheck: {self.service_id}>"
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+db.init_app(app)
+logger = setup_logging("server")
 
 # =================================
 # ======= UTILITY FUNCTIONS =======
 # =================================
-
-
-def setup_logging():
-    # 1. Create a logger instance
-    logger = logging.getLogger(__name__)
-    
-    # If the logger already has handlers, don't add more (prevents duplicate entries)
-    if logger.handlers:
-        logger.info(f"setup_logging(): logger already exists, returning existing logger")
-        return logger
-
-    logger.setLevel(logging.INFO)
-
-    # 2. Use ConcurrentRotatingFileHandler
-    # This handles multiple processes (Gunicorn workers + Worker.py) 
-    # and manages the .lock file automatically to prevent rotation crashes.
-    handler = ConcurrentRotatingFileHandler(
-        LOGFILE,        # LOGFILE path
-        "a",              # append mode
-        10 * 1024 * 1024, # maxBytes: 10MB
-        10,               # backupCount: keep 10 old logs
-        encoding='utf-8'
-    )
-    
-    # 3. Define the log format
-    formatter = logging.Formatter(
-        '[%(asctime)s] [%(process)d] %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    # Note: Added [%(process)d] to the format above. 
-    # This helps you identify which Gunicorn worker or background thread 
-    # sent the message when debugging.
-    
-    handler.setFormatter(formatter)
-    
-    # 4. Add the handler to the logger
-    logger.addHandler(handler)
-    
-    # Optional: Prevent logs from bubbling up to the root logger
-    logger.propagate = False
-    
-    return logger
-
-logger = setup_logging()
-logger.info(f"Starting server on {HOST}:{PORT}")
 
 # === DATABASE ====
 
@@ -466,28 +173,8 @@ def webhook_main():
                 time.sleep(2) # Wait a bit before checking for new tasks again
                 continue
 
-            # Fetch incident data needed for the webhook
-            incident = Incident.query.get(task.incident_id)
-            if not incident:
-                # Cleanup if incident was deleted
-                db.session.delete(task)
-                db.session.commit()
-                continue
-
-            # Prepare the payload like your original code did
-            incident_payload = {
-                "timestamp": incident.timestamp,
-                "agent_id": incident.agent_id,
-                "oldStatus": incident.oldStatus,
-                "tag": incident.tag,
-                "newStatus": incident.newStatus,
-                "message": incident.message,
-                "assignee": incident.assignee,
-                "sla": incident.sla
-            }
-
             # Send the webhook
-            resp, body = discord_webhook(task.incident_id, incident_payload)
+            resp, body = discord_webhook(task)
 
             try:
                 if resp.code == 429:
@@ -544,7 +231,7 @@ def webhook_main():
         #time.sleep(max(sleep_time,0.2))
         time.sleep(sleep_time)
 
-def discord_webhook(incident_id,incident,url=WEBHOOK_URL):
+def discord_webhook(task,url=WEBHOOK_URL):
     #compare rules level to set colors of the alert
     if not url:
         return
@@ -1648,6 +1335,9 @@ def update_criteria_locations():
 # =================================
 # ============= MAIN ==============
 # =================================
+
+logger.info(f"Starting server on {HOST}:{PORT}")
+create_db_tables()
 
 def start_server():
     app.run(host=HOST, port=PORT, ssl_context='adhoc', use_reloader=False, debug=False)
