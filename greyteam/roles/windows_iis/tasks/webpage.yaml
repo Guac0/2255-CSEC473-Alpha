@@ -1,10 +1,5 @@
 ---
 #Rose Standard lds9122@rit.edu
-- name: Ensure Pegasus application pool exists
-  microsoft.iis.web_app_pool:    
-    name: pegasus
-    state: started
-
 - name: Create nested folders on Windows
   ansible.windows.win_file:
     path: C:\sites\pegasus
