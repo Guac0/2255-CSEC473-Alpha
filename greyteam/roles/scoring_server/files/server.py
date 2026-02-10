@@ -154,263 +154,6 @@ def serialize_model(instance):
 
     return serialized_data
 
-# === WEBHOOK ===
-
-def webhook_main():
-    """Dedicated rate-limited sender thread with dynamic rate limiting."""
-    if not WEBHOOK_URL:
-        return
-
-    last_60_seconds = []
-    
-    while True:
-        sleep_time = 0
-        with app.app_context():
-            # Find the oldest unprocessed task
-            task = WebhookQueue.query.order_by(WebhookQueue.created_at.asc()).first()
-            
-            if not task:
-                time.sleep(2) # Wait a bit before checking for new tasks again
-                continue
-
-            # Send the webhook
-            resp, body = discord_webhook(task)
-
-            try:
-                if resp.code == 429:
-                    # Rate limited by Discord
-                    bodyDict = json.loads(body)
-                    sleep_time = float(bodyDict["retry_after"])
-
-                    logger.warning(f"/webhook_main - Retry_After succeeded, re-queued incident and sleeping for {sleep_time}.")
-                else:
-                    db.session.delete(task)
-                    db.session.commit()
-
-                    # Maybe rate-limit headers present
-                    remaining = resp.getheader("X-RateLimit-Remaining")
-                    reset_after = resp.getheader("X-RateLimit-Reset-After")
-
-                    if remaining is not None and reset_after is not None:
-                        try:
-                            remaining_int = int(remaining)
-                            reset_after_float = float(reset_after)
-
-                            if remaining_int == 0:
-                                sleep_time = reset_after_float
-                                logger.info(f"/webhook_main - incident {incident.incident_id}: 0 responses remaining, sleeping for {sleep_time}.")
-                        except ValueError:
-                            sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                            logger.warning(f"/webhook_main - incident {incident.incident_id}: failed to parse headers, sleeping {sleep_time}.")
-                    else:
-                        sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                        logger.warning(f"/webhook_main - Missing rate limit headers, sleeping {sleep_time}.")
-
-            except Exception as e:
-                sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                db.session.delete(task)
-                db.session.commit()
-                logger.error(f"/webhook_main - caught unknown error from discord_webhook, deleting incident {task.incident_id} from webhook queue - {e}.")
-
-        last_60_seconds.append(time.time())
-
-        for incTime in last_60_seconds:
-            if (time.time() - incTime) > 60:
-                last_60_seconds.remove(incTime)
-        
-        if len(last_60_seconds) >= MAX_WEBHOOK_MSG_PER_MINUTE - 1:
-            new_sleep_time = 60 - (time.time() - last_60_seconds[0]) # how long until first message is out of the 60 second window
-            if new_sleep_time < sleep_time: # dont go below existing ratelimit if any
-                new_sleep_time = sleep_time
-            new_sleep_time = math.ceil(new_sleep_time * 100) / 100 # round to 2 decimals
-            if new_sleep_time > (60 / MAX_WEBHOOK_MSG_PER_MINUTE): # reduce noise in normal operation
-                logger.info(f"/webhook_main - client side ratelimiting enabled: sleeping for {new_sleep_time} seconds. Old sleep_time: {sleep_time}. len(last_60_seconds): {len(last_60_seconds)}. MAX_WEBHOOK_MSG_PER_MINUTE: {MAX_WEBHOOK_MSG_PER_MINUTE}.") 
-            sleep_time = new_sleep_time # If we are client side ratelimited, set extra time to compensate for discord channel ratelimiting (wait until oldest message drops off)
-
-        # Rate limit enforcement
-        #time.sleep(max(sleep_time,0.2))
-        time.sleep(sleep_time)
-
-def discord_webhook(task,url=WEBHOOK_URL):
-    #compare rules level to set colors of the alert
-    if not url:
-        return
-    
-    color = "5e5e5e" # unknown
-    
-    try:
-        if (incident["message"].lower().split(' ')[0]  == "firewall"):
-            color = "641f1a"
-        elif (incident["message"].lower().split(' ')[0]  == "interface"):
-            color = "91251e"
-        elif (incident["message"].lower().split(' ')[0]  == "service"):
-            color = "8C573A"
-        elif (incident["message"].lower().split(' ')[0]  == "servicecustom"):
-            color = "a37526"
-        elif (incident["message"].lower().split(' ')[0] == "agent"):
-            color = "404C24"
-        elif (incident["message"].lower().split(' ')[0] == "server"):
-            color = "6d39cf"
-        elif (incident["message"].lower().split(' ')[0] == "ir"):
-            color = "4e08aa"
-        elif (incident["message"].lower().split(' ')[0] == "inject"):
-            color = "036995"
-        elif (incident["message"].lower().split(' ')[0] == "uptime"):
-            color = "380a8e"
-        elif (incident["message"].lower().split(' ')[0]  == "file"):
-            color = "b11226"
-
-    except Exception as E:
-        # weird format, fallback to generic color
-        pass
-
-    #data that the webhook will receive and use to display the alert in discord chat
-    try:
-        incident_record = db.session.get(Incident,incident_id)
-        agent = db.session.get(Agent,incident_record.agent_id)
-        if not agent:
-            #logger.warning(f"Could not find agent {incident_obj.agent_id} for incident {incident_obj.incident_id}.")
-            raise KeyError
-        
-        payload = json.dumps({
-        "embeds": [
-            {
-            "title": "Alert - {} Incident Created on {} for {}".format(incident["message"].split('-')[0].strip(),agent.hostname,agent.agent_name),
-            "color": int(color,16),
-            "description": "{}".format(incident["message"]),
-            #"description": "{}\n\n[Open Dashboard]({}/incidents)".format(incident["message"],PUBLIC_URL),
-            "url": f"{PUBLIC_URL}/incidents?incident_id={incident_id}",
-            "fields": [
-                {
-                "name": "Incident #",
-                "value": "{}".format(incident_id),
-                "inline": True
-                },
-                {
-                "name": "Timestamp",
-                "value": "{}".format(datetime.fromtimestamp(incident["timestamp"])),
-                "inline": True
-                },
-                {
-                "name": "Autofix Status",
-                "value": "{}".format(incident["newStatus"]),
-                "inline": True
-                },
-                {
-                "name": "Agent Name",
-                "value": "{}".format(agent.agent_name),
-                "inline": True
-                },
-                {
-                "name": "Hostname",
-                "value": "{}".format(agent.hostname),
-                "inline": True
-                },
-                {
-                "name": "IP Address",
-                "value": "{}".format(agent.ip),
-                "inline": True
-                }
-            ]
-            }
-        ]
-        })
-    except KeyError as E:
-        payload = json.dumps({
-        "embeds": [
-            {
-            "title": "Alert - Custom {} Incident Created".format(incident["message"].split('-')[0].strip()),
-            "color": int(color,16),
-            "description": "{}".format(incident["message"]),
-            #"description": "{}\n\n[Open Dashboard]({}/incidents)".format(incident["message"],PUBLIC_URL),
-            "url": f"{PUBLIC_URL}/incidents?incident_id={incident_id}",
-            "fields": [
-                {
-                "name": "Incident #",
-                "value": "{}".format(incident_id),
-                "inline": True
-                },
-                {
-                "name": "Timestamp",
-                "value": "{}".format(datetime.fromtimestamp(incident["timestamp"])),
-                "inline": True
-                },
-                {
-                "name": "Autofix Status",
-                "value": "{}".format(incident["newStatus"]),
-                "inline": True
-                }
-            ]
-            }
-        ]
-        })
-    except IndexError as E:
-        # weird data type with very short msg. should only happen with custom incidents, if any
-        # Actually this probably will never get hit lol as split()[0] should always work
-        payload = json.dumps({
-        "embeds": [
-            {
-            "title": "Alert - Custom Generic Incident Created",
-            "color": int(color,16),
-            "description": "{}".format(incident["message"]),
-            #"description": "{}\n\n[Open Dashboard]({}/incidents)".format(incident["message"],PUBLIC_URL),
-            "url": f"{PUBLIC_URL}/incidents?incident_id={incident_id}",
-            "fields": [
-                {
-                "name": "Incident #",
-                "value": "{}".format(incident_id),
-                "inline": True
-                },
-                {
-                "name": "Timestamp",
-                "value": "{}".format(datetime.fromtimestamp(incident["timestamp"])),
-                "inline": True
-                },
-                {
-                "name": "Autofix Status",
-                "value": "{}".format(incident["newStatus"]),
-                "inline": True
-                }
-            ]
-            }
-        ]
-        })
-
-    headers = {
-        'content-type': 'application/json',
-        'Accept-Charset': 'UTF-8',
-        'User-Agent': 'python-urllib/3' # Required for urllib, automatic with requests
-    }
-    data = payload.encode("utf-8") if isinstance(payload, str) else json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        url,
-        data=data,
-        headers=headers,
-        method="POST"
-    )
-
-    try:
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            logger.info(f"/discord_webhook - sent message for incident {incident_id}.")
-
-            #status_code = resp.getcode()
-            #status_text = resp.read().decode("utf-8")
-            #response_headers = resp.getheaders()   # <-- tuple list of headers
-
-            #print("Status Code:", status_code)
-            #print("Headers:")
-            #for k, v in response_headers:
-            #    print(f"  {k}: {v}")
-            #print("Body:")
-            #print(status_text)
-
-            body = resp.read().decode('utf-8') if resp.fp else ''  # consume body
-            return resp, body  # return the response for headers inspection
-    except urllib.error.HTTPError as err: #error is actually the full comm object
-        body = err.read().decode('utf-8') if err.fp else ''
-        logger.error(f"/discord_webhook - failed to send message for incident {incident_id}. StatusCode: {err.code}. Body: {body}.") # Headers: {err.headers}. 
-        return err,body
-
 # === LOGIN AND MISC ===
 
 def admin_required(f):
@@ -664,15 +407,12 @@ def add_user():
         db.session.add(new_user)
         db.session.commit()
 
-        incident_data = {
-            "timestamp": time.time(),
-            "agent_id": "custom",
-            "oldStatus": False,
-            "newStatus": False,
-            "message": f"Server - User Added With Username {username} and Role {role} by User {current_user.id}",
-            "sla": 0
-        }
-        create_incident(incident_data)
+        task = WebhookQueue(
+            title="Web User Added",
+            content=f"Web User Added With Username {username} and Role {role} by User {current_user.id}"
+        )
+        db.session.add(task)
+        db.session.commit()
 
         logger.info(f"/add_user - Successful connection from {current_user.id} at {request.remote_addr}. Adding user {username} with role {role}")
         return jsonify({"status": "ok"})
@@ -705,18 +445,15 @@ def delete_user():
 
     try:
         user_role = user_to_delete.role
-        
-        incident_data = {
-            "timestamp": time.time(),
-            "agent_id": "custom",
-            "oldStatus": False,
-            "newStatus": False,
-            "message": f"Server - User Deleted With Username {username} and Role {user_role} by User {current_user.id}",
-            "sla": 0
-        }
-        create_incident(incident_data)
 
         db.session.delete(user_to_delete)
+        db.session.commit()
+
+        task = WebhookQueue(
+            title="Web User Deleted",
+            content=f"Web User Deleted With Username {username} and Role {user_role} by User {current_user.id}"
+        )
+        db.session.add(task)
         db.session.commit()
         
         logger.info(f"/delete_user - Successful connection from {current_user.id} at {request.remote_addr}. Deleting user {username} with role {user_role}")
@@ -748,6 +485,13 @@ def update_password():
     try:
         user_role = user_to_update.role
         user_to_update.password = generate_password_hash(password)
+        db.session.commit()
+
+        task = WebhookQueue(
+            title="Web User Password Changed",
+            content=f"Web User Password Changed for User {user_to_update.username} by User {current_user.id}"
+        )
+        db.session.add(task)
         db.session.commit()
         
         logger.info(f"/update_password - Successful connection from {current_user.id} at {request.remote_addr}. Changing password for user {username}.")
@@ -784,15 +528,12 @@ def add_token():
         db.session.add(new_token)
         db.session.commit()
         
-        incident_data = {
-            "timestamp": time.time(),
-            "agent_id": "custom",
-            "oldStatus": False,
-            "newStatus": False,
-            "message": f"Server - Token Added by User {current_user.id}",
-            "sla": 0
-        }
-        create_incident(incident_data)
+        task = WebhookQueue(
+            title="Token Added",
+            content=f"Token ({new_token.token[:2]}...{new_token.token[-2:]}) Added by User {current_user.id}"
+        )
+        db.session.add(task)
+        db.session.commit()
 
         logger.info(f"/add_token - Successful connection from {current_user.id} at {request.remote_addr}. Adding token {token}")
         return jsonify({"status": "ok"})
@@ -823,17 +564,14 @@ def delete_token():
         added_by = token_to_delete.added_by
         timestamp = datetime.fromtimestamp(token_to_delete.timestamp)
         
-        incident_data = {
-            "timestamp": time.time(),
-            "agent_id": "custom",
-            "oldStatus": False,
-            "newStatus": False,
-            "message": f"Server - Token Deleted by User {current_user.id}",
-            "sla": 0
-        }
-        create_incident(incident_data)
-        
         db.session.delete(token_to_delete)
+        db.session.commit()
+
+        task = WebhookQueue(
+            title="Token Deleted",
+            content=f"Token {token_to_delete.token} Deleted by User {current_user.id}"
+        )
+        db.session.add(task)
         db.session.commit()
 
         logger.info(f"/delete_token - Successful connection from {current_user.id} at {request.remote_addr}. Deleting token {token} that was added by {added_by} at {timestamp}")
@@ -862,6 +600,13 @@ def add_host():
         db.session.add(new_host)
         db.session.commit()
 
+        task = WebhookQueue(
+            title="Host Added",
+            content=f"Host Added with Hostname {hostname}, IP {ip}, OS {os} by user {current_user.id}"
+        )
+        db.session.add(task)
+        db.session.commit()
+
         logger.info(f"/add_host - Successful connection from {current_user.id} at {request.remote_addr}. Added host {hostname} with IP {ip}")
         return jsonify({"status": "ok", "id": new_host.id})
     except Exception as e:
@@ -885,9 +630,18 @@ def remove_host():
 
     try:
         host_name = host_to_delete.hostname
+        ip = host_to_delete.ip
+        os = host_to_delete.os
         
         # Note: Cascading deletes should be handled by DB relationships to maintain referential integrity
         db.session.delete(host_to_delete)
+        db.session.commit()
+
+        task = WebhookQueue(
+            title="Host Deleted",
+            content=f"Host Deleted with Hostname {host_name}, IP {ip}, OS {os} by user {current_user.id}"
+        )
+        db.session.add(task)
         db.session.commit()
 
         logger.info(f"/remove_host - Successful connection from {current_user.id} at {request.remote_addr}. Deleted host {host_name} (ID: {host_id})")
@@ -915,6 +669,13 @@ def update_host_ip():
     try:
         old_ip = host.ip
         host.ip = new_ip
+        db.session.commit()
+
+        task = WebhookQueue(
+            title="Host IP Modified",
+            content=f"Host {host.hostname}'s IP changed from {old_ip} tp {new_ip} by user {current_user.id}"
+        )
+        db.session.add(task)
         db.session.commit()
 
         logger.info(f"/update_host_ip - Successful connection from {current_user.id} at {request.remote_addr}. Updated {host.hostname} IP from {old_ip} to {new_ip}")
@@ -958,6 +719,13 @@ def add_scoring_user():
         db.session.add(new_user)
         db.session.commit()
 
+        task = WebhookQueue(
+            title="Scoring User Added",
+            content=f"Scoring User added for host_id {host_id} with username {username} by user {current_user.id}"
+        )
+        db.session.add(task)
+        db.session.commit()
+
         logger.info(f"/add_scoring_user - Successful connection from {current_user.id} at {request.remote_addr}. Added user {username} to host {host_id}")
         return jsonify({"status": "ok", "id": new_user.id})
     except Exception as e:
@@ -986,6 +754,13 @@ def remove_scoring_user():
         db.session.delete(user_to_delete)
         db.session.commit()
 
+        task = WebhookQueue(
+            title="Scoring User Deleted",
+            content=f"Scoring User deleted for host_id {host_id} with username {username} by user {current_user.id}"
+        )
+        db.session.add(task)
+        db.session.commit()
+
         logger.info(f"/remove_scoring_user - Successful connection from {current_user.id} at {request.remote_addr}. Deleted user {username} (ID: {user_id}) from host {host_id}")
         return jsonify({"status": "ok"})
     except Exception as e:
@@ -1010,6 +785,13 @@ def update_scoring_user_pwd():
 
     try:
         user.password = new_password
+        db.session.commit()
+
+        task = WebhookQueue(
+            title="Scoring User Password Changed",
+            content=f"Scoring User password changed for host_id {user.host_id} with username {user.username} by user {current_user.id}"
+        )
+        db.session.add(task)
         db.session.commit()
 
         logger.info(f"/update_scoring_user_pwd - Successful connection from {current_user.id} at {request.remote_addr}. Updated password for user {user.username} (ID: {user_id})")
@@ -1187,6 +969,14 @@ def set_scoring():
             msg = f"Created round {round_num} for service {service_id}"
 
         db.session.commit()
+
+        task = WebhookQueue(
+            title="Scoring Modified",
+            content=f"Scoring Round {round_num} for service id {service_id} to be {value} by user {current_user.id}"
+        )
+        db.session.add(task)
+        db.session.commit()
+
         logger.info(f"/set_scoring - Successful connection from {current_user.id} at {request.remote_addr}. {msg}")
         return jsonify({"status": "ok"})
     except Exception as e:
@@ -1221,6 +1011,14 @@ def set_criteria():
             db.session.add(new_crit)
         
         db.session.commit()
+
+        task = WebhookQueue(
+            title="Scoring Criteria Reset",
+            content=f"Scoring Criteria Reset for service id {service_id} by user {current_user.id}"
+        )
+        db.session.add(task)
+        db.session.commit()
+
         logger.info(f"/set_criteria - Successful connection from {current_user.id} at {request.remote_addr}. Data: {data}")
         return jsonify({"status": "ok"})
     except Exception as e:
@@ -1250,6 +1048,13 @@ def add_criteria():
         db.session.add(new_criteria)
         db.session.commit()
 
+        task = WebhookQueue(
+            title="Scoring Criteria Added",
+            content=f"Scoring Criteria added for host_id {host_id} and service_id {service_id} with location {location} and content {content[:10]}... by user {current_user.id}"
+        )
+        db.session.add(task)
+        db.session.commit()
+
         logger.info(f"/add_criteria - Successful connection from {current_user.id} at {request.remote_addr}. Added criteria ID {new_criteria.id}")
         return jsonify({"status": "ok", "id": new_criteria.id})
     except Exception as e:
@@ -1272,7 +1077,18 @@ def remove_criteria():
         return "Criteria not found", 404
 
     try:
+        host_id = criteria.host_id
+        service_id = criteria.service_id
+        content = criteria.content
+        location = criteria.location
         db.session.delete(criteria)
+        db.session.commit()
+
+        task = WebhookQueue(
+            title="Scoring Criteria Deleted",
+            content=f"Scoring Criteria deleted for host_id {host_id} and service_id {service_id} with content {content[:10]}... and location {location} by user {current_user.id}"
+        )
+        db.session.add(task)
         db.session.commit()
 
         logger.info(f"/remove_criteria - Successful connection from {current_user.id} at {request.remote_addr}. Removed ID {criteria_id}")
@@ -1284,6 +1100,7 @@ def remove_criteria():
 
 @app.route("/update_criteria_content", methods=["POST"])
 def update_criteria_content():
+    # TODO webhook
     data = request.json
     criteria_id = data.get("id")
     new_content = data.get("content")
@@ -1309,6 +1126,7 @@ def update_criteria_content():
 
 @app.route("/update_criteria_locations", methods=["POST"])
 def update_criteria_locations():
+    # TODO webhook
     data = request.json
     criteria_id = data.get("id")
     new_location = data.get("location")

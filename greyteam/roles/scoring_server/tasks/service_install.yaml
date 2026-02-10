@@ -1,10 +1,10 @@
 ---
 - name: Deploy Scoring Worker Service
   copy:
-    dest: /etc/systemd/system/scoring-worker.service
+    dest: /etc/systemd/system/scoring-server-worker.service
     content: |
       [Unit]
-      Description=Scoring Background Worker
+      Description=Scoring Server Background Worker
       After=network.target
 
       [Service]

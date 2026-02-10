@@ -28,6 +28,7 @@ class WebUser(db.Model):
 
 class WebhookQueue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Text)
     content = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
