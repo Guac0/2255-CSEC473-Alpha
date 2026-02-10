@@ -1,0 +1,31 @@
+---
+# --- LINUX SECTION (Debian & RHEL) ---
+- name: Install Git on Linux
+  ansible.builtin.package:
+    name: git
+    state: present
+  when: ansible_os_family != "Windows"
+
+# --- WINDOWS SECTION ---
+- name: Download Git for Windows Installer
+  ansible.windows.win_get_url:
+    url: "https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe"
+    dest: '{{ ansible_env.TEMP }}\git_installer.exe'
+  when: ansible_os_family == "Windows"
+
+- name: Install Git on Windows (Silent)
+  ansible.windows.win_package:
+    path: '{{ ansible_env.TEMP }}\git_installer.exe'
+    # /VERYSILENT: No UI
+    # /NORESTART: Prevent auto-reboot
+    # /NOCANCEL: Disable cancel button
+    # /SP-: Disables the "This will install..." prompt
+    arguments: '/VERYSILENT /NORESTART /NOCANCEL /SP-'
+    state: present
+  when: ansible_os_family == "Windows"
+
+- name: Update Windows Path for Git
+  ansible.windows.win_path:
+    elements: 'C:\Program Files\Git\cmd'
+    state: present
+  when: ansible_os_family == "Windows"

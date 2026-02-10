@@ -1,0 +1,10 @@
+---
+- name: Reload systemd and start services
+  systemd:
+    daemon_reload: yes
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  loop:
+    - scoring-worker.service
+    - scoring-server.service
