@@ -18,11 +18,6 @@
           port: 80
           hostname: "{{ inventory_hostname_short }}"
 
-- name: Ensure website directory exists
-  ansible.windows.win_file:
-    path: C:\sites\pegasus
-    state: directory
-
 - name: Copy website files to IIS
   ansible.windows.win_copy:
     src: ../files/site/
