@@ -1,6 +1,6 @@
 ---
 - name: Join to domain
-  microsoft.ad.domain_membership:
+  microsoft.ad.membership:
     dns_domain_name: "{{ domain }}"
     domain_admin_user: "{{ greyteam_user }}"
     domain_admin_password: "{{ greyteam_password }}"
