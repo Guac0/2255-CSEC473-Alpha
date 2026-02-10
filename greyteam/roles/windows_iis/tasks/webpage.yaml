@@ -1,7 +1,7 @@
 ---
 #Rose Standard lds9122@rit.edu
 - name: Ensure Pegasus application pool exists
-  microsoft.iis.application_pool:
+  microsoft.iis.web_app_pool:    
     name: pegasus
     state: started
 
