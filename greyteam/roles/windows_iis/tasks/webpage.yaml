@@ -38,8 +38,3 @@
         add:
           - value: index.html
 
-- name: Remove IIS default start page
-  ansible.windows.win_file:
-    path: C:\sites\pegasus\iisstart.htm
-    state: absent
-
