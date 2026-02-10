@@ -23,16 +23,20 @@
     path: C:\sites\pegasus
     state: directory
 
-- name: Copy website files to IIS root
+- name: Copy website files to IIS
   ansible.windows.win_copy:
     src: site/
     dest: C:\sites\pegasus\
 
 - name: Set index.html as default document
-  microsoft.iis.default_document:
+  microsoft.iis.web_config:
     site_name: "Las Pegasus"
-    state: present
-    name: index.html
+    section: system.webServer/defaultDocument
+    value:
+      enabled: true
+      files:
+        add:
+          - value: index.html
 
 - name: Remove IIS default start page
   ansible.windows.win_file:
