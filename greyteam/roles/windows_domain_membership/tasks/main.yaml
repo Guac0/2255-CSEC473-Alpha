@@ -1,0 +1,3 @@
+---
+- name: Create Domain Account Profiles
+  ansible.builtin.include_tasks: domain_membership.yaml

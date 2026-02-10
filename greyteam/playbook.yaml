@@ -176,6 +176,24 @@
     - windows
     - inscope
 
+- name: Windows Boxes join AD
+  hosts: dc
+  roles:
+    - windows_domain_join
+  tags:
+    - dj
+    - windows
+    - inscope
+
+- name: Windows Create Profiles
+  hosts: dc
+  roles:
+    - windows_domain_membership
+  tags:
+    - dm
+    - windows
+    - inscope
+
 ####### Finish #######
 
 - name: Post Deploy Cleanup
