@@ -5,11 +5,6 @@
     path: C:\sites\pegasus
     state: directory
 
-- name: Create a new folder on Windows
-  ansible.windows.win_file:
-    path: C:\sites\logs
-    state: directory
-
 - name: Adding a webpage for IIS
   microsoft.iis.website:
     name: "Las Pegasus"
@@ -21,5 +16,3 @@
         ip_address: "*"
         port: 80
         hostname: "{{ inventory_hostname_short }}"
-    log_file:
-      directory: C:\sites\logs
