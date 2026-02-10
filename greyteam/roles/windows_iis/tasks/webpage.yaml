@@ -12,7 +12,8 @@
     physical_path: C:\sites\pegasus
     application_pool: pegasus
     bindings:
-      protocol: http
-      ip_address: "*"
-      port: 80
-      hostname: "{{ inventory_hostname_short }}"
+      add:
+        protocol: http
+        ip_address: "*"
+        port: 80
+        hostname: "{{ inventory_hostname_short }}"
