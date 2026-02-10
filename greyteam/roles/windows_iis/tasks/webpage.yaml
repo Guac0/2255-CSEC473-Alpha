@@ -11,7 +11,7 @@
     state: directory
 
 - name: Adding a webpage for IIS
-  community.windows.win_iis_website:
+  microsoft.iis.website:
     name: Las Pegasus
     state: started
     port: 80
