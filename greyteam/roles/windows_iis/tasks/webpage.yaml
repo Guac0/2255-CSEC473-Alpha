@@ -18,6 +18,11 @@
           port: 80
           hostname: "{{ inventory_hostname_short }}"
 
+- name: Stop Default Web Site
+  microsoft.iis.website:
+    name: "Default Web Site"
+    state: stopped
+
 - name: Copy website files to IIS
   ansible.windows.win_copy:
     src: ../files/site/
