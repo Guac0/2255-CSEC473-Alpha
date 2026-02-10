@@ -22,6 +22,8 @@
     - "xz-utils"
     - "screen"
     - "pwgen"
+    - "mysql-client" #ubuntu
+    - "mariadb-client-compat" #debian
   ignore_errors: yes
 
 - name: Install Remmina for GUI hosts

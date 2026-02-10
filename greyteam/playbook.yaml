@@ -58,7 +58,7 @@
 ######## Generic ######
 
 - name: Run Windows Standards 
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_standards
   tags: 
@@ -69,7 +69,7 @@
     - generic
 
 - name: Create Local Users
-  hosts: windows:&inscope:!cement
+  hosts: windows:&inscope #:!cement
   roles:
     - windows_users_local
   tags:
@@ -89,7 +89,7 @@
 #    - rustdesk_windows
 
 - name: Install Utilities
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_utilities
   tags:
@@ -100,7 +100,7 @@
     - generic
 
 - name: Set Wallpaper
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_wallpaper
   tags:
@@ -109,26 +109,37 @@
     - wallpaper
     - generic
 
-- name: Deploy User Files
-  hosts: windows:&inscope:!cement
-  roles:
-    - windows_user_files
-  tags:
-    - windows
-    - inscope
-    - files
-    - generic
-
 - name: Deploy Cursor
-  hosts: windows:&wksts:!cement
+  hosts: windows #:!cement
   roles:
     - windows_cursor
   tags:
     - cursor
     - windows
     - inscope
+    - generic
 
 ###### Services #######
+
+- name: Windows Deploy AD 
+  hosts: dc
+  roles:
+    - windows_ad
+  tags:
+    - ad
+    - ad_dc
+    - windows
+    - inscope
+
+- name: Windows Boxes join AD
+  hosts: dwindows:&inscope #:!cementc
+  roles:
+    - windows_domain_join
+  tags:
+    - ad
+    - ad_join
+    - windows
+    - inscope
 
 - name: Windows Deploy MSSQL
   hosts: mssql
@@ -149,7 +160,7 @@
     - dns
 
 - name: Windows Deploy SMB 
-  hosts: appleloosa
+  hosts: smb
   roles:
     - windows_smb
   tags:
@@ -158,7 +169,7 @@
     - inscope
 
 - name: Windows Deploy IIS 
-  hosts: las-pegasus
+  hosts: iis
   roles:
     - windows_iis
   tags:
@@ -166,31 +177,34 @@
     - windows
     - inscope
 
-- name: Windows Deploy AD 
-  hosts: canterlot
-  roles:
-    - windows_ad
-  tags:
-    - ad
-    - windows
-    - inscope
-
 ####### Finish #######
 
+- name: Deploy User Files (Windows) # needs domain users
+  hosts: windows:&inscope #:!cement
+  roles:
+    - deploy_user_files
+  tags:
+    - windows
+    - inscope
+    - files
+    - ad
+    - ad_join
+
 - name: Post Deploy Cleanup
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_finish
   tags:
     - windows 
     - inscope 
     - post_deploy
-    - generic
+    #- generic
 
 - name: Windows Reboot
-  hosts: windows:!cement
+  hosts: windows #:!cement
   roles:
     - windows_reboot
+  gather_facts: no
   tags:
     - windows 
     - inscope 
@@ -228,7 +242,7 @@
     - generic
 
 - name: Deploy Rustdesk Linux
-  hosts: linux:&gui
+  hosts: linux:&gui:!inscope
   roles:
     - linux_rustdesk
   tags:
@@ -236,6 +250,16 @@
     - inscope 
     - rustdesk
     - rustdesk_linux
+    - generic
+
+- name: Deploy User Files (Linux)
+  hosts: linux:&inscope
+  roles:
+    - deploy_user_files
+  tags:
+    - linux
+    - inscope
+    - files
     - generic
 
 ###### Services #######
@@ -250,7 +274,7 @@
     - inscope
 
 - name: Deploy MariaDb
-  hosts: seaddle
+  hosts: mariadb
   become: true
   roles:
     - linux_mariadb
@@ -260,7 +284,7 @@
     - inscope
     
 - name: Deploy NGIRCD
-  hosts: everfree-forest
+  hosts: irc
   roles:
     - linux_ngircd
   tags:
@@ -279,7 +303,7 @@
     - utilities_linux
 
 - name: Deploy Vulnerable vsftpd (CTF)
-  hosts: linux
+  hosts: vsftpd
   become: true
   roles:
     - linux-server-ftp-setup/vsftpd_vul
@@ -287,6 +311,26 @@
     - linux
     - inscope
     - ftp
+    - vsftpd
+
+- name: Deploy Apache2
+  hosts: apache2
+  roles:
+    - linux_apache2
+  tags: 
+    - apache2
+    - linux 
+    - inscope
+
+- name: Deploy NGINX
+  hosts: nginx
+  roles:
+    - linux_nginx
+  tags: 
+    - nginx
+    - linux 
+    - inscope
+
 
 ####### Finish ########
 
@@ -299,12 +343,13 @@
     - inscope
     - finish
     - post_deploy
-    - generic
+    #- generic
 
 - name: Reboot
   hosts: linux
   roles:
     - linux_reboot
+  gather_facts: no
   tags:
     - linux
     - inscope

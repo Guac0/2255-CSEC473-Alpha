@@ -1,17 +1,18 @@
 [Global]
-Name = everfree-forest.mlp.local
+Name = {{ inventory_hostname_short }}.{{ domain }}
 AdminInfo1 = Ponyville Datacenter
 AdminInfo2 = Grey Team IRC
 AdminEMail = admin@mlp.local
-Network = FriendshipNet
 Listen = 0.0.0.0
 Ports = 6667
 MotdFile = /etc/ngircd/ngircd.motd
 
+{% for admin in local_admins %}
 [Operator]
-Name = cadence
+Name = {{ admin }}
 Password = {{ team_password }}
 Mask = *@*
+{% endfor %}
 
 [Server]
 Name = ponyville
@@ -24,3 +25,8 @@ PeerPassword = {{ team_password }}
 
 [Options]
 SyslogFacility = local5
+PAM = yes
+PAMIsOptional = no
+Ident = no
+DNS = yes
+

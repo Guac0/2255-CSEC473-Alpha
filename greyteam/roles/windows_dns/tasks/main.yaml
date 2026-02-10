@@ -13,13 +13,51 @@
     start_mode: auto
     state: started
 
-- name: Ensure DNS server A record exists
+# --- Ensure forward lookup zone exists (file-backed primary) ---
+- name: Ensure forward lookup zone exists for {{ domain }}
+  ansible.windows.win_shell: |
+    if (-not (Get-DnsServerZone -Name "{{ domain }}" -ErrorAction SilentlyContinue)) {
+      Add-DnsServerPrimaryZone -Name "{{ domain }}" -ZoneFile "{{ domain }}.dns"
+      "CREATED"
+    } else {
+      "EXISTS"
+    }
+  register: zone_create
+  changed_when: "'CREATED' in zone_create.stdout"
+
+# --- Configure forwarder to mgmt DNS
+- name: Ensure DNS forwarder includes mgmt DNS
+  ansible.windows.win_shell: |
+    $existing = @()
+    try { $existing = (Get-DnsServerForwarder).IPAddress.IPAddressToString } catch { }
+
+    $target = "{{ mgmt_dns[0] }}"
+    if ($existing -notcontains $target) {
+      Set-DnsServerForwarder -IPAddress @($existing + $target) -UseRootHints $true
+      "CHANGED"
+    } else {
+      "OK"
+    }
+  register: fwd_result
+  changed_when: "'CHANGED' in fwd_result.stdout"
+  when: mgmt_dns is defined and (mgmt_dns | length) > 0
+
+
+- name: List of inscope hosts
+  ansible.builtin.set_fact:
+    inscope_hosts_unique: "{{ (groups['inscope'] | default([])) | unique }}"
+
+- name: Create A records for all inscope hosts in {{ domain }}
   ansible.windows.win_dns_record:
-    zone: "inscope.local"
-    name: "canterlot"
+    zone: "{{ domain }}"
+    name: "{{ item }}"
     type: "A"
-    value: "10.0.10.1"
+    value: "{{ hostvars[item].ansible_host }}"
     state: present
+  loop: "{{ inscope_hosts_unique }}"
+  when:
+    - hostvars[item] is defined
+    - hostvars[item].ansible_host is defined
 
 - name: Create NS record for inscope.local
   ansible.windows.win_dns_record:

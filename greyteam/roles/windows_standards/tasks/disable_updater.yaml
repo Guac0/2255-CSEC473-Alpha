@@ -1,11 +1,12 @@
 ---
-- name: make sure app readiness service is disabled
-  ansible.windows.win_service:
-    name: appreadiness
-    start_mode: disabled
-    state: stopped
-  when: ansible_distribution_major_version|int > 6
-  ignore_errors: true
+# Disabling appreadiness breaks the start menu!
+#- name: make sure app readiness service is disabled
+#  ansible.windows.win_service:
+#    name: appreadiness
+#    start_mode: disabled
+#    state: stopped
+#  when: ansible_distribution_major_version|int > 6
+#  ignore_errors: true
 
 - name: make sure windows update service is disabled
   ansible.windows.win_service:
@@ -26,6 +27,9 @@
     name: WaaSMedicSvc
     start_mode: disabled
     state: stopped  
+  become: yes #experimental
+  become_user: SYSTEM
+  become_method: runas
   ignore_errors: true      
 
 - name: Disable windows automatic updates via registry
