@@ -25,16 +25,7 @@
 
 - name: Copy website files to IIS
   ansible.windows.win_copy:
-    src: site/
+    src: ../files/site/
     dest: C:\sites\pegasus\
 
-- name: Set index.html as default document
-  microsoft.iis.web_config:
-    site_name: "Las Pegasus"
-    section: system.webServer/defaultDocument
-    value:
-      enabled: true
-      files:
-        add:
-          - value: index.html
 
