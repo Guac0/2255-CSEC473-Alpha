@@ -12,12 +12,14 @@
 
 - name: Adding a webpage for IIS
   microsoft.iis.website:
-    name: Las Pegasus
+    name: "Las Pegasus"
     state: started
-    port: 80
-    ip: 0.0.0.0
-    hostname: "{{ inventory_hostname_short }}"
-    application_pool: pegasus
     physical_path: C:\sites\pegasus
-    parameters: logfile.directory:C:\sites\logs
-  register: website
+    application_pool: pegasus
+    bindings:
+      - protocol: http
+        ip_address: "*"
+        port: 80
+        hostname: "{{ inventory_hostname_short }}"
+    log_file:
+      directory: C:\sites\logs
