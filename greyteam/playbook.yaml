@@ -109,16 +109,6 @@
     - wallpaper
     - generic
 
-- name: Deploy User Files (Windows)
-  hosts: windows:&inscope #:!cement
-  roles:
-    - deploy_user_files
-  tags:
-    - windows
-    - inscope
-    - files
-    - generic
-
 - name: Deploy Cursor
   hosts: windows #:!cement
   roles:
@@ -130,6 +120,26 @@
     - generic
 
 ###### Services #######
+
+- name: Windows Deploy AD 
+  hosts: dc
+  roles:
+    - windows_ad
+  tags:
+    - ad
+    - ad_dc
+    - windows
+    - inscope
+
+- name: Windows Boxes join AD
+  hosts: dwindows:&inscope #:!cementc
+  roles:
+    - windows_domain_join
+  tags:
+    - ad
+    - ad_join
+    - windows
+    - inscope
 
 - name: Windows Deploy MSSQL
   hosts: mssql
@@ -167,34 +177,18 @@
     - windows
     - inscope
 
-- name: Windows Deploy AD 
-  hosts: dc
-  roles:
-    - windows_ad
-  tags:
-    - ad
-    - windows
-    - inscope
-
-- name: Windows Boxes join AD
-  hosts: dc
-  roles:
-    - windows_domain_join
-  tags:
-    - dj
-    - windows
-    - inscope
-
-- name: Windows Create Profiles
-  hosts: dc
-  roles:
-    - windows_domain_membership
-  tags:
-    - dm
-    - windows
-    - inscope
-
 ####### Finish #######
+
+- name: Deploy User Files (Windows) # needs domain users
+  hosts: windows:&inscope #:!cement
+  roles:
+    - deploy_user_files
+  tags:
+    - windows
+    - inscope
+    - files
+    - ad
+    - ad_join
 
 - name: Post Deploy Cleanup
   hosts: windows #:!cement

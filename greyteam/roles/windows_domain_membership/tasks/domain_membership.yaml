@@ -1,7 +1,0 @@
----
-- name: Create Domain Account Profiles
-  ansible.windows.win_user_profile:
-    username: "{{ item }}"
-    state: present
-  loop:
-    "{{ domain_users + domain_admins }}"

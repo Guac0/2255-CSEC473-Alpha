@@ -10,7 +10,7 @@
 - name: Create Domain
   microsoft.ad.domain: 
     dns_domain_name: '{{ domain }}'
-    safe_mode_password: '{{ greyteam_password }}'
+    safe_mode_password: '{{ team_password }}'
   register: ad
   
 - name: reboot server

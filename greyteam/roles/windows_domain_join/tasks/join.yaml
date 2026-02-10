@@ -4,4 +4,14 @@
     dns_domain_name: "{{ domain }}"
     domain_admin_user: "{{ greyteam_user }}"
     domain_admin_password: "{{ greyteam_password }}"
+    domain_ou_path: "OU=Windows,OU=Servers,DC=mlp,DC=local" # TODO - dynamic
+    hostname: "{{ inventory_hostname_short }}"
     state: domain
+    reboot: true
+
+- name: Create Domain Account Profiles
+  ansible.windows.win_user_profile:
+    username: "{{ item }}"
+    state: present
+  loop:
+    "{{ domain_users + domain_admins + ['greyteam_user'] }}"
