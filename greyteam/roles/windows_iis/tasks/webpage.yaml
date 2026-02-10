@@ -17,3 +17,25 @@
           ip: "*"
           port: 80
           hostname: "{{ inventory_hostname_short }}"
+
+- name: Ensure website directory exists
+  ansible.windows.win_file:
+    path: C:\sites\pegasus
+    state: directory
+
+- name: Copy website files to IIS root
+  ansible.windows.win_copy:
+    src: site/
+    dest: C:\sites\pegasus\
+
+- name: Set index.html as default document
+  microsoft.iis.default_document:
+    site_name: "Las Pegasus"
+    state: present
+    name: index.html
+
+- name: Remove IIS default start page
+  ansible.windows.win_file:
+    path: C:\sites\pegasus\iisstart.htm
+    state: absent
+
