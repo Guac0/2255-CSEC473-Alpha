@@ -132,7 +132,7 @@
     - inscope
 
 - name: Windows Boxes join AD
-  hosts: dwindows:&inscope #:!cementc
+  hosts: windows:&inscope:!dc #:!cementc
   roles:
     - windows_domain_join
   tags:
