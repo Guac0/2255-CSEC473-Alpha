@@ -24,7 +24,7 @@
 - name: Set MariaDB root password
   mysql_user:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: " "
     name: root
     password: "{{ team_password }}"
     host_all: true
