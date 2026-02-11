@@ -15,6 +15,13 @@
     state: absent
   register: defaultusername
 
+- name: Disable first logon screen
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    name: EnableFirstLogonAnimation
+    data: 0
+    type: dword
+
 - name: Reboot if Needed
   ansible.windows.win_reboot:
   when: autologin.changed or defaultusername.changed

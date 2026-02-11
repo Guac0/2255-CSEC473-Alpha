@@ -35,7 +35,7 @@
   when: not app_check.stat.exists
 
 - name: Install MSSQL
-  ansible.windows.win_command: './installer.exe /ConfigurationFile={{ working_dir }}\\config.ini {{ sa_password_switch }}'
+  ansible.windows.win_command: '.\installer.exe /ConfigurationFile=.\config.ini /IACCEPTSQLSERVERLICENSETERMS /Q'
   args:
     chdir: "{{ working_dir }}\\mssql"
   when: not app_check.stat.exists

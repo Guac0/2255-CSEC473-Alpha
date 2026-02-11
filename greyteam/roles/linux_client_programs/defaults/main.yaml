@@ -1,0 +1,8 @@
+---
+#Author: Darius Flontas (daf2478)
+
+linux_client_programs_packages:
+  - thunderbird
+  - libreoffice
+  - filezilla
+  - hexchat 

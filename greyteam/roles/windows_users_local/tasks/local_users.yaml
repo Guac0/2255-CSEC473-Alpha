@@ -1,9 +1,9 @@
 ---
 - name: Set Administrator/Admin Users
   ansible.windows.win_user:
-    name: "{{ item.name|default(item) }}"
+    name: "{{ item }}"
     state: present
-    password: "{{ item.password|default(team_password) }}"
+    password: "{{ team_password }}"
     update_password: always
     groups:
       - Users
@@ -15,25 +15,43 @@
 
 - name: Add Local Administrative Users
   ansible.windows.win_user:
-    name: "{{ item.name|default(item) }}"
+    name: "{{ item }}"
     state: present
-    password: "{{ item.password|default(team_password) }}"
+    password: "{{ team_password }}"
     update_password: always
     groups:
       - Users
       - Administrators
       - Remote Desktop Users
   loop:
-    "{{ local_admins if local_admins is iterable else [] }}"
+    "{{ local_admins }}"
+
+- name: Add Local Redteam Administrative Users
+  ansible.windows.win_user:
+    name: "{{ redteam_user }}"
+    state: present
+    password: "{{ redteam_password }}"
+    update_password: always
+    groups:
+      - Users
+      - Administrators
+      - Remote Desktop Users
 
 - name: Add Local Users
   ansible.windows.win_user:
-    name: "{{ item.name|default(item) }}"
+    name: "{{ item }}"
     state: present
-    password: "{{ item.password|default(team_password) }}"
+    password: "{{ team_password }}"
     update_password: always
     groups:
       - Users
       - Remote Desktop Users
   loop: 
-    "{{ local_admins if local_admins is iterable else [] }}"
+    "{{ local_users }}"
+
+- name: Create Local Account Profiles
+  ansible.windows.win_user_profile:
+    username: "{{ item }}"
+    state: present
+  loop:
+    "{{ local_users + local_admins + ['Admin']}}"

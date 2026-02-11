@@ -1,0 +1,40 @@
+---
+# Name: Marissa V
+# Disc: mars1e
+# Date last edited: 02/04/2026
+# Service: NGIRCD IRC server
+# Target: everfree-forest
+
+
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+
+- name: Install ngircd IRC server  #installs server 
+  apt:
+    name: ngircd
+    state: present
+
+
+- name: Deploy ngircd configuration file #deploys config file
+  template:
+    src: ngircd.conf.j2
+    dest: /etc/ngircd/ngircd.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart ngircd
+
+- name: Ensure ngircd service is enabled #checks if ngircd is enabled 
+  systemd:
+    name: ngircd
+    enabled: true
+
+- name: Start ngircd service #starts the service
+  systemd:
+    name: ngircd
+    state: started
+
+
+
+

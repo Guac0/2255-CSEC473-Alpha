@@ -17,15 +17,35 @@
     db: "{{ mssql_database_name }}"
     script: "SELECT 1"
 
-- name: Query within a transaction
+- name: Add Table
   community.general.mssql_script:
     login_user: "{{ mssql_sqlsvcaccount }}"
     login_password: "{{ team_password }}"
     login_host: "{{ mssql_host }}"
     login_port: 1433
+    # Create table, delete existing data if it already exists, and add 2 rows of example data. Data taken from old database course, user must add in their own relevant to the comp theme
     script: |
-      UPDATE sys.SomeTable SET desc = 'some_table_desc' WHERE name = %(dbname)s
-      UPDATE sys.AnotherTable SET desc = 'another_table_desc' WHERE name = %(dbname)s
+      IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Finances]') AND type in (N'U'))
+      BEGIN
+          CREATE TABLE [dbo].[Finances] (
+              [TransactionID] INT IDENTITY(1,1) PRIMARY KEY,
+              [AccountName] NVARCHAR(100),
+              [AccountNumber] NVARCHAR(20),
+              [TransactionDate] DATETIME DEFAULT GETDATE(),
+              [Amount] DECIMAL(18, 2),
+              [Description] NVARCHAR(255),
+              [AuthCode] NVARCHAR(10)
+          );
+      END
+      TRUNCATE TABLE [dbo].[Finances];
+
+      INSERT INTO [dbo].[Finances] (AccountName, AccountNumber, Amount, Description, AuthCode)
+      VALUES 
+      ('Executive Travel Fund', '8821-4402-991', 12500.00, 'Q1 Flight Reimbursements', 'AUTH771'),
+      ('Offshore Payroll', '1002-5591-223', 450000.00, 'Monthly Salary Distribution - Cayman Branch', 'PAY9902'),
+      ('Vendor - CyberDyne Systems', '4491-2201-002', 8500.50, 'Hardware Infrastructure Upgrade', 'VND551'),
+      ('Petty Cash - Corporate Office', '3321-0091-118', 500.00, 'Office Supplies and Snacks', 'PC882'),
+      ('Emergency Reserve', '7721-8832-110', 1200000.00, 'Quarterly Backup Capital', 'EMER001');
     transaction: true
     params:
       dbname: "{{ mssql_database_name }}"

@@ -1,6 +1,6 @@
 ---
 - name: Expand C drive to fill all available space
-  win_partition:
+  community.windows.win_partition:
     drive_letter: C
-    size: -1          # -1 tells Windows to use all remaining space
+    partition_size: -1          # -1 tells Windows to use all remaining space
     state: present

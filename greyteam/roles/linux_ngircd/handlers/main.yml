@@ -1,0 +1,5 @@
+---
+- name: restart ngircd
+  systemd:
+    name: ngircd
+    state: restarted

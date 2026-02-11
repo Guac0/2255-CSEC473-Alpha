@@ -33,24 +33,23 @@ scoringworker = {
 }
 
 deb13 = {
-  "apache2" = { hostname = "ponyvile", ip = "10.1.10.3", network = "core"}
-  "mariadb" = { hostname = "seaddle", ip = "10.1.10.4", network = "core"}
-  "cups" = { hostname = "todo", ip = "10.1.10.5", network = "core"}
-  "vsftpd" = { hostname = "crystal-empire", ip = "10.1.10.6", network = "core"}
-  "irc" = { hostname = "everfree-forest", ip = "10.1.20.3", network = "dmz"}
-  "nginx" = { hostname = "griffonstone", ip = "10.1.20.4", network = "dmz"}
+  "apache2" = { hostname = "ponyville", ip = "10.0.10.3", network = "core"}
+  "mariadb" = { hostname = "seaddle", ip = "10.0.10.4", network = "core"}
+  "cups" = { hostname = "trotsylvania", ip = "10.0.10.5", network = "core"}
+  "irc" = { hostname = "everfree-forest", ip = "10.0.20.3", network = "dmz"}
+  "nginx" = { hostname = "griffonstone", ip = "10.0.20.4", network = "dmz"}
 }
 ubun24 = {
-  "linux_wkst1" = { hostname = "cloudsdale", ip = "10.1.30.3", network = "internal"}
-  "linux_wkst2" = { hostname = "vanhoover", ip = "10.1.30.4", network = "internal"}
+  "linux_wkst1" = { hostname = "cloudsdale", ip = "10.0.30.4", network = "internal"}
+  "linux_wkst2" = { hostname = "vanhoover", ip = "10.0.30.5", network = "internal"}
 }
 win10 = {
-  "windows_wkst1" = { hostname = "baltamare", ip = "10.1.30.1", network = "internal"}
-  "windows_wkst2" = { hostname = "neighara-falls", ip = "10.1.30.2", network = "internal"}
+  "windows_wkst1" = { hostname = "baltamare", ip = "10.0.30.1", network = "internal"}
+  "windows_wkst2" = { hostname = "neighara-falls", ip = "10.0.30.2", network = "internal"}
 }
 winserv22 = {
-  "dc" = { hostname = "canterlot", ip = "10.1.10.1", network = "core" }
-  "mssql" = { hostname = "manehatten", ip = "10.1.10.2", network = "core" }
-  "iis" = { hostname = "las-pegasus", ip = "10.1.20.1", network = "internal" }
-  "smb" = { hostname = "appleloosa", ip = "10.1.20.2", network = "internal" }
+  "dc" = { hostname = "canterlot", ip = "10.0.10.1", network = "core" }
+  "mssql" = { hostname = "manehatten", ip = "10.0.10.2", network = "core" }
+  "iis" = { hostname = "las-pegasus", ip = "10.0.20.1", network = "dmz" }
+  "smb" = { hostname = "appleloosa", ip = "10.0.20.2", network = "dmz" }
 }

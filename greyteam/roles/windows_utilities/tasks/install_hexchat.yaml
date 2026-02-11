@@ -1,0 +1,42 @@
+---
+# optimize performance by early out if app is already installed
+- name: Check if app is installed
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\HexChat\\hexchat.exe"
+  register: app_check
+
+# optimize performance by only copying installer if it does not already exist
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ working_dir }}\\hexchat\\HexChat.x64.exe"
+  register: installer_check
+  when: not app_check.stat.exists
+
+- name: Create Directory
+  ansible.windows.win_file:
+    path: "{{ working_dir }}\\hexchat"
+    state: directory
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Copy over file
+  ansible.windows.win_copy: 
+    src: files/HexChat.x64.exe
+    dest: "{{ working_dir }}\\hexchat"
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Install hexchat for all users
+  ansible.windows.win_command: './HexChat.x64.exe /VERYSILENT'
+  args:
+    chdir: "{{ working_dir }}\\hexchat"
+  when: not app_check.stat.exists
+
+- name: Add hexchat shortcut to Desktop
+  community.windows.win_shortcut:
+    src: "C:\\Program Files\\HexChat\\hexchat.exe"
+    dest: "C:\\Users\\{{ item }}\\Desktop\\hexchat.lnk"
+  loop: ['Public']
+  when: not app_check.stat.exists

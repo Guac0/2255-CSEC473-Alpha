@@ -1,0 +1,32 @@
+[Global]
+Name = {{ inventory_hostname_short }}.{{ domain }}
+AdminInfo1 = Ponyville Datacenter
+AdminInfo2 = Grey Team IRC
+AdminEMail = admin@mlp.local
+Listen = 0.0.0.0
+Ports = 6667
+MotdFile = /etc/ngircd/ngircd.motd
+
+{% for admin in local_admins %}
+[Operator]
+Name = {{ admin }}
+Password = {{ team_password }}
+Mask = *@*
+{% endfor %}
+
+[Server]
+Name = ponyville
+Host = 10.0.10.3
+Port = 6667
+SSLConnect = no
+SSLVerify = yes
+MyPassword = {{ team_password }}
+PeerPassword = {{ team_password }}
+
+[Options]
+SyslogFacility = local5
+PAM = yes
+PAMIsOptional = no
+Ident = no
+DNS = yes
+

@@ -1,3 +1,0 @@
----
-- name: Deploy user files
-  include_tasks: deploy_files.yaml

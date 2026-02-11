@@ -1,0 +1,64 @@
+---
+#Rose Standard lds9122@rit.edu
+- name: Create nested folders on Windows
+  ansible.windows.win_file:
+    path: C:\sites\pegasus
+    state: directory
+
+- name: Remove Default Web Site
+  microsoft.iis.website:
+    name: "Default Web Site"
+    state: absent
+
+
+- name: Create a new application pool in 'Started' state
+  microsoft.iis.web_app_pool:
+    name: pegasus
+    state: started
+
+- name: Remove IIS site completely
+  microsoft.iis.website:
+    name: "Las Pegasus"
+    state: absent
+
+- name: Restart IIS
+  ansible.windows.win_service:
+    name: W3SVC
+    state: restarted
+
+- name: Adding a webpage for IIS
+  microsoft.iis.website:
+    name: "Las Pegasus"
+    state: started
+    physical_path: C:\sites\pegasus
+    application_pool: pegasus
+    bindings:
+      add:
+        - protocol: http
+          ip: ""
+          port: 80
+          hostname: "{{ inventory_hostname_short }}"
+
+- name: Copy website files to IIS
+  ansible.windows.win_copy:
+    src: ../files/site/
+    dest: C:\sites\pegasus\
+
+- name: Remove a directory and all its contents
+  ansible.windows.win_file:
+    path: C:\inetpub\wwwroot
+    state: absent
+
+- name: Create nested folders on Windows
+  ansible.windows.win_file:
+    path: C:\inetpub\wwwroot
+    state: directory
+
+- name: Copy website files to IIS
+  ansible.windows.win_copy:
+    src: ../files/site/
+    dest: C:\inetpub\wwwroot\
+
+
+
+

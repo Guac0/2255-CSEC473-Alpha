@@ -1,0 +1,42 @@
+---
+# optimize performance by early out if app is already installed
+- name: Check if app is installed
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\FileZilla FTP Client\\filezilla.exe"
+  register: app_check
+
+# optimize performance by only copying installer if it does not already exist
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ working_dir }}\\filezilla\\FileZilla_win64-setup.exe"
+  register: installer_check
+  when: not app_check.stat.exists
+
+- name: Create Directory
+  ansible.windows.win_file:
+    path: "{{ working_dir }}\\filezilla"
+    state: directory
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Copy over file
+  ansible.windows.win_copy: 
+    src: files/FileZilla_win64-setup.exe
+    dest: "{{ working_dir }}\\filezilla"
+  when:
+    - not app_check.stat.exists
+    - not installer_check.stat.exists
+
+- name: Install FileZilla for all users
+  ansible.windows.win_command: './FileZilla_win64-setup.exe /S /user=all'
+  args:
+    chdir: "{{ working_dir }}\\filezilla"
+  when: not app_check.stat.exists
+
+- name: Add FileZilla shortcut to Desktop
+  community.windows.win_shortcut:
+    src: "C:\\Program Files\\FileZilla FTP Client\\filezilla.exe"
+    dest: "C:\\Users\\{{ item }}\\Desktop\\filezilla.lnk"
+  loop: ['Public']
+  when: not app_check.stat.exists

@@ -1,0 +1,25 @@
+- name: Ensure SMB share directory exists
+  ansible.windows.win_file:
+    path: "{{ smb_share_path }}"
+    state: directory
+
+- name: Ensure File Server role is installed
+  ansible.windows.win_feature:
+    name: FS-FileServer
+    state: present
+
+- name: Create SMB share
+  ansible.windows.win_share:
+    name: "{{ smb_share_name }}"
+    path: "{{ smb_share_path }}"
+    description: "{{ smb_share_description }}"
+    full: "Administrators"
+    read: "Everyone"
+    list: true
+    state: present
+
+- name: Drop content files into the share
+  ansible.windows.win_copy:
+    dest: "{{ smb_share_path }}\\{{ item.name }}"
+    content: "{{ item.content }}"
+  loop: "{{ smb_content_files }}"

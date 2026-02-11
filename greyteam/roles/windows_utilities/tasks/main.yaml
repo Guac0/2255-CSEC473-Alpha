@@ -5,8 +5,17 @@
 - name: Install notepadpp
   ansible.builtin.include_tasks: install_notepadpp.yaml
 
+- name: Install Hexchat
+  ansible.builtin.include_tasks: install_hexchat.yaml
+
+- name: Install FileZilla
+  ansible.builtin.include_tasks: install_filezilla.yaml
+
 - name: Install Thunderbird
   ansible.builtin.include_tasks: install_thunderbird.yaml
+
+- name: Install Git
+  ansible.builtin.include_tasks: install_git.yaml
 
 #- name: Download sysinternals
 #  ansible.builtin.include_tasks: install_sysinternals.yaml

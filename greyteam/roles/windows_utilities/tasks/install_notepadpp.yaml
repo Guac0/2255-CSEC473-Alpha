@@ -1,9 +1,11 @@
 ---
+# optimize performance by early out if app is already installed
 - name: Check if app is installed
   ansible.windows.win_stat:
     path: "C:\\Program Files\\Notepad++\\notepad++.exe"
   register: app_check
 
+# optimize performance by only copying installer if it does not already exist
 - name: Check if installer is present
   ansible.windows.win_stat:
     path: "{{ working_dir }}\\npp\\npp.Installer.x64.exe"

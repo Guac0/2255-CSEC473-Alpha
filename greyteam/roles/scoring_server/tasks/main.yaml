@@ -1,0 +1,23 @@
+---
+- name: Install Git
+  ansible.builtin.include_tasks: install_git.yaml
+
+- name: Install Python
+  ansible.builtin.include_tasks: install_python.yaml
+
+- name: Copy files
+  ansible.builtin.include_tasks: copy_files.yaml
+
+- name: Generate SSL Cert
+  ansible.builtin.include_tasks: ssl.yaml
+
+- name: Deploy Services
+  ansible.builtin.include_tasks: service_install.yaml
+
+- name: Start Services
+  ansible.builtin.include_tasks: service_start.yaml
+  when: scoring_service_start
+
+#- name: Start scheduled task
+#  ansible.builtin.include_tasks: scheduled_task.yaml
+#  when: stabvest_task_create

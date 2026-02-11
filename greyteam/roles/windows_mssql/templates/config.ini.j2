@@ -27,13 +27,13 @@ SQLSVCPASSWORD="{{ mssql_sqlsvcpassword }}"
 SQLSYSADMINACCOUNTS="{{ mssql_sqlsysadminaccounts }}"
 
 ; REQUIRED - Specifies the account for the SQL Server Agent service.
-AGTSVCACCOUNT="{{ mssql_agtsvcaccount }}"
+;AGTSVCACCOUNT="{{ mssql_agtsvcaccount }}"
 
 ; Specifies the password for SQL Server Agent service account. This parameter can be omitted when using a managed service account, virtual account, or built-in account.
 ;AGTSVCPASSWORD=""
 
 ; Specifies the startup mode for the SQL Server Agent service.
-AGTSVCSTARTUPTYPE="Automatic"
+;AGTSVCSTARTUPTYPE="Automatic"
 
 ; Enables instant file initialization for SQL Server service account. For security and performance considerations, see Database instant file initialization.
 SQLSVCINSTANTFILEINIT="True"

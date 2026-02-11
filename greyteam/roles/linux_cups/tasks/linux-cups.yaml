@@ -41,13 +41,34 @@
     dest: "/etc/systemd/system/ippprinter.service"
   become: yes
 
+# If we changed the service file, it needs to be reloaded
+- name: Reload systemctl daemons
+  ansible.builtin.command:
+    cmd: "systemctl daemon-reload"
+  become: yes
+
 - name: Start printer service
   ansible.builtin.service:
     name: ippprinter
     state: restarted
+    enabled: yes
   become: yes
 
 # Set our new printer to be the default printer
 - name: Set printer to default
   ansible.builtin.command:
     cmd: "lpoptions -d {{ printer_name }}"
+
+- name: Set correct printer model
+  ansible.builtin.command:
+    cmd: "/usr/sbin/lpadmin -p {{ printer_name }} -m everywhere"
+
+# Share this printer with the subnet
+- name: Set server to share printers
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cupsctl --share-printers"
+
+- name: Tag this printer as sharable
+  ansible.builtin.command:
+    cmd: "/usr/sbin/lpadmin -p {{ printer_name }} -o printer-is-shared=true"
+

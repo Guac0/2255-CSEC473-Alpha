@@ -1,0 +1,37 @@
+---
+- name: Ensure staging folder exists
+  ansible.builtin.file:
+    path: "{{ working_dir }}/user_files/generic"
+    state: directory
+    mode: '0755'
+
+- name: Copy files to staging folder
+  ansible.builtin.copy:
+    src: files/generic
+    dest: "{{ working_dir }}/user_files/"
+    mode: '0644'
+
+# Check if the user's home directory exists on the Linux target
+- name: Check if user's home exists
+  ansible.builtin.stat:
+    path: "/home/{{ username }}"
+  register: user_profile_check
+  loop: "{{ local_users + local_admins + ['greyteam','Admin','Administrator'] }}"
+  loop_control:
+    loop_var: username
+
+# Distribute generic files only to users whose folders were found
+- name: Copy user files from staging to user home
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ working_dir }}/user_files/generic/"
+    dest: "/home/{{ user_res.username }}/"
+    force: no
+    # Ensure the user actually owns the files copied into their home
+    owner: "{{ user_res.username }}"
+    group: "{{ user_res.username }}"
+    mode: '0700'
+  loop: "{{ user_profile_check.results }}"
+  loop_control:
+    loop_var: user_res
+  when: user_res.stat.exists

@@ -6,6 +6,8 @@
     - ping
     - ping_linux
     - linux
+    - generic
+    - inscope
   tasks:
     - name: Ping Linux
       ansible.builtin.ping:
@@ -17,6 +19,8 @@
     - ping
     - ping_windows
     - windows
+    - generic
+    - inscope
   tasks:
     - name: Ping Windows
       ansible.windows.win_ping:
@@ -54,23 +58,25 @@
 ######## Generic ######
 
 - name: Run Windows Standards 
-  hosts: windows:&inscope:!cement
+  hosts: windows #:!cement
   roles:
     - windows_standards
   tags: 
     - windows
-    - team
+    - inscope
     - standards
     - stds
+    - generic
 
 - name: Create Local Users
-  hosts: windows:&inscope:!cement
+  hosts: windows:&inscope #:!cement
   roles:
     - windows_users_local
   tags:
-  - windows
-  - team
-  - local_users
+    - windows
+    - inscope
+    - local_users
+    - generic
 
 #- name: Deploy Rustdesk Windows
 #  hosts: windows:&gui:!cement
@@ -78,38 +84,62 @@
 #    - windows_rustdesk
 #  tags:
 #    - windows 
-#    - team 
+#    - inscope 
 #    - rustdesk
 #    - rustdesk_windows
 
 - name: Install Utilities
-  hosts: windows:&inscope:!cement
+  hosts: windows #:!cement
   roles:
     - windows_utilities
   tags:
     - windows
-    - team
+    - inscope
     - utilities
+    - utilities_windows
+    - generic
 
 - name: Set Wallpaper
-  hosts: windows:&inscope:!cement
+  hosts: windows #:!cement
   roles:
     - windows_wallpaper
   tags:
     - windows
-    - team
+    - inscope
     - wallpaper
+    - generic
 
-- name: Deploy User Files
-  hosts: windows:&inscope:!cement
+- name: Deploy Cursor
+  hosts: windows #:!cement
   roles:
-    - windows_user_files
+    - windows_cursor
   tags:
+    - cursor
     - windows
-    - team
-    - files
+    - inscope
+    - generic
 
 ###### Services #######
+
+- name: Windows Deploy AD 
+  hosts: dc
+  roles:
+    - windows_ad
+  tags:
+    - ad
+    - ad_dc
+    - windows
+    - inscope
+
+- name: Windows Boxes join AD
+  hosts: windows:&inscope:!dc #:!cementc
+  roles:
+    - windows_domain_join
+  tags:
+    - ad
+    - ad_join
+    - windows
+    - inscope
 
 - name: Windows Deploy MSSQL
   hosts: mssql
@@ -117,19 +147,71 @@
     - windows_mssql
   tags:
     - windows
-    - team
+    - inscope
     - mssql
+
+- name: Windows Deploy DNS
+  hosts: dns
+  roles:
+    - windows_dns
+  tags:
+    - windows
+    - inscope
+    - dns
+
+- name: Windows Deploy SMB 
+  hosts: smb
+  roles:
+    - windows_smb
+  tags:
+    - smb
+    - windows
+    - inscope
+
+- name: Windows Deploy IIS 
+  hosts: iis
+  roles:
+    - windows_iis
+  tags:
+    - iis
+    - windows
+    - inscope
 
 ####### Finish #######
 
+- name: Deploy User Files (Windows) # needs domain users
+  hosts: windows:&inscope #:!cement
+  roles:
+    - deploy_user_files
+  tags:
+    - windows
+    - inscope
+    - files
+    - ad
+    - ad_join
+
 - name: Post Deploy Cleanup
-  hosts: windows:&inscope:!cement
+  hosts: windows #:!cement
   roles:
     - windows_finish
   tags:
     - windows 
-    - team 
+    - inscope 
     - post_deploy
+    #- generic
+
+- name: Windows Reboot
+  hosts: windows #:!cement
+  roles:
+    - windows_reboot
+  gather_facts: no
+  tags:
+    - windows 
+    - inscope 
+    - post_deploy
+    - reboot
+    - reboot_windows
+    - generic
 
 #######################
 ######## LINUX ########
@@ -143,9 +225,10 @@
     - linux_standards
   tags:
     - linux 
-    - team 
+    - inscope 
     - standards
     - stds
+    - generic
 
 - name: Deploy Linux Users
   hosts: linux
@@ -153,19 +236,31 @@
     - linux_users
   tags:
     - linux 
-    - team 
+    - inscope 
     - users
     - users_linux
+    - generic
 
 - name: Deploy Rustdesk Linux
-  hosts: linux:&gui
+  hosts: linux:&gui:!inscope
   roles:
     - linux_rustdesk
   tags:
     - linux 
-    - team 
+    - inscope 
     - rustdesk
     - rustdesk_linux
+    - generic
+
+- name: Deploy User Files (Linux)
+  hosts: linux:&inscope
+  roles:
+    - deploy_user_files
+  tags:
+    - linux
+    - inscope
+    - files
+    - generic
 
 ###### Services #######
 
@@ -178,6 +273,65 @@
     - linux
     - inscope
 
+- name: Deploy MariaDb
+  hosts: mariadb
+  become: true
+  roles:
+    - linux_mariadb
+  tags:
+    - mariadb
+    - linux
+    - inscope
+    
+- name: Deploy NGIRCD
+  hosts: irc
+  roles:
+    - linux_ngircd
+  tags:
+    - ngircd
+    - linux
+    - inscope
+
+- name: Deploy Linux Client Programs
+  hosts: linux:&wksts 
+  roles:
+    - linux_client_programs
+  tags:
+    - linux
+    - inscope
+    - utilities
+    - utilities_linux
+
+- name: Deploy Vulnerable vsftpd (CTF)
+  hosts: vsftpd
+  become: true
+  roles:
+    - linux-server-ftp-setup/vsftpd_vul
+  tags:
+    - linux
+    - inscope
+    - ftp
+    - vsftpd
+
+- name: Deploy Apache2
+  hosts: apache2
+  roles:
+    - linux_apache2
+  tags: 
+    - apache2
+    - linux 
+    - inscope
+
+- name: Deploy NGINX
+  hosts: nginx
+  roles:
+    - linux_nginx
+  tags: 
+    - nginx
+    - linux 
+    - inscope
+
+
 ####### Finish ########
 
 - name: Clean Up
@@ -186,22 +340,20 @@
     - linux_finish
   tags:
     - linux 
-    - team
+    - inscope
     - finish
     - post_deploy
+    #- generic
 
 - name: Reboot
   hosts: linux
   roles:
     - linux_reboot
+  gather_facts: no
   tags:
-<<<<<<< Updated upstream
     - linux
-    - team
+    - inscope
     - reboot
+    - reboot_linux
     - post_deploy
-=======
-    - linux 
-    - team 
-    - reboot
->>>>>>> Stashed changes
+    - generic

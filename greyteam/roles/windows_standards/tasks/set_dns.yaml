@@ -1,5 +1,6 @@
 - name: Ensure DNS Points to Management DNS
   ansible.windows.win_dns_client:
     adapter_names: '*'
-    ipv4_addresses:
-      - "{{ mgmt_dns }}"
+    dns_servers: "{{ mgmt_dns }}"
+  # Support mgmt dns having zero entries (why?)
+  when: mgmt_dns is defined and mgmt_dns | length > 0

@@ -1,0 +1,65 @@
+---
+- name: Create domain admin users
+  microsoft.ad.user:
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    state: present
+    enabled: yes
+    password_never_expires: yes
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+  loop: "{{ domain_admins }}"
+
+- name: Assign domain admin group memberships
+  microsoft.ad.group:
+    name: "{{ item }}"
+    members: 
+      add: "{{ domain_admins }}"
+    state: present
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+  loop:
+    - Domain Admins
+    - Enterprise Admins
+
+- name: Add domain admins to builtin access groups
+  microsoft.ad.group:
+    identity: "CN={{ item }},CN=Builtin,DC=mlp,DC=local"
+    members:
+      add: "{{ domain_admins }}"
+    state: present
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+  loop:
+    - Remote Management Users
+    - Remote Desktop Users
+
+- name: Create domain users
+  microsoft.ad.user:
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    state: present
+    enabled: yes
+    password_never_expires: yes
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+  loop: "{{ domain_users }}"
+
+- name: Add domain users to builtin access groups
+  microsoft.ad.group:
+    identity: "CN={{ item }},CN=Builtin,DC=mlp,DC=local"
+    members:
+      add: "{{ domain_users }}"
+    state: present
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+  loop:
+    - Remote Management Users
+    - Remote Desktop Users
+
+

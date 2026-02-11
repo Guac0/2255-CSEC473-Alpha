@@ -7,7 +7,8 @@ resource "openstack_compute_instance_v2" "deb13" {
   key_pair        = "cdt"
 
   block_device {
-    uuid                  = "865d8624-6139-4447-bc34-312399c9d929" #debian-trixie-13
+    uuid                  = "70de79be-69be-45dc-b956-f15dbe194ccd" #debian-trixie-server
+    #uuid                  = "865d8624-6139-4447-bc34-312399c9d929" #debian-trixie-13
     source_type           = "image"
     destination_type      = "volume"
     volume_size           = 40

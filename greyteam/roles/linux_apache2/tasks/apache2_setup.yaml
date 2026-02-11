@@ -1,0 +1,112 @@
+---
+# Matthew Sisco
+
+
+# SERVICE: Install Apache2
+-  name: install Apache2
+   apt:
+    name: apache2 
+    update_cache: yes
+
+
+
+# Feature #1: Install php modules for DokuWiki
+
+# Install DokuWiki dependencies; PHP and required modules for DokuWiki
+-  name: Install DokuWiki dependencies
+   apt:
+      name: "{{ item }}"
+      update_cache: yes
+   loop:
+      - php
+      - php-xml
+      - php-mbstring
+      - php-json
+      - php-curl
+      - php-zip
+      - php-gd
+      - php-intl
+      - php-sqlite3
+   
+
+#Feature #2: Download and setup DokuWiki
+
+
+
+# Install the latest stable version of DokuWiki
+-  name: Install DokuWiki
+   ansible.builtin.get_url:
+      url: https://download.dokuwiki.org/src/dokuwiki/dokuwiki-stable.tgz
+      dest: /tmp/dokuwiki-stable.tgz
+   
+
+
+# Feature #3: Create web root with vulnerable permissions
+- name: Create web root with vulnerable permissions
+  file:
+    path: /var/www/html/dokuwiki-2025-05-14b
+    state: directory 
+    mode: '0777'
+
+
+
+
+# Unpack DokuWiki to the Apache web directory
+-  name: Unpack DokuWiki
+   unarchive:
+      src: /tmp/dokuwiki-stable.tgz
+      dest: /var/www/html/dokuwiki-2025-05-14b
+      remote_src: yes
+
+   
+# Set ownership of the DokuWiki directory to the Apache user
+-  name: Set ownership of DokuWiki directory
+   file:
+      path: /var/www/html/dokuwiki-2025-05-14b
+      owner: www-data
+      group: www-data
+      recurse: yes
+
+
+
+# Restart Apache to apply changes
+-  name: Restart Apache2
+   service:
+      name: apache2
+      state: restarted
+
+
+# Create a Dokuwiki Virtual Host Configuration File
+- name: Create Dokuwiki Virtual Host Configuration File
+  copy:
+    dest: /etc/apache2/sites-available/dokuwiki.conf
+    content: |
+      <VirtualHost *:80>
+          ServerAdmin webmaster@localhost
+          DocumentRoot /var/www/html/dokuwiki-2025-05-14b   
+            <Directory /var/www/html/dokuwiki-2025-05-14b>
+               Options Indexes FollowSymLinks
+               AllowOverride All
+               Require all granted
+            </Directory>
+      </VirtualHost>
+
+
+# Enable the Dokuwiki Site
+- name: Enable the Dokuwiki Site
+  command: a2ensite dokuwiki.conf
+
+
+# Disable the Default Apache Site
+- name: Disable the Default Apache Site
+  command: a2dissite 000-default.conf
+
+
+# Reload Apache to Apply Changes
+- name: Reload Apache to Apply Changes
+  service:
+    name: apache2
+    state: reloaded
+
+
+

@@ -1,17 +1,7 @@
 ---
-- name: Disable first logon screen
-  ansible.windows.win_regedit:
-    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
-    name: EnableFirstLogonAnimation
-    data: 0
-    type: dword
-
 - name: Re-enable UAC for Administrators
   win_regedit:
     path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
     name: ConsentPromptBehaviorAdmin
     data: 5  # 5 = Default UAC prompt for Admins
     type: dword
-
-- name: Reboot the machine with all defaults
-  ansible.windows.win_reboot:  

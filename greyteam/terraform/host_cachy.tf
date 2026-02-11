@@ -1,7 +1,7 @@
-resource "openstack_compute_instance_v2" "crystalempire" {
+resource "openstack_compute_instance_v2" "crystal-empire" {
   depends_on = [openstack_networking_secgroup_v2.secgroup_blue]
 
-  name            = "crystalempire"
+  name            = "crystal-empire"
   flavor_name     = "medium"
   key_pair        = "cdt"
 
@@ -16,7 +16,7 @@ resource "openstack_compute_instance_v2" "crystalempire" {
 
 
   network {
-    uuid        = openstack_networking_network_v2.network_blue.id
+    uuid        = openstack_networking_network_v2.network_core.id
     fixed_ip_v4 = "10.0.10.6"
   }
 

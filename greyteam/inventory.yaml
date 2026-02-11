@@ -4,7 +4,13 @@ all:
     dc:
       hosts:
         canterlot:
-          ansible_host: "10.1.10.1"
+          ansible_host: "10.0.10.1"
+    dns: #alias dc to dns and ad
+      children:
+        dc:
+    ad:
+      children:
+        dc:
   
     mssql:
       hosts:
@@ -14,7 +20,7 @@ all:
     apache2:
       hosts:
         ponyville:
-          ansible_host: "10.1.10.3"
+          ansible_host: "10.0.10.3"
 
     mariadb:
       hosts:
@@ -23,7 +29,7 @@ all:
     
     cups:
       hosts:
-        todo:
+        trotsylvania:
           ansible_host: "10.0.10.5"
 
     vsftpd:
@@ -60,25 +66,25 @@ all:
       hosts:
         neighara-falls:
           ansible_host: "10.0.30.2"
-
-    linux_wkst1:
-      hosts:
-        cloudsdale:
-          ansible_host: "10.0.30.3"
-
-    linux_wkst2:
-      hosts:
-        vanhoover:
-          ansible_host: "10.0.30.4"
-    
-    void:
-      hosts:
-        whinnyapolis:
-          ansible_host: "10.0.30.5"
     
     cement:
       hosts:
         fillydelphia:
+          ansible_host: "10.0.30.3"
+
+    linux_wkst1:
+      hosts:
+        cloudsdale:
+          ansible_host: "10.0.30.4"
+
+    linux_wkst2:
+      hosts:
+        vanhoover:
+          ansible_host: "10.0.30.5"
+    
+    void:
+      hosts:
+        whinnyapolis:
           ansible_host: "10.0.30.6"
 
 # Groups
@@ -95,11 +101,13 @@ all:
     inscope:
       children:
         dc:
+        ad:
+        dns:
         mssql:
         iis:
         smb:
-        windows_wks1:
-        windows_wks2:
+        windows_wkst1:
+        windows_wkst2:
         apache2:
         mariadb:
         cups:
@@ -192,9 +200,10 @@ all:
       children:
         dc:
         mssql:
+        dns:
         iis:
         smb:
-        windows_wks1:
+        windows_wkst1:
         windows_wkst2:
         cement: #maybe remove since no ansible
     # Hosts that are Linux
@@ -208,6 +217,7 @@ all:
         nginx:
         linux_wkst1:
         linux_wkst2:
+        void:
         jumpboxes:
         scoring_all:
         deploy:

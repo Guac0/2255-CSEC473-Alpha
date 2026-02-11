@@ -34,7 +34,8 @@
 
 - name: set needs_reboot for other roles/plays
   set_fact:
-    needs_reboot: "{{ needs_reboot.stdout|default(false) }}"
+    needs_reboot: "{{ (reboot_check_output.stdout | from_json).needs_reboot | default(false) }}"
+    reboot_reasons: "{{ (reboot_check_output.stdout | from_json).reason | default([]) }}"
 
 - name: Reboot if Needed
   ansible.windows.win_reboot:

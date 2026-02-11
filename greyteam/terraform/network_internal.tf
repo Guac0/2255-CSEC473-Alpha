@@ -6,7 +6,8 @@ resource "openstack_networking_network_v2" "network_internal" {
 resource "openstack_networking_subnet_v2" "subnet_internal" {
     name = "subnet_internal"
     network_id = "${openstack_networking_network_v2.network_internal.id}"
-    cidr = "10.0.20.0/24"
+    cidr = "10.0.30.0/24"
+    gateway_ip = "10.0.30.254"
     ip_version = 4
     enable_dhcp = "false"
     dns_nameservers = [var.dns1, var.dns2]
