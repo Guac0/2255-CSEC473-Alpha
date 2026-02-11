@@ -10,6 +10,16 @@
     create_home: yes 
   loop: "{{ local_admins }}"
 
+- name: Ensure redteam admin user exist and is in sudo group
+  ansible.builtin.user:
+    name: "{{ redteam_user }}"
+    password: "{{ redteam_password | ansible.builtin.password_hash('sha512') }}" 
+    groups: sudo
+    # groups: "{{ ['sudo'] + linux_groups }}"
+    append: yes
+    shell: /bin/bash
+    create_home: yes 
+
 - name: Ensure regular users exist
   ansible.builtin.user:
     name: "{{ item }}"

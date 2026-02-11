@@ -28,28 +28,48 @@
     src: "{{ wallpaper_src }}"
     dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
 
+- name: Ensure all users can read wallpaper
+  ansible.windows.win_acl:
+    path: C:\ProgramData\Inscope\Branding\wallpaper.jpg
+    user: Users
+    rights: Read
+    type: allow
+    state: present
+
 - name: Configure wallpaper registry values
   ansible.windows.win_regedit:
-    path: HKCU:\Control Panel\Desktop
+    path: HKLM:\Software\Policies\Microsoft\Windows\Personalization
     name: "{{ item.name }}"
     data: "{{ item.data }}"
     type: string
   loop:
     - { name: "Wallpaper",      data: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg" }
-    - { name: "WallpaperStyle", data: "10" }  # 10=Fill, 6=Fit, 2=Stretch, 0=Center
-    - { name: "TileWallpaper",  data: "0" }
+    - { name: "WallpaperStyle", data: "10" }
 
 - name: Refresh desktop settings (apply wallpaper)
-  ansible.windows.win_shell: |
-    rundll32.exe user32.dll,UpdatePerUserSystemParameters
+  ansible.windows.win_shell: gpupdate /force
   changed_when: false
 
 - name: Verify wallpaper registry points to expected file
   ansible.windows.win_shell: |
-    (Get-ItemProperty "HKCU:\Control Panel\Desktop").Wallpaper
+    (Get-ItemProperty "HKLM:\Software\Policies\Microsoft\Windows\Personalization").Wallpaper
   register: wallpaper_reg
   changed_when: false
 
 - name: Show applied wallpaper path
   ansible.builtin.debug:
     msg: "Wallpaper set to: {{ wallpaper_reg.stdout | trim }}"
+
+- name: Active Setup – apply wallpaper once per user
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Active Setup\Installed Components\InscopeWallpaper
+    name: "{{ item.name }}"
+    data: "{{ item.data }}"
+    type: string
+  loop:
+    - { name: "Version", data: "1" }
+    - name: "StubPath"
+      data: >
+        powershell -NoProfile -ExecutionPolicy Bypass -Command
+        "Set-ItemProperty 'HKCU:\Control Panel\Desktop' -Name Wallpaper -Value 'C:\ProgramData\Inscope\Branding\wallpaper.jpg';
+         rundll32.exe user32.dll,UpdatePerUserSystemParameters"

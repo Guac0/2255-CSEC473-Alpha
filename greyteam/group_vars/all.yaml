@@ -4,6 +4,9 @@
 greyteam_user: greyteam
 greyteam_password: ponyuploc0!
 
+redteam_user: redteam
+redteam_password: sugarcubes4doom!
+
 ansible_user: "{{ greyteam_user }}"
 ansible_password: "{{ greyteam_password }}"
 ansible_ssh_private_key_file: ~/.ssh/cdt
@@ -11,7 +14,11 @@ ansible_ssh_private_key_file: ~/.ssh/cdt
 team_password: FriendshipIsMagic0!
 
 domain: mlp.local
-mgmt_dns: 8.8.8.8
+# DNS can be left empty to make no changes
+mgmt_dns:
+#- 10.0.10.1
+- 129.21.3.17
+- 8.8.8.8
 
 payload_key_content: 'Do not modify this file in any way (name, content, permissions). Contact greyteam if you have questions.'
 
@@ -38,4 +45,4 @@ domain_admins:
   - celestia
   - discord
   - luna
-  - starswirlthebearded
+  - starswirl

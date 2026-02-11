@@ -83,3 +83,22 @@
     state: started
     enabled: yes
 
+# ==============================
+# Creating Scoring User & File
+# ==============================
+
+- name: Create scoring user
+  user:
+    name: scoring
+    password: "{{ 'Score123' | password_hash('sha512') }}"
+    home: /home/scoring
+    create_home: yes
+
+
+- name: Create scoring file
+  copy:
+    dest: /home/scoring/score.txt
+    content: "FTP_SERVICE_OK"
+    owner: scoring
+    group: scoring
+    mode: '0644'

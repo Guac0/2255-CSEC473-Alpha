@@ -2,4 +2,5 @@
 Description=IPP Printer (save to file)
 
 [Service]
-ExecStart=/usr/sbin/ippeveprinter -d /home/{{ printer_admin }}/print -c /usr/sbin/ippeveps {{ printer_name }}
+ExecStart=/usr/sbin/ippeveprinter -D /home/{{ printer_admin }}/print -F application/postscript -c /usr/sbin/ippeveps {{ printer_name }}
+

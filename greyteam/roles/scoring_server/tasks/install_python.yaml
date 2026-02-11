@@ -1,0 +1,23 @@
+---
+# --- LINUX SECTION (Debian & RHEL) ---
+- name: Install Python and Pip on Linux
+  ansible.builtin.package:
+    name:
+      - python3
+      - python3-pip
+    state: present
+  when: ansible_os_family != "Windows"
+
+# --- WINDOWS SECTION ---
+- name: Download Python Installer for Windows
+  ansible.windows.win_get_url:
+    url: "https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe"
+    dest: '{{ ansible_env.TEMP }}\python_installer.exe'
+  when: ansible_os_family == "Windows"
+
+- name: Install Python on Windows (Silent)
+  ansible.windows.win_package:
+    path: '{{ ansible_env.TEMP }}\python_installer.exe'
+    arguments: '/quiet InstallAllUsers=1 PrependPath=1'
+    state: present
+  when: ansible_os_family == "Windows"

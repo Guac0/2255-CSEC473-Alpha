@@ -51,6 +51,7 @@
   ansible.builtin.service:
     name: ippprinter
     state: restarted
+    enabled: yes
   become: yes
 
 # Set our new printer to be the default printer
@@ -58,4 +59,16 @@
   ansible.builtin.command:
     cmd: "lpoptions -d {{ printer_name }}"
 
+- name: Set correct printer model
+  ansible.builtin.command:
+    cmd: "/usr/sbin/lpadmin -p {{ printer_name }} -m everywhere"
+
+# Share this printer with the subnet
+- name: Set server to share printers
+  ansible.builtin.command:
+    cmd: "/usr/sbin/cupsctl --share-printers"
+
+- name: Tag this printer as sharable
+  ansible.builtin.command:
+    cmd: "/usr/sbin/lpadmin -p {{ printer_name }} -o printer-is-shared=true"
 

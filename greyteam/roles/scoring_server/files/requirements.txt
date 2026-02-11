@@ -7,3 +7,4 @@ pyopenssl
 gunicorn
 concurrent-log-handler
 sdnotify
+tabulate

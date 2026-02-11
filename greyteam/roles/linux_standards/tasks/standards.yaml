@@ -34,6 +34,28 @@
 #              addresses: [{{ dns_primary }}, {{ dns_secondary }}]
 #  notify: Apply netplan # runs netplan apply to save changes
 
+# Works on Ubuntu and Debian, untested elsewhere
+- name: Create resolved.conf.d directory
+  ansible.builtin.file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    mode: '0755'
+
+- name: Create DNS override file
+  ansible.builtin.copy:
+    dest: /etc/systemd/resolved.conf.d/dns_override.conf
+    content: |
+      [Resolve]
+      DNS={{ mgmt_dns | join(' ') }}
+    mode: '0644'
+  register: dns_dropin
+
+- name: Restart systemd-resolved
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: restarted
+  when: dns_dropin.changed
+    
 - name: Create payload keying file
   ansible.builtin.copy:
     dest: '{{ payload_key_location }}'

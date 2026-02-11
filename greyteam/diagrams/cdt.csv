@@ -11,10 +11,10 @@
 10.0.20.0/24,10.0.20.4,griffonstone,Debian 13,Nginx
 10.0.30.0/24,10.0.30.1,baltamare,Windows 10,Workstation
 10.0.30.0/24,10.0.30.2,neighara-falls,Windows 10,Workstation
-10.0.30.0/24,10.0.30.3,cloudsdale,Ubuntu 24.04,Workstation
-10.0.30.0/24,10.0.30.4,vanhoover,Ubuntu 24.04,Workstation
-10.0.30.0/24,10.0.30.5,whinnyapolis,VoidOS,Workstation
-10.0.30.0/24,10.0.30.6,fillydelphia,Windows CEMeNT,Workstation
+10.0.30.0/24,10.0.30.3,fillydelphia,Windows CEMeNT,Workstation
+10.0.30.0/24,10.0.30.4,cloudsdale,Ubuntu 24.04,Workstation
+10.0.30.0/24,10.0.30.5,vanhoover,Ubuntu 24.04,Workstation
+10.0.30.0/24,10.0.30.6,whinnyapolis,VoidOS,Workstation
 172.20.0.32/27,172.20.0.41,bluejump1,Ubuntu 24.04,Jumpbox
 172.20.0.32/27,172.20.0.42,bluejump2,Ubuntu 24.04,Jumpbox
 172.20.0.32/27,172.20.0.43,bluejump3,Ubuntu 24.04,Jumpbox

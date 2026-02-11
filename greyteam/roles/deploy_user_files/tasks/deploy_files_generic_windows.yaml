@@ -4,25 +4,29 @@
     path: "{{ working_dir }}\\user_files\\generic"
     state: directory
 
-# Improves copy times at expense of disk usage
+# Improves copy times by minimizing network traffic at expense of disk usage and allows for better pause and restart support
 - name: Copy files to staging folder
   ansible.windows.win_copy:
-    src: files/
-    dest: "{{ working_dir }}\\user_files\\generic"
+    src: files/generic
+    dest: "{{ working_dir }}\\user_files\\"
     #force: yes
 
 # Failsafe to avoid errors when user doesn't exist yet
 - name: Check if user's folder exists
   ansible.windows.win_stat:
-    path: "C:\\Users\\{{ item }}"
+    path: "C:\\Users\\{{ username }}"
   register: user_check
-  loop: "{{ local_admins + local_admins + domain_users + domain_admins }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
+  loop: "{{ local_admins + local_admins + domain_users + domain_admins + ['greyteam'] }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
+  loop_control:
+    loop_var: username
 
 - name: Copy user files from staging to user folder 
   ansible.windows.win_copy:
     remote_src: true
     src: "{{ working_dir }}\\user_files\\generic\\"
-    dest: "C:\\Users\\{{ item.item }}"
+    dest: "C:\\Users\\{{ user_result.username }}"
     force: no #make sure not to replace existing files since this could result in deleting essential data if greyteam copies in bad files
   loop: "{{ user_check.results }}"
-  when: item.stat.exists
+  loop_control:
+    loop_var: user_result
+  when: user_result.stat.exists

@@ -1,7 +1,6 @@
 ---
 # Alpha – Anny Hua
 # Feature: Custom cursor theme (ship cursor files)
-# Targets: Windows 10 clients
 
 - name: Create cursor directory
   ansible.windows.win_file:
@@ -15,14 +14,22 @@
 
 - name: Set cursor registry paths to custom cursors
   ansible.windows.win_regedit:
-    path: HKCU:\Control Panel\Cursors
+    path: HKLM:\Software\Microsoft\Active Setup\Installed Components\InscopeCursors
     name: "{{ item.name }}"
     data: "{{ item.data }}"
     type: string
   loop:
-    - { name: "Arrow",       data: "C:\\ProgramData\\Inscope\\Cursors\\Arrow.cur" }
-    - { name: "IBeam",       data: "C:\\ProgramData\\Inscope\\Cursors\\IBeam.ani"}
-    - { name: "Select",        data: "C:\\ProgramData\\Inscope\\Cursors\\Hand.ani" }
+    - name: Version
+      data: "1"
+    - name: StubPath
+      data: |
+        powershell -NoProfile -ExecutionPolicy Bypass -Command "
+        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name Arrow -Value 'C:\ProgramData\Inscope\Cursors\Arrow.cur';
+        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name IBeam -Value 'C:\ProgramData\Inscope\Cursors\IBeam.ani';
+        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name Hand  -Value 'C:\ProgramData\Inscope\Cursors\Hand.ani';
+        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name SchemeSource -Value 2;
+        rundll32.exe user32.dll,UpdatePerUserSystemParameters
+        "
 
 - name: Notify user a logoff/login may be needed to fully apply cursor changes
   ansible.windows.win_shell: |

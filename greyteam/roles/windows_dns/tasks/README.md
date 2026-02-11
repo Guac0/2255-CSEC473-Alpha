@@ -1,6 +1,2 @@
-# tasks
-
-This folder contains files with the actual tasks that Ansible will execute on the destination machine.
-By default, Ansible will only execute the contents of "main.yaml". This file must source any other task files that you may want.
-For ease of use, we will standardize on main.yaml not containing any other tasks. Instead, tasks will be split up into other files that are then sourced by main.yaml.
-This allows use to easily read and modify (without merge conflicts) our tasks.
+This project automates the installation and configuration of a Windows DNS Server using Ansible.
+It ensures the DNS role is installed, the DNS service is running, and a name server (NS) record is created for a specified zone.
