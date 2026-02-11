@@ -26,6 +26,11 @@
   changed_when: false
 # My three features are Secureing MariaDB, configureing file with permissions, and Create a datab base and a user
     # Secure MariaDB 
+- name: Check if root password is already set
+  shell: mysql -u root -e "SELECT 1" 2>&1
+  register: root_password_check
+  failed_when: false
+  changed_when: false
 
 - name: Set MariaDB root password (when no password is set)
   mysql_user:
