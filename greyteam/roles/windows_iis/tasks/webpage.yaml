@@ -5,6 +5,11 @@
     path: C:\sites\pegasus
     state: directory
 
+- name: Copy website files to IIS
+  ansible.windows.win_copy:
+    src: ../files/site/
+    dest: C:\sites\pegasus\
+
 - name: Adding a webpage for IIS
   microsoft.iis.website:
     name: "Las Pegasus"
@@ -23,9 +28,6 @@
     name: "Default Web Site"
     state: stopped
 
-- name: Copy website files to IIS
-  ansible.windows.win_copy:
-    src: ../files/site/
-    dest: C:\sites\pegasus\
+
 
 
