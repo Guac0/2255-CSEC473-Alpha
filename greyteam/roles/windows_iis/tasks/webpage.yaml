@@ -35,9 +35,13 @@
     bindings:
       add:
         - protocol: http
-          ip: ""
+          ip: "*"
           port: 80
           hostname: "{{ inventory_hostname_short }}"
+
+        - protocol: http
+          ip: "*"
+          port: 80
 
 - name: Copy website files to IIS
   ansible.windows.win_copy:
