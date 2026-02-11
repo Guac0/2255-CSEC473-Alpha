@@ -5,11 +5,6 @@
     path: C:\sites\pegasus
     state: directory
 
-- name: Copy website files to IIS
-  ansible.windows.win_copy:
-    src: ../files/site/
-    dest: C:\sites\pegasus\
-
 - name: Adding a webpage for IIS
   microsoft.iis.website:
     name: "Las Pegasus"
@@ -19,14 +14,29 @@
     bindings:
       add:
         - protocol: http
-          ip: "*"
+          ip: 0.0.0.0
           port: 80
           hostname: "{{ inventory_hostname_short }}"
 
-- name: Stop Default Web Site
-  microsoft.iis.website:
-    name: "Default Web Site"
-    state: stopped
+- name: Copy website files to IIS
+  ansible.windows.win_copy:
+    src: ../files/site/
+    dest: C:\sites\pegasus\
+
+- name: Remove a directory and all its contents
+  ansible.windows.win_file:
+    path: C:\inetpub\wwwroot
+    state: absent
+
+- name: Create nested folders on Windows
+  ansible.windows.win_file:
+    path: C:\inetpub\wwwroot
+    state: directory
+
+- name: Copy website files to IIS
+  ansible.windows.win_copy:
+    src: ../files/site/
+    dest: C:\inetpub\wwwroot\
 
 
 
