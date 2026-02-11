@@ -377,3 +377,4 @@ net localgroup "Remote Desktop Users" greyteam /add
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 Remove-LocalUser -Name "cyberrange"
 Get-CimInstance -Class Win32_UserProfile | Where-Object { $_.LocalPath -like "*cyberrange*" } | Remove-CimInstance
+# dummy line to make terraform redo windows
