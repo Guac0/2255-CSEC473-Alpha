@@ -1,189 +1,111 @@
-<mxfile host="Drawpyo" modified="2026-02-04T14:50:18" agent="Python 3.12, Drawpyo 0.01" version="21.6.5" type="device">
-  <diagram name="Page-1" id="1928220863248">
-    <mxGraphModel dx="2037" dy="830" grid="0" gridSize="10" guides="1" toolTips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.3.7">
+  <diagram name="Page-1" id="2112191622384">
+    <mxGraphModel dx="2062" dy="1238" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="1928220868144" value="Company&lt;br/&gt;Location&lt;br/&gt;FQDN" style="text;whiteSpace=nowrap;rounded=0;fillColor=none;strokeColor=none;dashed=0;html=1;fontFamily=Helvetica;fontStyle=1;fontSize=16;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1">
-  <mxGeometry x="650" y="20" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220868192" value="Router&lt;br/&gt;127.0.0.1&lt;br/&gt;PfSense" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://symbols.getvecta.com/stencil_240/204_router.7b208c1133.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;spacingBottom=45;align=center;verticalAlign=bottom;horizontal=1;" vertex="1" parent="1">
-  <mxGeometry x="650" y="140" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220867712" value="Public Internet" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://static.wikia.nocookie.net/cloudss/images/9/94/The_Clouds_Wiki_Icon.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;spacingBottom=60;align=center;verticalAlign=bottom;horizontal=1;" vertex="1" parent="1">
-  <mxGeometry x="650" y="330" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220867088" value="canterlot&lt;br/&gt;10.0.10.1&lt;br/&gt;Windows Server 2022&lt;br/&gt;Active Directory" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/960px-Windows_logo_-_2021.svg.png?20220927154043;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220867184">
-  <mxGeometry x="50" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220866656" value="manehatten&lt;br/&gt;10.0.10.2&lt;br/&gt;Windows Server 2022&lt;br/&gt;MSSQL" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/960px-Windows_logo_-_2021.svg.png?20220927154043;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220867184">
-  <mxGeometry x="175" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928213068160" value="ponyville&lt;br/&gt;10.0.10.3&lt;br/&gt;Debian 13&lt;br/&gt;Apache2" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220867184">
-  <mxGeometry x="300" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220866704" value="seaddle&lt;br/&gt;10.0.10.4&lt;br/&gt;Debian 13&lt;br/&gt;MariaDB" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220867184">
-  <mxGeometry x="425" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220865888" value="trotsylvania&lt;br/&gt;10.0.10.5&lt;br/&gt;Debian 13&lt;br/&gt;cups" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220867184">
-  <mxGeometry x="50" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220951184" value="crystal-empire&lt;br/&gt;10.0.10.6&lt;br/&gt;CachyOS&lt;br/&gt;vsftpd" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://symbols.getvecta.com/stencil_240/79_fileserver.c500813aaa.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220867184">
-  <mxGeometry x="175" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220867184" value="10.0.10.0/24" style="whiteSpace=wrap;rounded=0;fillColor=#F0F9F4;strokeColor=#2D8A5B;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#144D3E;" vertex="1" parent="1">
-  <mxGeometry x="0" y="0" width="550" height="356.25" as="geometry" />
-</mxCell>
-        <mxCell id="1928220952240" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" edge="1" parent="1" source="1928220867184" target="1928220868192" value="127.0.0.1">
-  <mxGeometry x="-1" y="15" relative="1" as="geometry" />
-</mxCell>
-        <mxCell id="1928220952768" value="las-pegasus&lt;br/&gt;10.0.20.1&lt;br/&gt;Windows Server 2022&lt;br/&gt;IIS" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/960px-Windows_logo_-_2021.svg.png?20220927154043;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928213198848">
-  <mxGeometry x="50" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220952912" value="appleloosa&lt;br/&gt;10.0.20.2&lt;br/&gt;Windows Server 2022&lt;br/&gt;SMB" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/960px-Windows_logo_-_2021.svg.png?20220927154043;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928213198848">
-  <mxGeometry x="175" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220953440" value="everfree-forest&lt;br/&gt;10.0.20.3&lt;br/&gt;Debian 13&lt;br/&gt;IRC" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928213198848">
-  <mxGeometry x="300" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220953968" value="griffonstone&lt;br/&gt;10.0.20.4&lt;br/&gt;Debian 13&lt;br/&gt;Nginx" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928213198848">
-  <mxGeometry x="425" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928213198848" value="10.0.20.0/24" style="whiteSpace=wrap;rounded=0;fillColor=#F2F0FF;strokeColor=#7B61FF;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#4A3BB1;" vertex="1" parent="1">
-  <mxGeometry x="0" y="406.25" width="550" height="200.0" as="geometry" />
-</mxCell>
-        <mxCell id="1928220955024" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" edge="1" parent="1" source="1928213198848" target="1928220868192" value="127.0.0.1">
-  <mxGeometry x="-1" y="15" relative="1" as="geometry" />
-</mxCell>
-        <mxCell id="1928220955648" value="baltamare&lt;br/&gt;10.0.30.1&lt;br/&gt;Windows 10&lt;br/&gt;Workstation" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/250px-Windows_logo_-_2012_%28dark_blue%29.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220955600">
-  <mxGeometry x="50" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220955792" value="neighara-falls&lt;br/&gt;10.0.30.2&lt;br/&gt;Windows 10&lt;br/&gt;Workstation" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/250px-Windows_logo_-_2012_%28dark_blue%29.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220955600">
-  <mxGeometry x="175" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220956320" value="cloudsdale&lt;br/&gt;10.0.30.3&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Workstation" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220955600">
-  <mxGeometry x="300" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220956848" value="vanhoover&lt;br/&gt;10.0.30.4&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Workstation" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220955600">
-  <mxGeometry x="425" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220957328" value="whinnyapolis&lt;br/&gt;10.0.30.5&lt;br/&gt;VoidOS&lt;br/&gt;Workstation" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://symbols.getvecta.com/stencil_240/79_fileserver.c500813aaa.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220955600">
-  <mxGeometry x="50" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220957856" value="fillydelphia&lt;br/&gt;10.0.30.6&lt;br/&gt;Windows CEMeNT&lt;br/&gt;Workstation" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/250px-Windows_logo_-_2012_%28dark_blue%29.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220955600">
-  <mxGeometry x="175" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220955600" value="10.0.30.0/24" style="whiteSpace=wrap;rounded=0;fillColor=#FFFBEB;strokeColor=#D97706;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#92400E;" vertex="1" parent="1">
-  <mxGeometry x="0" y="656.25" width="550" height="356.25" as="geometry" />
-</mxCell>
-        <mxCell id="1928220958912" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" edge="1" parent="1" source="1928220955600" target="1928220868192" value="127.0.0.1">
-  <mxGeometry x="-1" y="15" relative="1" as="geometry" />
-</mxCell>
-        <mxCell id="1928220959536" value="bluejump10&lt;br/&gt;172.20.0.40&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="50" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220959680" value="bluejump1&lt;br/&gt;172.20.0.41&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="175" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220960160" value="bluejump2&lt;br/&gt;172.20.0.42&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="300" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220960688" value="bluejump3&lt;br/&gt;172.20.0.43&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="425" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220961168" value="bluejump4&lt;br/&gt;172.20.0.44&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="50" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220961696" value="bluejump5&lt;br/&gt;172.20.0.45&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="175" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220962224" value="bluejump6&lt;br/&gt;172.20.0.46&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="300" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220962752" value="bluejump7&lt;br/&gt;172.20.0.47&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="425" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928213069552" value="bluejump8&lt;br/&gt;172.20.0.48&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="50" y="362.5" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220865936" value="bluejump9&lt;br/&gt;172.20.0.49&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220959488">
-  <mxGeometry x="175" y="362.5" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220959488" value="172.20.0.32/27" style="whiteSpace=wrap;rounded=0;fillColor=#E6F6F7;strokeColor=#00A4A6;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#147EBA;" vertex="1" parent="1">
-  <mxGeometry x="0" y="1062.5" width="550" height="512.5" as="geometry" />
-</mxCell>
-        <mxCell id="1928220964672" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" edge="1" parent="1" source="1928220959488" target="1928220868192" value="127.0.0.1">
-  <mxGeometry x="-1" y="15" relative="1" as="geometry" />
-</mxCell>
-        <mxCell id="1928220965248" value="scoring1&lt;br/&gt;172.20.0.67&lt;br/&gt;Debian 13&lt;br/&gt;Scoring" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="50" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220965392" value="greyjump10&lt;br/&gt;172.20.0.70&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="175" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220965920" value="greyjump1&lt;br/&gt;172.20.0.71&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="300" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220966448" value="greyjump2&lt;br/&gt;172.20.0.72&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="425" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220966496" value="greyjump3&lt;br/&gt;172.20.0.73&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="50" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221016624" value="greyjump4&lt;br/&gt;172.20.0.74&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="175" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221017152" value="greyjump5&lt;br/&gt;172.20.0.75&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="300" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220952624" value="greyjump6&lt;br/&gt;172.20.0.76&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="425" y="206.25" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221017200" value="greyjump7&lt;br/&gt;172.20.0.77&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="50" y="362.5" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221018640" value="greyjump8&lt;br/&gt;172.20.0.78&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="175" y="362.5" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221019120" value="greyjump9&lt;br/&gt;172.20.0.79&lt;br/&gt;Ubuntu 24.04&lt;br/&gt;Jumpbox" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="300" y="362.5" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221019648" value="ansible&lt;br/&gt;172.20.0.80&lt;br/&gt;Debian 13&lt;br/&gt;Ansible" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="425" y="362.5" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221020176" value="scoring2&lt;br/&gt;172.20.0.82&lt;br/&gt;Debian 13&lt;br/&gt;Scoring" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="50" y="518.75" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221020704" value="scoring3&lt;br/&gt;172.20.0.90&lt;br/&gt;Debian 13&lt;br/&gt;Scoring" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="175" y="518.75" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221021088" value="scoring&lt;br/&gt;172.20.0.100&lt;br/&gt;Debian 13&lt;br/&gt;Scoring Server" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="300" y="518.75" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221021616" value="scoring4&lt;br/&gt;172.20.0.106&lt;br/&gt;Debian 13&lt;br/&gt;Scoring" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="425" y="518.75" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221021136" value="scoring5&lt;br/&gt;172.20.0.115&lt;br/&gt;Debian 13&lt;br/&gt;Scoring" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928220965200">
-  <mxGeometry x="50" y="675.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928220965200" value="172.20.0.64/26" style="whiteSpace=wrap;rounded=0;fillColor=#FFF1F2;strokeColor=#E11D48;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#9F1239;" vertex="1" parent="1">
-  <mxGeometry x="825" y="0" width="550" height="825.0" as="geometry" />
-</mxCell>
-        <mxCell id="1928221023152" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" edge="1" parent="1" source="1928220965200" target="1928220868192" value="127.0.0.1">
-  <mxGeometry x="-1" y="-15" relative="1" as="geometry" />
-</mxCell>
-        <mxCell id="1928221023776" value="rednetwork&lt;br/&gt;172.99.0.0&lt;br/&gt;Network Bridge&lt;br/&gt;Network Bridge" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://symbols.getvecta.com/stencil_240/79_fileserver.c500813aaa.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" vertex="1" parent="1928221023680">
-  <mxGeometry x="50" y="50.0" width="75" height="75" as="geometry" />
-</mxCell>
-        <mxCell id="1928221023680" value="172.99.0.0/27" style="whiteSpace=wrap;rounded=0;fillColor=#F3F4F6;strokeColor=#4B5563;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#1F2937;" vertex="1" parent="1">
-  <mxGeometry x="825" y="875.0" width="175" height="200.0" as="geometry" />
-</mxCell>
-        <mxCell id="1928221024352" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" edge="1" parent="1" source="1928221023680" target="1928220868192" value="127.0.0.1">
-  <mxGeometry x="-1" y="-15" relative="1" as="geometry" />
-</mxCell>
-        <mxCell id="1928221024928" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;targetPerimeterSpacing=33;endSize=30;startSize=30;" edge="1" parent="1" source="1928220867712" target="1928220868192">
-  <mxGeometry relative="1" as="geometry" />
-</mxCell>
+        <mxCell id="2112191624688" parent="1" style="text;whiteSpace=nowrap;rounded=0;fillColor=none;strokeColor=none;dashed=0;html=1;fontFamily=Helvetica;fontStyle=1;fontSize=16;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="&lt;div&gt;CDT Alpha&lt;/div&gt;&lt;div&gt;Spring 2026&lt;/div&gt;mlp.local" vertex="1">
+          <mxGeometry height="75" width="75" x="525" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191624496" parent="1" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://symbols.getvecta.com/stencil_240/204_router.7b208c1133.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;spacingBottom=70;align=center;verticalAlign=bottom;horizontal=1;" value="Competition Network" vertex="1">
+          <mxGeometry height="75" width="75" x="525" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191624352" parent="1" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://static.wikia.nocookie.net/cloudss/images/9/94/The_Clouds_Wiki_Icon.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;spacingBottom=45;align=center;verticalAlign=bottom;horizontal=1;" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;MAIN-NAT&lt;div&gt;Internet&lt;/div&gt;" vertex="1">
+          <mxGeometry height="75" width="75" x="525" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="2112187239840" parent="1" style="whiteSpace=wrap;rounded=0;fillColor=#F0F9F4;strokeColor=#2D8A5B;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#144D3E;" value="10.0.10.0/24 - Core Subnet" vertex="1">
+          <mxGeometry height="356.25" width="425" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191624016" parent="2112187239840" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/960px-Windows_logo_-_2021.svg.png?20220927154043;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="canterlot&lt;br/&gt;10.0.10.1&lt;br/&gt;Windows Server 2022&lt;br/&gt;Active Directory" vertex="1">
+          <mxGeometry height="75" width="75" x="50" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191623296" parent="2112187239840" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/960px-Windows_logo_-_2021.svg.png?20220927154043;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="manehatten&lt;br/&gt;10.0.10.2&lt;br/&gt;Windows Server 2022&lt;br/&gt;MSSQL" vertex="1">
+          <mxGeometry height="75" width="75" x="175" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191625456" parent="2112187239840" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="ponyville&lt;br/&gt;10.0.10.3&lt;br/&gt;Debian 13&lt;br/&gt;Apache2" vertex="1">
+          <mxGeometry height="75" width="75" x="300" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191625744" parent="2112187239840" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="seaddle&lt;br/&gt;10.0.10.4&lt;br/&gt;Debian 13&lt;br/&gt;MariaDB" vertex="1">
+          <mxGeometry height="75" width="75" x="50" y="206.25" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191626464" parent="2112187239840" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="trotsylvania&lt;br/&gt;10.0.10.5&lt;br/&gt;Debian 13&lt;br/&gt;cups" vertex="1">
+          <mxGeometry height="75" width="75" x="175" y="206.25" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191626992" parent="2112187239840" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://symbols.getvecta.com/stencil_240/79_fileserver.c500813aaa.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="crystal-empire&lt;br/&gt;10.0.10.6&lt;br/&gt;CachyOS&lt;br/&gt;vsftpd" vertex="1">
+          <mxGeometry height="75" width="75" x="300" y="206.25" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191623776" edge="1" parent="1" source="2112187239840" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" target="2112191624496" value="">
+          <mxGeometry relative="1" x="-1" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191693552" parent="1" style="whiteSpace=wrap;rounded=0;fillColor=#F2F0FF;strokeColor=#7B61FF;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#4A3BB1;" value="10.0.20.0/24 - DMZ Subnet" vertex="1">
+          <mxGeometry height="356.25" width="425" y="406.25" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191694032" parent="2112191693552" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/960px-Windows_logo_-_2021.svg.png?20220927154043;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="las-pegasus&lt;br/&gt;10.0.20.1&lt;br/&gt;Windows Server 2022&lt;br/&gt;IIS" vertex="1">
+          <mxGeometry height="75" width="75" x="50" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191694176" parent="2112191693552" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/960px-Windows_logo_-_2021.svg.png?20220927154043;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="appleloosa&lt;br/&gt;10.0.20.2&lt;br/&gt;Windows Server 2022&lt;br/&gt;SMB" vertex="1">
+          <mxGeometry height="75" width="75" x="175" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191694704" parent="2112191693552" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="everfree-forest&lt;br/&gt;10.0.20.3&lt;br/&gt;Debian 13&lt;br/&gt;IRC" vertex="1">
+          <mxGeometry height="75" width="75" x="50" y="206.75" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191695232" parent="2112191693552" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="griffonstone&lt;br/&gt;10.0.20.4&lt;br/&gt;Debian 13&lt;br/&gt;Nginx" vertex="1">
+          <mxGeometry height="75" width="75" x="175" y="206.75" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191696240" edge="1" parent="1" source="2112191693552" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" target="2112191624496" value="">
+          <mxGeometry relative="1" x="-1" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191696816" parent="1" style="whiteSpace=wrap;rounded=0;fillColor=#FFFBEB;strokeColor=#D97706;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#92400E;" value="10.0.30.0/24 - Internal Subnet" vertex="1">
+          <mxGeometry height="356.25" width="425" y="838" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191696864" parent="2112191696816" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/250px-Windows_logo_-_2012_%28dark_blue%29.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="baltamare&lt;br/&gt;10.0.30.1&lt;br/&gt;Windows 10&lt;br/&gt;Workstation" vertex="1">
+          <mxGeometry height="75" width="75" x="50" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191697008" parent="2112191696816" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/250px-Windows_logo_-_2012_%28dark_blue%29.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="neighara-falls&lt;br/&gt;10.0.30.2&lt;br/&gt;Windows 10&lt;br/&gt;Workstation" vertex="1">
+          <mxGeometry height="75" width="75" x="175" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191697536" parent="2112191696816" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="cloudsdale&lt;br&gt;10.0.30.4&lt;br&gt;Ubuntu 24.04&lt;br&gt;Workstation" vertex="1">
+          <mxGeometry height="75" width="75" x="50" y="206.25" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191698064" parent="2112191696816" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="vanhoover&lt;br&gt;10.0.30.5&lt;br&gt;Ubuntu 24.04&lt;br&gt;Workstation" vertex="1">
+          <mxGeometry height="75" width="75" x="175" y="206.25" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191698592" parent="2112191696816" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://symbols.getvecta.com/stencil_240/79_fileserver.c500813aaa.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="whinnyapolis&lt;br&gt;10.0.30.6&lt;br&gt;VoidOS&lt;br&gt;Workstation" vertex="1">
+          <mxGeometry height="75" width="75" x="300" y="206.25" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191699120" parent="2112191696816" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/250px-Windows_logo_-_2012_%28dark_blue%29.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="fillydelphia&lt;br&gt;10.0.30.3&lt;br&gt;Windows CEMeNT&lt;br&gt;Workstation" vertex="1">
+          <mxGeometry height="75" width="75" x="300" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191700176" edge="1" parent="1" source="2112191696816" style="shape=link;edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;endSize=40;startSize=40;" target="2112191624496" value="">
+          <mxGeometry relative="1" x="-1" y="-15" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191702000" parent="1" style="whiteSpace=wrap;rounded=0;fillColor=#FFF1F2;strokeColor=#E11D48;dashed=0;html=1;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;grStroke=0;verticalAlign=top;align=left;spacingLeft=30;fontColor=#9F1239;" value="172.20.0.32-127 - Remote Access, Management" vertex="1">
+          <mxGeometry height="200" width="307" x="715" y="77.5" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191702096" parent="2112191702000" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/UbuntuCoF.svg/1200px-UbuntuCoF.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="jumpboxes&lt;br&gt;Ubuntu 24.04 Desktop" vertex="1">
+          <mxGeometry height="75" width="76.75" x="51.16666666666667" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191702240" parent="2112191702000" style="whiteSpace=nowrap;rounded=0;dashed=0;shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;html=1;image=https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Openlogo-debianV2.svg/640px-Openlogo-debianV2.svg.png;fontFamily=Helvetica;fontSize=10;fontColor=#000000;labelPosition=center;align=center;horizontal=1;" value="scoring&lt;br&gt;172.20.0.100" vertex="1">
+          <mxGeometry height="75" width="76.75" x="179.08333333333334" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="2112191703872" edge="1" parent="1" source="2112191624496" style="edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;targetPerimeterSpacing=40;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="2112191624352">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="603" y="317" as="sourcePoint" />
+            <mxPoint x="603" y="235" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eL7l3TEAOUYkO3j7tq53-2112191703872" edge="1" parent="1" source="2112191624352" style="edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;targetPerimeterSpacing=40;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.005;entryY=0.988;entryDx=0;entryDy=0;entryPerimeter=0;" target="2112191702000">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="734" y="352" as="sourcePoint" />
+            <mxPoint x="734" y="467" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eL7l3TEAOUYkO3j7tq53-2112191703873" edge="1" parent="1" style="edgeStyle=elbowEdgeStyle;rounded=1;jettySize=auto;targetPerimeterSpacing=40;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="2112191624496">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="714" y="178" as="sourcePoint" />
+            <mxPoint x="635" y="246" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>

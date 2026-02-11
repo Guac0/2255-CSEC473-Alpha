@@ -18,7 +18,7 @@ resource "openstack_compute_instance_v2" "fillydelphia" {
 
   network {
     uuid        = openstack_networking_network_v2.network_internal.id
-    fixed_ip_v4 = "10.0.30.6"
+    fixed_ip_v4 = "10.0.30.3"
   }
 
   security_groups = ["secgroup_blue"]

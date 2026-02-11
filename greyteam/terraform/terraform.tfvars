@@ -40,8 +40,8 @@ deb13 = {
   "nginx" = { hostname = "griffonstone", ip = "10.0.20.4", network = "dmz"}
 }
 ubun24 = {
-  "linux_wkst1" = { hostname = "cloudsdale", ip = "10.0.30.3", network = "internal"}
-  "linux_wkst2" = { hostname = "vanhoover", ip = "10.0.30.4", network = "internal"}
+  "linux_wkst1" = { hostname = "cloudsdale", ip = "10.0.30.4", network = "internal"}
+  "linux_wkst2" = { hostname = "vanhoover", ip = "10.0.30.5", network = "internal"}
 }
 win10 = {
   "windows_wkst1" = { hostname = "baltamare", ip = "10.0.30.1", network = "internal"}

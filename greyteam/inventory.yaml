@@ -66,25 +66,25 @@ all:
       hosts:
         neighara-falls:
           ansible_host: "10.0.30.2"
-
-    linux_wkst1:
-      hosts:
-        cloudsdale:
-          ansible_host: "10.0.30.3"
-
-    linux_wkst2:
-      hosts:
-        vanhoover:
-          ansible_host: "10.0.30.4"
-    
-    void:
-      hosts:
-        whinnyapolis:
-          ansible_host: "10.0.30.5"
     
     cement:
       hosts:
         fillydelphia:
+          ansible_host: "10.0.30.3"
+
+    linux_wkst1:
+      hosts:
+        cloudsdale:
+          ansible_host: "10.0.30.4"
+
+    linux_wkst2:
+      hosts:
+        vanhoover:
+          ansible_host: "10.0.30.5"
+    
+    void:
+      hosts:
+        whinnyapolis:
           ansible_host: "10.0.30.6"
 
 # Groups
