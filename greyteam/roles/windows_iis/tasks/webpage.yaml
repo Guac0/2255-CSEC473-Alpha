@@ -18,16 +18,16 @@
 
 - name: Adding a webpage for IIS
   microsoft.iis.website:
-  name: "Las Pegasus"
-  state: started
-  physical_path: C:\sites\pegasus
-  application_pool: pegasus
-  bindings:
-    add:
-      protocol: http
-      ip: ""
-      port: 8080
-      hostname: "{{ inventory_hostname_short }}"
+    name: "Las Pegasus"
+    state: started
+    physical_path: C:\sites\pegasus
+    application_pool: pegasus
+    bindings:
+      add:
+        protocol: http
+        ip: ""
+        port: 8080
+        hostname: "{{ inventory_hostname_short }}"
 
 - name: Copy website files to IIS
   ansible.windows.win_copy:
