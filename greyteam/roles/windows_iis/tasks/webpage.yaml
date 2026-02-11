@@ -5,6 +5,11 @@
     path: C:\sites\pegasus
     state: directory
 
+- name: Create a new application pool in 'Started' state
+  microsoft.iis.web_app_pool:
+    name: pegasus
+    state: started
+
 - name: Adding a webpage for IIS
   microsoft.iis.website:
     name: "Las Pegasus"
