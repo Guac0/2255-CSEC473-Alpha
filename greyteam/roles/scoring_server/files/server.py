@@ -18,6 +18,7 @@ import math
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import class_mapper
 from sqlalchemy import func, event
+import ipaddress
 
 from shared import (
 CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE,
@@ -26,7 +27,7 @@ INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, SECRET_KEY,
 setup_logging)
 from models import (
 db, AuthToken, WebUser, WebhookQueue, Host,
-ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria
+ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
 )
 
 # =================================
@@ -224,6 +225,54 @@ def hash_id(*args):
     return encoded
     #return hashlib.sha256(f"{ip}|{hostname}".encode()).hexdigest() #sha256 hash - too complex to use on frontend
 
+def get_scoring_data_latest():
+    try:
+        # Find latest round with all services listed
+        total_services = db.session.query(func.count(Service.id)).scalar()
+        if total_services == 0:
+            return [], 0
+        recent_round_query = db.session.query(ScoringHistory.round)\
+            .group_by(ScoringHistory.round)\
+            .having(func.count(ScoringHistory.id) == total_services)\
+            .order_by(ScoringHistory.round.desc())\
+            .first()
+
+        if not recent_round_query:
+            logger.info("/get_hosts - No complete scoring rounds found.")
+            return [], 0
+
+        latest_round = recent_round_query[0]
+
+        # Fetch all data for the round using joins
+        results = db.session.query(
+            Host.hostname,
+            Host.ip,
+            Host.os,
+            ScoringTeams.team_name,
+            ScoringHistory.message
+        ).join(Host, ScoringHistory.host_id == Host.id)\
+         .join(ScoringTeams, ScoringHistory.value == ScoringTeams.id)\
+         .filter(ScoringHistory.round == latest_round)\
+         .all()
+
+        # Convert to list of dicts and sort by ip
+        host_list = [
+            {
+                "hostname": r.hostname,
+                "ip": r.ip,
+                "os": r.os,
+                "team": r.team_name,
+                "message": r.message
+            } for r in results
+        ]
+        host_list.sort(key=lambda x: ipaddress.ip_address(x['ip']))
+
+        return host_list, latest_round
+
+    except Exception as e:
+        logger.warning(f"Exception when running get_scoring_json_latest(): {e}")
+        return [], 0
+    
 # =================================
 # ========= API ENDPOINTS =========
 # =================================
@@ -983,7 +1032,7 @@ def set_scoring():
         db.session.rollback()
         logger.error(f"/set_scoring - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}. Data: {data}")
         return jsonify({"error": "Database error while setting score"}), 500
-
+    
 # --- ScoringCriteria Endpoints ---
 
 @app.route("/set_criteria", methods=["POST"])

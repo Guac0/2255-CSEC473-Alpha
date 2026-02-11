@@ -7,7 +7,7 @@ INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, SECRET_KEY,
 setup_logging)
 from models import (
 db, AuthToken, WebUser, WebhookQueue, Host,
-ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria
+ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
 )
 
 logger = setup_logging("scoring_worker")

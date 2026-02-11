@@ -57,6 +57,27 @@ class Host(db.Model):
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+class ScoringTeams(db.Model):
+    """
+    Records each team and their score
+
+    Relationships:
+    one:many with scoring histories
+    """
+    __tablename__ = 'scoring_teams'
+
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    team_name = db.Column(db.String(10), nullable=False)
+    score = db.Column(db.Integer, nullable=False, default=0)
+    multiplier = db.Column(db.Integer, nullable=False, default=1)
+
+    scoringhistories = db.relationship('ScoringHistory', backref='scoringteam')
+
+    def __repr__(self):
+        return f"<ScoringTeam {self.team_name}, id {self.id}, score {self.score}>"
+    def to_dict(self):
+         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 class ScoringUser(db.Model):
     """
     Records each user:password combo for each host
@@ -76,7 +97,7 @@ class ScoringUser(db.Model):
     scoringuserlists = db.relationship('ScoringUserList', backref='scoringuser')
 
     def __repr__(self):
-        return f"<ScoringUser {self.username}@{self.hostname}>"
+        return f"<ScoringUser {self.username}@{self.host_id}>"
     def to_dict(self):
         #return {"hostname": self.hostname,"username": self.username} # no password
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -138,7 +159,7 @@ class ScoringHistory(db.Model):
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'), index=True, nullable=False)
     host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'), index=True, nullable=False)
     round = db.Column(db.Integer, index=True, nullable=False)
-    value = db.Column(db.Integer, nullable=False)
+    value = db.Column(db.Integer, db.ForeignKey('scoring_teams.id'), nullable=False)
     message = db.Column(db.String(128), nullable=False)
 
     __table_args__ = (

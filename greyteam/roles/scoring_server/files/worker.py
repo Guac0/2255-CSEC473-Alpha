@@ -7,13 +7,17 @@ import math
 from shared import (
 CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE,
 DEFAULT_WEBHOOK_SLEEP_TIME, MAX_WEBHOOK_MSG_PER_MINUTE, WEBHOOK_URL,
-INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, SECRET_KEY, 
+INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, SECRET_KEY, NETCAT_PORT,
 setup_logging)
 from models import (
 db, AuthToken, WebUser, WebhookQueue, Host,
-ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria
+ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
 )
-from server import app
+import socket
+import threading
+import time
+from tabulate import tabulate
+from server import app, get_scoring_data_latest
 
 # === WEBHOOK ===
 
@@ -180,14 +184,140 @@ def discord_webhook(task,url=WEBHOOK_URL):
         logger.error(f"/discord_webhook - failed to send message for WebhookQueue task id {task.id}. StatusCode: {err.code}. Body: {body}.") # Headers: {err.headers}. 
         return err,body
 
+# === Netcat ===
+
+class ScoreboardManager:
+    def __init__(self):
+        self.clients = []
+        self.last_round = -1
+        self.lock = threading.Lock()
+
+    def add_client(self, client_socket):
+        with self.lock:
+            self.clients.append(client_socket)
+        # Immediately send the current data so they aren't staring at a blank screen
+        self.push_to_single(client_socket)
+
+    def push_to_single(self, client_socket):
+        """Sends current state to a newly connected client."""
+        with app.app_context():
+            data, current_round = get_scoring_data_latest()
+            if data:
+                payload = self.format_payload(data, current_round)
+                try:
+                    client_socket.sendall(payload.encode('utf-8'))
+                except:
+                    pass
+
+    def format_payload(self, data, round_num):
+        """Standardized formatting for CLI clients."""
+        # Add ANSI Colors
+        for row in data:
+            team = row['team'].lower()
+            if "blue" in team:
+                row['message'] = f"\033[92m{row['team']}\033[0m" # Green
+            elif "red" in team:
+                row['team'] = f"\033[91m{row['team']}\033[0m" # Red
+            elif "offline" in team:
+                row['team'] = f"\033[93m{row['team']}\033[0m" # yellow
+
+        clear_screen = "\033[H\033[2J"
+        header = f"\033[1m=== LIVE SCOREBOARD - ROUND {round_num} ===\033[0m\n"
+        table = tabulate(data, headers="keys", tablefmt="grid")
+        footer = f"\nUpdated: {time.strftime('%H:%M:%S')} | Active Users: {len(self.clients)}\n"
+        return clear_screen + header + table + footer
+
+    def broadcast_loop(self):
+        logger.info("Central Manager loop started.")
+        while True:
+            with app.app_context():
+                data, current_round = get_scoring_data_latest()
+
+                if current_round and current_round > self.last_round:
+                    logger.info(f"New round {current_round} detected! Broadcasting...")
+                    
+                    try:
+                        data_discord = data
+                        for row in data_discord:
+                            team = row['team'].lower()
+                            if "blue" in team:
+                                row['team'] = f"🟩{row['team']}" # Green
+                            elif "red" in team:
+                                row['team'] = f"🟥{row['team']}" # Red
+                            elif "offline" in team:
+                                row['team'] = f"🟨{row['team']}" # yellow
+                        table = tabulate(data_discord, headers="keys", tablefmt="grid")
+                        task = WebhookQueue(
+                            title=f"Scoring Round {current_round}",
+                            content=table
+                        )
+                        db.session.add(task)
+                        db.session.commit()
+                    except Exception as E:
+                        db.session.rollback()
+                        logger.error(f"Error when adding scoring round to webhook queue: {E}")
+
+                    # Push to all NC Clients
+                    payload = self.format_payload(data, current_round).encode('utf-8')
+                    
+                    with self.lock:
+                        disconnected = []
+                        for client in self.clients:
+                            try:
+                                client.sendall(payload)
+                            except:
+                                disconnected.append(client)
+                        
+                        # Clean up dead connections
+                        for dead in disconnected:
+                            self.clients.remove(dead)
+                    
+                    self.last_round = current_round
+            
+            time.sleep(9)
+
+def handle_client(manager, client_socket, addr):
+    manager.add_client(client_socket)
+    # We don't need a loop here anymore; the manager pushes updates.
+    # We just keep the thread alive to detect when the client closes the connection.
+    try:
+        while True:
+            # If recv returns empty, client disconnected
+            if not client_socket.recv(1024): break
+    except:
+        pass
+    finally:
+        with manager.lock:
+            if client_socket in manager.clients:
+                manager.clients.remove(client_socket)
+        client_socket.close()
+
+def start_nc_server(manager, port=9000):
+    # Start the broadcaster in its own thread
+    threading.Thread(target=manager.broadcast_loop, daemon=True).start()
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(('0.0.0.0', port))
+    server.listen(50)
+
+    while True:
+        client, addr = server.accept()
+        threading.Thread(target=handle_client, args=(manager, client, addr), daemon=True).start()
+
+# === Main ===
+
 if __name__ == "__main__":
     logger = setup_logging("server_worker")
     logger.info("Starting server worker threads...")
     notifier = sdnotify.SystemdNotifier()
-
+    manager = ScoreboardManager()
+    #start_nc_server(manager,NETCAT_PORT)
+    
     # Start the same threads you had before
     threads = [
         threading.Thread(target=webhook_main, daemon=True),
+        threading.Thread(target=start_nc_server, args=(manager,NETCAT_PORT,), daemon=True),
         # testing only!
         #threading.Thread(target=start_server, daemon=True)
         #gunicorn --certfile=cert.pem --keyfile=key.pem --workers 4 --bind 0.0.0.0:8080 server:app 
