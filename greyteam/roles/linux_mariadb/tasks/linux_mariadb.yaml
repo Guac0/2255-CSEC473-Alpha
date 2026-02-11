@@ -27,13 +27,26 @@
 # My three features are Secureing MariaDB, configureing file with permissions, and Create a datab base and a user
     # Secure MariaDB 
 
-- name: Set MariaDB root password
+- name: Set MariaDB root password (when no password is set)
   mysql_user:
     login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
     name: root
     password: "{{ team_password }}"
     host_all: true
     state: present
+  when: root_password_check.rc == 0
+
+- name: Update MariaDB root password (when password already exists)
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: root
+    password: "{{ team_password }}"
+    host_all: true
+    state: present
+  when: root_password_check.rc != 0
 
 - name: Remove anonymous MariaDB users
   mysql_user:
