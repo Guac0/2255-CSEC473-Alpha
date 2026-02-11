@@ -1,0 +1,45 @@
+"subnet","ip","hostname","os","services"
+10.0.10.0/24,10.0.10.1,canterlot,Windows Server 2022,Active Directory
+10.0.10.0/24,10.0.10.2,manehatten,Windows Server 2022,MSSQL
+10.0.10.0/24,10.0.10.3,ponyville,Debian 13,Apache2
+10.0.10.0/24,10.0.10.4,seaddle,Debian 13,MariaDB
+10.0.10.0/24,10.0.10.5,todo,Debian 13,cups
+10.0.10.0/24,10.0.10.6,crystal-empire,CachyOS,vsftpd
+10.0.20.0/24,10.0.20.1,las-pegasus,Windows Server 2022,IIS
+10.0.20.0/24,10.0.20.2,appleloosa,Windows Server 2022,SMB
+10.0.20.0/24,10.0.20.3,everfree-forest,Debian 13,IRC
+10.0.20.0/24,10.0.20.4,griffonstone,Debian 13,Nginx
+10.0.30.0/24,10.0.30.1,baltamare,Windows 10,Workstation
+10.0.30.0/24,10.0.30.2,neighara-falls,Windows 10,Workstation
+10.0.30.0/24,10.0.30.3,cloudsdale,Ubuntu 24.04,Workstation
+10.0.30.0/24,10.0.30.4,vanhoover,Ubuntu 24.04,Workstation
+10.0.30.0/24,10.0.30.5,todo,VoidOS,Workstation
+10.0.30.0/24,10.0.30.6,fillydelphia,Windows CEMeNT,Workstation
+172.20.0.32/27,172.20.0.41,bluejump1,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.42,bluejump2,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.43,bluejump3,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.44,bluejump4,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.45,bluejump5,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.46,bluejump6,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.47,bluejump7,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.48,bluejump8,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.49,bluejump9,Ubuntu 24.04,Jumpbox
+172.20.0.32/27,172.20.0.40,bluejump10,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.67,scoring1,Debian 13,Scoring
+172.20.0.64/26,172.20.0.71,greyjump1,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.72,greyjump2,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.73,greyjump3,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.74,greyjump4,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.75,greyjump5,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.76,greyjump6,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.77,greyjump7,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.78,greyjump8,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.79,greyjump9,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.70,greyjump10,Ubuntu 24.04,Jumpbox
+172.20.0.64/26,172.20.0.80,ansible,Debian 13,Ansible
+172.20.0.64/26,172.20.0.82,scoring2,Debian 13,Scoring
+172.20.0.64/26,172.20.0.90,scoring3,Debian 13,Scoring
+172.20.0.64/26,172.20.0.100,scoring,Debian 13,Scoring Server
+172.20.0.64/26,172.20.0.106,scoring4,Debian 13,Scoring
+172.20.0.64/26,172.20.0.115,scoring5,Debian 13,Scoring
+172.99.0.0/27,172.99.0.0,rednetwork,Network Bridge,Network Bridge

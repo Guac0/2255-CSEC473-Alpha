@@ -1,0 +1,152 @@
+---
+# note for all: non admin users wont be able to change their own regkeys. But blue teams wont be signing in as them anyways. Oh well! IRSEC 2025
+# wallpaper isnt changed for whiteteam due to different credentials
+
+- name: Ensure wallpaper folder 1 exists
+  ansible.windows.win_file:
+    path: "C:\\windows\\web\\wallpaper\\cloud\\"
+    state: directory
+
+- name: Ensure wallpaper folder 2 exists
+  ansible.windows.win_file:
+    path: "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\DesktopSpotlight\\Assets\\Images\\"
+    state: directory
+
+- name: Check if hostname-specific wallpaper exists
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ inventory_hostname_short }}.jpg" # role_path needed due to delegation. IRSEC 2025
+  register: wallpaper_check
+  delegate_to: localhost
+
+- name: Copy Wallpaper to Dst
+  ansible.windows.win_copy:
+    src: "{{ wallpaper_check.stat.exists | ternary('files/' + inventory_hostname_short + '.jpg', 'files/wallpaper.jpg') }}"
+    dest: "C:\\windows\\web\\wallpaper\\cloud\\Wallpaper.jpg"
+
+- name: Copy Wallpaper to Working Directory
+  ansible.windows.win_copy:
+    src: "{{ wallpaper_check.stat.exists | ternary('files/' + inventory_hostname_short + '.jpg', 'files/wallpaper.jpg') }}"
+    dest: "{{ working_dir }}\\Wallpaper.jpg"
+
+#- name: Copy Wallpaper to All Locations
+#  ansible.windows.win_copy:
+#    src: "{{ working_dir }}\\Wallpaper.jpg"
+#    dest: "{{ item }}"
+#  become: true
+#  become_method: runas
+#  become_user: SYSTEM
+#  loop:
+#    - "C:\\windows\\web\\wallpaper\\cloud\\Wallpaper.jpg"
+#    - "C:\\windows\\web\\wallpaper\\Windows\\img0.jpg"
+#    - "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\DesktopSpotlight\\Assets\\Images\\image_0.jpg"
+#    - "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\DesktopSpotlight\\Assets\\Images\\image_1.jpg"
+#    - "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\DesktopSpotlight\\Assets\\Images\\image_2.jpg"
+#    - "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\DesktopSpotlight\\Assets\\Images\\image_3.jpg"
+
+- name: Copy Wallpaper to All Locations via PowerShell
+  ansible.windows.win_shell: |
+    $Src = "C:\Temp\Working\Ansible\Wallpaper.jpg"
+    $Dests = @(
+      "C:\windows\web\wallpaper\cloud\Wallpaper.jpg",
+      "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\DesktopSpotlight\Assets\Images\image_0.jpg",
+      "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\DesktopSpotlight\Assets\Images\image_1.jpg",
+      "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\DesktopSpotlight\Assets\Images\image_2.jpg",
+      "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\DesktopSpotlight\Assets\Images\image_3.jpg",
+      "C:\windows\web\wallpaper\Windows\img0.jpg"
+    )
+
+    foreach ($Dest in $Dests) {
+      try {
+        takeown /F $Dest /A /R /D Y | Out-Null
+        icacls $Dest /grant SYSTEM:F /T /C | Out-Null
+        Copy-Item -Path $Src -Destination $Dest -Force -ErrorAction Stop
+        Write-Host "Copied to $Dest successfully."
+      } catch {
+        Write-Host "Failed to copy to ${Dest}: $($_.Exception.Message)"
+      }
+    }
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+  ignore_errors: true
+
+#- name: Enable personalization # this is already on by default but may as well. never mind, it fails so skip it. IRSEC 2025
+#  ansible.windows.win_regedit:
+#    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Personalization
+#    name: AllowPersonalization
+#    data: 1
+
+- name: Change WallpaperStyle to 4 (all users) # Not needed on Windows 10 versions used before IRSEC 2025. For windows versions starting at IRSEC 2025, this does not override windows not being activated and blocking wallpaper change
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System
+    name: WallpaperStyle
+    data: 4
+
+- name: Change Wallpaper (all users) # Not needed on Windows 10 versions used before IRSEC 2025. For windows versions starting at IRSEC 2025, this does not override windows not being activated and blocking wallpaper change
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System
+    name: Wallpaper
+    data: C:\windows\web\wallpaper\cloud\Wallpaper.jpg
+
+- name: Change Wallpaper 2(all users) # Not needed on Windows 10 versions used before IRSEC 2025. For windows versions starting at IRSEC 2025, this does not override windows not being activated and blocking wallpaper change
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System
+    name: WallPaper
+    data: C:\windows\web\wallpaper\cloud\Wallpaper.jpg
+
+- name: Change WallpaperStyle to 4 (Domain)
+  ansible.windows.win_regedit:
+    path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System
+    name: WallpaperStyle
+    data: 4
+  ignore_errors: true
+  vars:
+    ansible_become: yes
+    ansible_become_method: runas
+    ansible_become_user: "team{{ team_number }}\\{{ item.name|default(item) }}"
+    ansible_become_password: "{{ item.password|default(team_password) }}"
+  loop: "{{ domain_admins + domain_users }}"
+
+- name: Change WallpaperStyle to 4 (Local) # Pretty sure this doesn't actually do anything, as wallpaper is also changed for whiteteam even if no other users are on the box 
+  ansible.windows.win_regedit:
+    path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System
+    name: WallpaperStyle
+    data: 4
+  ignore_errors: true
+  vars:
+    ansible_become: yes
+    ansible_become_method: runas
+    ansible_become_user: "{{ item.name|default(item) }}"
+    ansible_become_password: "{{ item.password|default(team_password) }}"
+  loop: "{{ local_admins + local_users + ['Administrator', 'Admin'] }}"
+  when: inventory_hostname_short != "pyramid"
+
+- name: Change wallpaper path regkey (Domain) # lol you can just set this without having windows activated LMAO. IRSEC 2025
+  ansible.windows.win_regedit:
+    path: HKCU:\Control Panel\Desktop
+    name: Wallpaper
+    data: C:\windows\web\wallpaper\cloud\Wallpaper.jpg
+  ignore_errors: true
+  vars:
+    ansible_become: yes
+    ansible_become_method: runas
+    ansible_become_user: "team{{ team_number }}\\{{ item.name|default(item) }}"
+    ansible_become_password: "{{ item.password|default(team_password) }}"
+  loop: "{{ domain_admins + domain_users }}"
+
+- name: Change wallpaper path regkey (Local) # lol you can just set this without having windows activated LMAO. IRSEC 2025
+  ansible.windows.win_regedit:
+    path: HKCU:\Control Panel\Desktop
+    name: WallPaper
+    data: C:\windows\web\wallpaper\cloud\Wallpaper.jpg
+  ignore_errors: true
+  vars:
+    ansible_become: yes
+    ansible_become_method: runas
+    ansible_become_user: "{{ item.name|default(item) }}"
+    ansible_become_password: "{{ item.password|default(team_password) }}"
+  loop: "{{ local_admins + local_users + ['Administrator', 'Admin'] }}"
+  when: inventory_hostname_short != "pyramid"
+
+- name: Reboot Box
+  ansible.windows.win_reboot:

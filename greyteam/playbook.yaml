@@ -1,11 +1,32 @@
 ---
+- name: Ping Linux
+  hosts: linux
+  gather_facts: no
+  tags:
+    - ping
+    - ping_linux
+    - linux
+  tasks:
+    - name: Ping Linux
+      ansible.builtin.ping:
+
+- name: Ping Windows
+  hosts: windows
+  gather_facts: no
+  tags: 
+    - ping
+    - ping_windows
+    - windows
+  tasks:
+    - name: Ping Windows
+      ansible.windows.win_ping:
 
 #################################
 ########### Management ##########
 #################################
 
 - name: Deploy OpenVPN Server
-  hosts: jumpbox
+  hosts: vpn
   roles:
     - openvpn_server
   tags: 
@@ -14,7 +35,7 @@
     - openvpn_server
 
 - name: Deploy Scoring Server
-  hosts: deploy
+  hosts: scoring
   roles:
     - scoring_server
   tags: 
@@ -33,7 +54,7 @@
 ######## Generic ######
 
 - name: Run Windows Standards 
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_standards
   tags: 
@@ -43,7 +64,7 @@
     - stds
 
 - name: Create Local Users
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_users_local
   tags:
@@ -51,8 +72,18 @@
   - team
   - local_users
 
+#- name: Deploy Rustdesk Windows
+#  hosts: windows:&gui:!cement
+#  roles:
+#    - windows_rustdesk
+#  tags:
+#    - windows 
+#    - team 
+#    - rustdesk
+#    - rustdesk_windows
+
 - name: Install Utilities
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_utilities
   tags:
@@ -61,7 +92,7 @@
     - utilities
 
 - name: Set Wallpaper
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_wallpaper
   tags:
@@ -70,7 +101,7 @@
     - wallpaper
 
 - name: Deploy User Files
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_user_files
   tags:
@@ -81,7 +112,7 @@
 ###### Services #######
 
 - name: Windows Deploy MSSQL
-  hosts: windows:&inscope
+  hosts: mssql
   roles:
     - windows_mssql
   tags:
@@ -92,7 +123,7 @@
 ####### Finish #######
 
 - name: Post Deploy Cleanup
-  hosts: windows:&inscope
+  hosts: windows:&inscope:!cement
   roles:
     - windows_finish
   tags:
@@ -107,7 +138,7 @@
 ####### Generic #######
 
 - name: Deploy Linux Standards
-  hosts: linux:&inscope
+  hosts: linux
   roles:
     - linux_standards
   tags:
@@ -117,23 +148,60 @@
     - stds
 
 - name: Deploy Linux Users
-  hosts: linux:&inscope
+  hosts: linux
   roles:
     - linux_users
   tags:
     - linux 
     - team 
     - users
+    - users_linux
 
-###### Services #######
-
-####### Finish ########
-
-- name: Reboot
-  hosts: linux:&inscope
+- name: Deploy Rustdesk Linux
+  hosts: linux:&gui
   roles:
-    - linux_reboot
+    - linux_rustdesk
   tags:
     - linux 
     - team 
+    - rustdesk
+    - rustdesk_linux
+
+###### Services #######
+
+- name: Deploy CUPS
+  hosts: cups
+  roles:
+    - linux_cups
+  tags:
+    - cups
+    - linux
+    - inscope
+
+####### Finish ########
+
+- name: Clean Up
+  hosts: linux
+  roles:
+    - linux_finish
+  tags:
+    - linux 
+    - team
+    - finish
+    - post_deploy
+
+- name: Reboot
+  hosts: linux
+  roles:
+    - linux_reboot
+  tags:
+<<<<<<< Updated upstream
+    - linux
+    - team
     - reboot
+    - post_deploy
+=======
+    - linux 
+    - team 
+    - reboot
+>>>>>>> Stashed changes

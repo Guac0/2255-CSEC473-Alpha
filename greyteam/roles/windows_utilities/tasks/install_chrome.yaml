@@ -6,13 +6,13 @@
 
 - name: Check if installer is present
   ansible.windows.win_stat:
-    path: "{{ windows_working_dir }}\\chrome\\chrome_install.exe"
+    path: "{{ working_dir }}\\chrome\\chrome_install.exe"
   register: installer_check
   when: not app_check.stat.exists
 
 - name: Create Directory
   ansible.windows.win_file:
-    path: "{{ windows_working_dir }}\\chrome"
+    path: "{{ working_dir }}\\chrome"
     state: directory
   when:
     - not app_check.stat.exists
@@ -21,7 +21,7 @@
 - name: Copy over file
   ansible.windows.win_copy: 
     src: files/chrome_install.exe
-    dest: "{{ windows_working_dir }}\\chrome"
+    dest: "{{ working_dir }}\\chrome"
   when:
     - not app_check.stat.exists
     - not installer_check.stat.exists
@@ -29,7 +29,7 @@
 - name: Install Chrome
   ansible.windows.win_command: 'chrome_install.exe /silent /install'
   args:
-    chdir: "{{ windows_working_dir }}\\chrome"
+    chdir: "{{ working_dir }}\\chrome"
   when: not app_check.stat.exists
 
 # chrome installer automatically adds desktop shortcut to all users

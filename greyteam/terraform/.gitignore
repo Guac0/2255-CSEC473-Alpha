@@ -1,10 +1,7 @@
-app-cred-key_cdt_1-openrc.sh
+app-cred-*
 aan8745-openrc.sh
-clouds.yaml
-old2/
-old/
-.terraform/
-.terraform.lock.hcl
+clouds*
+old*
+.terraform*
 terraform.tfstate
 terraform.tfstate.backup
-app-cred-neko-openrc.sh

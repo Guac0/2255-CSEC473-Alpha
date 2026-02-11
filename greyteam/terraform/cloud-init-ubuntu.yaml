@@ -19,8 +19,20 @@ chpasswd:
     greyteam:ponyuploc0!
   expire: false
 
+package_update: true
+#package_upgrade: true
+#packages:
+#  - git
+
 runcmd:
   # Unlock user in case PAM or cloud-init locked it
   - passwd -u greyteam
   # Ensure account isn't expired
   - chage -E -1 -M 99999 greyteam
+  # Delete golden image user
+  - pkill -u cyberrange || true
+  - [ userdel, -f, -r, cyberrange ]
+    # Ensure the login screen (SDDM) refreshes its user list
+  - sed -i 's/^User=.*/User=/' /etc/sddm.conf
+  - sed -i 's/^Session=.*/Session=/' /etc/sddm.conf
+  - systemctl restart sddm

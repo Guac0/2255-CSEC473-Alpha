@@ -3,7 +3,7 @@
   ansible.windows.win_user:
     name: "{{ item.name|default(item) }}"
     state: present
-    password: "{{ item.password|default(users_password) }}"
+    password: "{{ item.password|default(team_password) }}"
     update_password: always
     groups:
       - Users
@@ -17,23 +17,23 @@
   ansible.windows.win_user:
     name: "{{ item.name|default(item) }}"
     state: present
-    password: "{{ item.password|default(users_password) }}"
+    password: "{{ item.password|default(team_password) }}"
     update_password: always
     groups:
       - Users
       - Administrators
       - Remote Desktop Users
   loop:
-    "{{ windows_local_admins if windows_local_admins is iterable else [] }}"
+    "{{ local_admins if local_admins is iterable else [] }}"
 
 - name: Add Local Users
   ansible.windows.win_user:
     name: "{{ item.name|default(item) }}"
     state: present
-    password: "{{ item.password|default(users_password) }}"
+    password: "{{ item.password|default(team_password) }}"
     update_password: always
     groups:
       - Users
       - Remote Desktop Users
   loop: 
-    "{{ windows_local_users if windows_local_users is iterable else [] }}"
+    "{{ local_admins if local_admins is iterable else [] }}"

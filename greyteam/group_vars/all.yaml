@@ -1,11 +1,41 @@
+---
+# Variables that apply to all hosts.
+
 greyteam_user: greyteam
 greyteam_password: ponyuploc0!
 
 ansible_user: "{{ greyteam_user }}"
 ansible_password: "{{ greyteam_password }}"
-ansible_ssh_private_key_file: ~/.ssh/irsec2024
+ansible_ssh_private_key_file: ~/.ssh/cdt
 
-users_password: FriendshipIsMagic0!
+team_password: FriendshipIsMagic0!
 
 domain: mlp.local
 mgmt_dns: 8.8.8.8
+
+payload_key_content: 'Do not modify this file in any way (name, content, permissions). Contact greyteam if you have questions.'
+
+local_users:
+  - twilight
+  - pinkiepie
+  - applejack
+  - rarity
+  - rainbowdash
+  - fluttershy
+local_admins:
+  - bigmac
+  - mayormare
+  - shiningarmor
+  - candence
+domain_users:
+  - spike
+  - starlight
+  - trixie
+  - derpy
+  - snips
+  - snails
+domain_admins:
+  - celestia
+  - discord
+  - luna
+  - starswirlthebearded

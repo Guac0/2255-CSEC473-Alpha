@@ -14,3 +14,7 @@ required_version = ">= 0.14.0"
 #  cloud = "openstack"
   #tenant_name = "aan8745"
 #}
+provider "openstack" {
+  tenant_name = "cdtalpha"
+  auth_url    = "https://openstack.cyberrange.rit.edu:5000/v3/"
+}

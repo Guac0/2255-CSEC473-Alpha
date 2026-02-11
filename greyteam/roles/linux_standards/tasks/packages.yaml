@@ -13,11 +13,22 @@
     - "curl"
     - "python3"
     - "python3-pip"
+    - "python3-venv"
+    - "python-is-python3"
     #- "python3-pymysql"
     - "git"
     - "iptables"
     - "tmux"
+    - "xz-utils"
+    - "screen"
+    - "pwgen"
   ignore_errors: yes
+
+- name: Install Remmina for GUI hosts
+  package:
+    name: remmina
+    state: present
+  when: "'gui' in group_names"
 
 #- name: Install python packages
 #  ansible.builtin.pip:

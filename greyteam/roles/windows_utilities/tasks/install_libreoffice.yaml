@@ -6,13 +6,13 @@
 
 - name: Check if installer is present
   ansible.windows.win_stat:
-    path: "{{ windows_working_dir }}\\libreoffice\\LibreOffice_Win_x86-64.msi"
+    path: "{{ working_dir }}\\libreoffice\\LibreOffice_Win_x86-64.msi"
   register: installer_check
   when: not app_check.stat.exists
 
 - name: Create Directory
   ansible.windows.win_file:
-    path: "{{ windows_working_dir }}\\libreoffice"
+    path: "{{ working_dir }}\\libreoffice"
     state: directory
   when:
     - not app_check.stat.exists
@@ -22,7 +22,7 @@
   ansible.windows.win_copy: 
     # files/npp.Installer.x64.exe
     src: files/LibreOffice_Win_x86-64.msi
-    dest: "{{ windows_working_dir }}\\libreoffice"
+    dest: "{{ working_dir }}\\libreoffice"
   when:
     - not app_check.stat.exists
     - not installer_check.stat.exists
@@ -30,7 +30,7 @@
 - name: Install libreoffice for all users
   ansible.windows.win_command: 'msiexec /i "LibreOffice_Win_x86-64.msi" /qn REBOOTYESNO=No ALLUSERS=1 ADDLOCAL=ALL CREATEDESKTOPLINK=1 UI_LANGS=en_GB ISCHECKFORPRODUCTUPDATES=0 QUICKSTART=0'
   args:
-    chdir: "{{ windows_working_dir }}\\libreoffice"
+    chdir: "{{ working_dir }}\\libreoffice"
   when: not app_check.stat.exists
   #ignore_errors: true
 # Automatically creates a desktop shortcut due to CREATEDESKTOPLINK=1

@@ -2,27 +2,27 @@
 - name: Create Database
   community.general.mssql_db:
     login_user: "{{ mssql_sqlsvcaccount }}"
-    login_password: "{{ users_password }}"
+    login_password: "{{ team_password }}"
     login_host: "{{ mssql_host }}"
-    login_port: "{{ mssql_port }}"
+    login_port: 1433
     name: "{{ mssql_database_name }}"
     state: present
 
 - name: Check DB connection
   community.general.mssql_script:
     login_user: "{{ mssql_sqlsvcaccount }}"
-    login_password: "{{ users_password }}"
+    login_password: "{{ team_password }}"
     login_host: "{{ mssql_host }}"
-    login_port: "{{ mssql_port }}"
+    login_port: 1433
     db: "{{ mssql_database_name }}"
     script: "SELECT 1"
 
 - name: Query within a transaction
   community.general.mssql_script:
     login_user: "{{ mssql_sqlsvcaccount }}"
-    login_password: "{{ users_password }}"
+    login_password: "{{ team_password }}"
     login_host: "{{ mssql_host }}"
-    login_port: "{{ mssql_port }}"
+    login_port: 1433
     script: |
       UPDATE sys.SomeTable SET desc = 'some_table_desc' WHERE name = %(dbname)s
       UPDATE sys.AnotherTable SET desc = 'another_table_desc' WHERE name = %(dbname)s

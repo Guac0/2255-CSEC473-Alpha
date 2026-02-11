@@ -1,0 +1,31 @@
+---
+- name: Ensure the target user is not root
+  ansible.builtin.assert:
+    that: delete_user != "root"
+    fail_msg: "Cannot use pkill -u on the root user; this can cause system instability."
+    success_msg: "Target user is not root. Proceeding with log out task."
+
+- name: Get list of logged-in users (optional, for verification)
+  ansible.builtin.command: who
+  register: who_output
+  changed_when: false
+  check_mode: false
+  
+- name: Forcefully log out the user by killing all their processes
+  ansible.builtin.command: "pkill -SIGKILL -u {{ delete_user }}"
+  register: logout_result
+  ignore_errors: true # Ignore errors if the user is not logged in or has no processes
+  
+- name: Display logout result
+  ansible.builtin.debug:
+    var: logout_result.stdout_lines
+    
+- name: Verify user is logged out (optional)
+  ansible.builtin.command: who
+  register: who_output_after
+  changed_when: false
+  check_mode: false
+
+- name: Display users after attempt
+  ansible.builtin.debug:
+    var: who_output_after.stdout_lines

@@ -1,0 +1,3 @@
+---
+- name: Delete Working Dir
+  ansible.builtin.include_tasks: clean_working_dir.yaml
