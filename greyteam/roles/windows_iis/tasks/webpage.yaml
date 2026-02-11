@@ -5,6 +5,12 @@
     path: C:\sites\pegasus
     state: directory
 
+- name: Remove Default Web Site
+  microsoft.iis.website:
+    name: "Default Web Site"
+    state: absent
+
+
 - name: Create a new application pool in 'Started' state
   microsoft.iis.web_app_pool:
     name: pegasus
