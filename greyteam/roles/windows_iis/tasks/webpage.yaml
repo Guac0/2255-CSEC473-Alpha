@@ -16,6 +16,16 @@
     name: pegasus
     state: started
 
+- name: Remove IIS site completely
+  microsoft.iis.website:
+    name: "Las Pegasus"
+    state: absent
+
+- name: Restart IIS
+  ansible.windows.win_service:
+    name: W3SVC
+    state: restarted
+
 - name: Adding a webpage for IIS
   microsoft.iis.website:
     name: "Las Pegasus"
@@ -26,7 +36,7 @@
       add:
         - protocol: http
           ip: ""
-          port: 8080
+          port: 80
           hostname: "{{ inventory_hostname_short }}"
 
 - name: Copy website files to IIS
