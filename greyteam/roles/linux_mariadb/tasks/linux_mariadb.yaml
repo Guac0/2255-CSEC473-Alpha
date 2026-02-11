@@ -84,6 +84,7 @@
     owner: root
     group: root
     mode: '0644'
+  register: config_deployed
   notify: Restart MariaDB
 - name: Restart MariaDB to apply configuration
   systemd:
