@@ -12,6 +12,12 @@
     name: mariadb
     state: started
     enabled: true
+
+- name: Wait for MariaDB to be ready
+  wait_for:
+    port: 3306
+    delay: 2
+    timeout: 30
 # My three features are Secureing MariaDB, configureing file with permissions, and Create a datab base and a user
     # Secure MariaDB 
 
