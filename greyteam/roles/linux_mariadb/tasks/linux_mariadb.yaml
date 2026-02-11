@@ -85,7 +85,26 @@
     group: root
     mode: '0644'
   notify: Restart MariaDB
+- name: Restart MariaDB to apply configuration
+  systemd:
+    name: mariadb
+    state: restarted
+  when: config_deployed.changed
 
+- name: Wait for MariaDB after restart
+  wait_for:
+    port: 3306
+    delay: 5
+    timeout: 60
+    state: started
+  when: config_deployed.changed
+
+- name: Verify MariaDB is running after restart
+  command: systemctl is-active mariadb
+  register: mariadb_active
+  failed_when: mariadb_active.stdout != "active"
+  changed_when: false
+  when: config_deployed.changed
     # Create database and user
 - name: Create  database
   mysql_db:
