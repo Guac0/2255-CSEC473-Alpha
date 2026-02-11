@@ -4,6 +4,9 @@
 greyteam_user: greyteam
 greyteam_password: ponyuploc0!
 
+redteam_user: redteam
+redteam_password: sugarcubes4doom!
+
 ansible_user: "{{ greyteam_user }}"
 ansible_password: "{{ greyteam_password }}"
 ansible_ssh_private_key_file: ~/.ssh/cdt
