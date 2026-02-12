@@ -17,7 +17,7 @@ import sys
 
 logger = setup_logging("scoring_worker")
 
-def check(service:Service) -> int:
+def check(service:Service) -> tuple[int, str]:
     """
     Used by processes to output check results to the main thread
 
@@ -28,12 +28,12 @@ def check(service:Service) -> int:
     """
     # Match scorecheck name to a check
     check_obj : checks.Check = None
-    
+
     match service.scorecheck_name:
         case 'http':
             check_obj = checks.Http(service)
         case _: # Default: no class match
-            raise ValueError(f'Check type "{service.scorecheck_name}" not implemented.')
+            return (0, f'Check type "{service.scorecheck_name}" not implemented.')
 
     return check_obj.check()
 
@@ -82,22 +82,19 @@ def run_scoring_round(round_num:int, services:list[Service]):
             try:
                 # I use timeout of 0 b/c I already waited above
                 # Use of async is mostly to get the timeout error
-                success = processes[i].get(0)
-                message = "Check succeeded"
+                res = processes[i].get(0)
             except mp.TimeoutError as e:
-                success = 0
-                message = "Check timed out"
+                res = (0, "Check timed out")
             except Exception as e:
-                success = 0
-                message = str(e)
+                res = (0, "Something went wrong with scoring multiprocessing")
 
             # Construct score
             new_score = ScoringHistory (
                 service_id = services[i].id,
                 host = services[i].host_id,
                 round = round_num,
-                value = success,
-                message = message
+                value = res[0],
+                message = res[1]
             )
             db.session.add(new_score)
         

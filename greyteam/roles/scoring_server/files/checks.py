@@ -50,15 +50,15 @@ class Check:
         except Exception as e:
             raise e
 
-    def check () -> int:
+    def check () -> tuple[int, str]:
         '''
         Performs a check.
         
-        :return: the integer identifier of the appropriate team
-        :rtype: int
+        :return: a tuple containing the integer identifier of the appropriate team and a success/failure message
+        :rtype: tuple[int,str]
         '''
 
-        return -1
+        return (0, "Check class")
 
 class Http (Check):
 
@@ -76,7 +76,7 @@ class Http (Check):
             
             # Check succeeded
             if res.returncode == 0 and criterion.content in res.stdout:
-                return criterion.team
+                return (criterion.team, "Generic success")
             # Command failed
             elif res.returncode != 0:
                 err.insert(0, res.stderr)
@@ -84,13 +84,7 @@ class Http (Check):
             elif criterion.content not in res.stdout:
                 err.append("Content did not match expected value")
         
-        # Some criterion caused an error
-        if len(err) > 0:
-            # Note that stderrs take precedent over content mismatches
-            raise Exception(err[0])
-        
-        # All criterion failed, meaning that the service is down :(
-        return 0
+        return (0, err[0])
 
 class Ssh (Check):
     users:list[tuple[str,str]]
@@ -106,6 +100,6 @@ class Ssh (Check):
     def check (self):
         user = random.choice(self.users)
         sshProcess = subprocess.Popen(
-            ['ssh', f'{user[0]}@{self.host}'],
+            ['ssh', f'{user[0]}@{self.host_ip}'],
             input=user[1]
         )
