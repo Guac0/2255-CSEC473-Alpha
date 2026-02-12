@@ -1217,4 +1217,4 @@ if __name__ == "__main__":
     #threading.Thread(target=webhook_main, daemon=True).start()
 
     # Start main app. Do not put any code below this line. Comment out when using gunicorn
-    start_server()
+    #start_server()

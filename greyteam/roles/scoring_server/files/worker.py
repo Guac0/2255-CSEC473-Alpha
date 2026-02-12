@@ -18,7 +18,9 @@ import socket
 import threading
 import time
 from tabulate import tabulate
-from server import app, get_scoring_data_latest
+from server import app, get_scoring_data_latest, create_db_tables
+
+logger = setup_logging("server-worker")
 
 # === WEBHOOK ===
 
@@ -294,6 +296,7 @@ def handle_client(manager, client_socket, addr):
         client_socket.close()
 
 def start_nc_server(manager, port=9000):
+
     # Start the broadcaster in its own thread
     threading.Thread(target=manager.broadcast_loop, daemon=True).start()
 
@@ -305,3 +308,6 @@ def start_nc_server(manager, port=9000):
     while True:
         client, addr = server.accept()
         threading.Thread(target=handle_client, args=(manager, client, addr), daemon=True).start()
+
+if __name__ == "__main__":
+    create_db_tables()
