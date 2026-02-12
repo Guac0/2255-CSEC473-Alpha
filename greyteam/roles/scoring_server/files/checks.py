@@ -69,7 +69,7 @@ class Http (Check):
         err = []
         for criterion in self.criteria:
             res = subprocess.run(
-                ["curl", f"{self.host}:{criterion.loc}"],
+                ["curl", f"{self.host_ip}:{criterion.loc}"],
                 capture_output=True,
                 text=True
             )

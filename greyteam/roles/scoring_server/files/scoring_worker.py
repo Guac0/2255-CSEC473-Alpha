@@ -91,7 +91,7 @@ def run_scoring_round(round_num:int, services:list[Service]):
             # Construct score
             new_score = ScoringHistory (
                 service_id = services[i].id,
-                host = services[i].host_id,
+                host_id = services[i].host_id,
                 round = round_num,
                 value = res[0],
                 message = res[1]
