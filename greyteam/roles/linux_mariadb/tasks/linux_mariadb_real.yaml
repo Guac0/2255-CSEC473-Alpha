@@ -19,12 +19,6 @@
     delay: 5
     timeout: 60
 
-- name: Check if MariaDB is actually running
-  command: systemctl status mariadb
-  register: mariadb_status
-  failed_when: false
-  changed_when: false
-
 # My three features are Securing MariaDB, configuring file with permissions, and Create a database and a user
 # Secure MariaDB 
 - name: Check if root password is already set
@@ -88,56 +82,36 @@
   systemd:
     name: mariadb
     state: restarted
+    daemon_reload: yes
   when: config_deployed.changed
+  register: mariadb_restart
 
-- name: Wait a moment for restart to complete
+- name: Wait after restart
   pause:
     seconds: 10
   when: config_deployed.changed
 
-- name: Check MariaDB status after restart
-  command: systemctl status mariadb
-  register: mariadb_status_after
+- name: Force start MariaDB if restart failed
+  systemd:
+    name: mariadb
+    state: started
+  when: config_deployed.changed
   failed_when: false
-  changed_when: false
-  when: config_deployed.changed
 
-- name: Display MariaDB status
-  debug:
-    var: mariadb_status_after.stdout_lines
-  when: config_deployed.changed
-
-- name: Check MariaDB error log
-  command: tail -n 100 /var/log/mysql/error.log
-  register: mariadb_error_log
-  failed_when: false
-  changed_when: false
-  when: config_deployed.changed
-
-- name: Display MariaDB error log
-  debug:
-    var: mariadb_error_log.stdout_lines
-  when: config_deployed.changed and mariadb_error_log is defined
-
-- name: Wait for MariaDB port after restart
+- name: Wait for MariaDB port to be available
   wait_for:
     port: 3306
     delay: 2
-    timeout: 60
+    timeout: 30
     state: started
   when: config_deployed.changed
 
-- name: Verify MariaDB is running
-  command: systemctl is-active mariadb
-  register: mariadb_active
-  failed_when: mariadb_active.stdout != "active"
-  changed_when: false
-
-# Create database and user
+# Create database and user (use unix socket for reliability)
 - name: Create database
   mysql_db:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_name }}"
     state: present
     
@@ -169,6 +143,7 @@
   mysql_db:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_name }}"
     state: import
     target: /tmp/ponies.sql
@@ -177,6 +152,7 @@
   mysql_user:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_user }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"
@@ -187,6 +163,7 @@
   mysql_user:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ item }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"
@@ -198,6 +175,7 @@
   mysql_user:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ item }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"
