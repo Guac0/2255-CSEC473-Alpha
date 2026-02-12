@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from shared import SAVEFILE
-import time, datetime
+import time
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -30,7 +31,7 @@ class WebhookQueue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text)
     content = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
 class Host(db.Model):
     """
@@ -72,6 +73,7 @@ class ScoringTeams(db.Model):
     multiplier = db.Column(db.Integer, nullable=False, default=1)
 
     scoringhistories = db.relationship('ScoringHistory', backref='scoringteam')
+    scoringcriterias = db.relationship('ScoringCriteria', backref='scoringteam')
 
     def __repr__(self):
         return f"<ScoringTeam {self.team_name}, id {self.id}, score {self.score}>"
@@ -190,7 +192,7 @@ class ScoringCriteria(db.Model):
     #userlist_index = db.Column(db.Integer, index=True, nullable=False)
     content = db.Column(db.Text, nullable=False)
     location = db.Column(db.String(128), nullable=False)
-    team = db.Column(db.Integer, nullable=False)
+    team_id = db.Column(db.Integer, db.ForeignKey('scoring_teams.id'), nullable=False)
 
     scoringuserlist = db.relationship('ScoringUserList', backref='scoringcriteria')
 

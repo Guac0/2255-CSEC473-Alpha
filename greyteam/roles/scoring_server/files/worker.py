@@ -1,4 +1,5 @@
 import threading
+import multiprocessing as mp
 import time
 import sdnotify
 import json
@@ -17,16 +18,21 @@ import socket
 import threading
 import time
 from tabulate import tabulate
-from server import app, get_scoring_data_latest
+from server import app, get_scoring_data_latest, create_db_tables
+
+logger = setup_logging("server_worker")
 
 # === WEBHOOK ===
 
 def webhook_main():
     """Dedicated rate-limited sender thread with dynamic rate limiting."""
     if not WEBHOOK_URL:
+        logger.error(f"/webhook main - no WEBHOOK URL provided, exiting! {WEBHOOK_URL}")
         return
 
     last_60_seconds = []
+
+    logger.info("/webhook_main - starting main loop")
     
     while True:
         sleep_time = 0
@@ -47,7 +53,7 @@ def webhook_main():
                     bodyDict = json.loads(body)
                     sleep_time = float(bodyDict["retry_after"])
 
-                    logger.warning(f"/webhook_main - Retry_After succeeded, re-queued incident and sleeping for {sleep_time}.")
+                    logger.warning(f"/webhook_main - message {task.id}: Retry_After detected, re-queued message {task.id} and sleeping for {sleep_time}.")
                 else:
                     db.session.delete(task)
                     db.session.commit()
@@ -63,20 +69,20 @@ def webhook_main():
 
                             if remaining_int == 0:
                                 sleep_time = reset_after_float
-                                logger.info(f"/webhook_main - incident {task.id}: 0 responses remaining, sleeping for {sleep_time}.")
+                                logger.info(f"/webhook_main - message {task.id}: 0 responses remaining, sleeping for {sleep_time}.")
                         except ValueError:
                             sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                            logger.warning(f"/webhook_main - incident {task.id}: failed to parse headers, sleeping {sleep_time}.")
+                            logger.warning(f"/webhook_main - message {task.id}: failed to parse headers, sleeping {sleep_time}.")
                     else:
                         sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                        logger.warning(f"/webhook_main - Missing rate limit headers, sleeping {sleep_time}.")
+                        logger.warning(f"/webhook_main - message {task.id}: Missing rate limit headers, sleeping {sleep_time}.")
 
             except Exception as e:
                 db.session.rollback()
                 sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
                 db.session.delete(task)
                 db.session.commit()
-                logger.error(f"/webhook_main - caught unknown error from discord_webhook, deleting incident {task.id} from webhook queue - {e}.")
+                logger.error(f"/webhook_main - caught unknown error from discord_webhook, deleting message {task.id} from webhook queue - {e}.")
 
         last_60_seconds.append(time.time())
 
@@ -215,7 +221,8 @@ class ScoreboardManager:
         for row in data:
             team = row['team'].lower()
             if "blue" in team:
-                row['message'] = f"\033[92m{row['team']}\033[0m" # Green
+                #row['team'] = f"\033[92m{row['team']}\033[0m" # Green
+                row['team'] = f"\033[94m{row['team']}\033[0m" # Blue
             elif "red" in team:
                 row['team'] = f"\033[91m{row['team']}\033[0m" # Red
             elif "offline" in team:
@@ -224,7 +231,7 @@ class ScoreboardManager:
         clear_screen = "\033[H\033[2J"
         header = f"\033[1m=== LIVE SCOREBOARD - ROUND {round_num} ===\033[0m\n"
         table = tabulate(data, headers="keys", tablefmt="grid")
-        footer = f"\nUpdated: {time.strftime('%H:%M:%S')} | Active Users: {len(self.clients)}\n"
+        footer = f"\nUpdated: {time.strftime('%H:%M:%S')} | Active Clients: {len(self.clients)}\n"
         return clear_screen + header + table + footer
 
     def broadcast_loop(self):
@@ -234,14 +241,14 @@ class ScoreboardManager:
                 data, current_round = get_scoring_data_latest()
 
                 if current_round and current_round > self.last_round:
-                    logger.info(f"New round {current_round} detected! Broadcasting...")
+                    logger.info(f"New round {current_round} detected! Broadcasting to {len(self.clients)} clients...")
                     
                     try:
-                        data_discord = data
+                        data_discord = data.copy() # note: only works at first level
                         for row in data_discord:
                             team = row['team'].lower()
                             if "blue" in team:
-                                row['team'] = f"🟩{row['team']}" # Green
+                                row['team'] = f"🟦{row['team']}" # Blue # Green🟩
                             elif "red" in team:
                                 row['team'] = f"🟥{row['team']}" # Red
                             elif "offline" in team:
@@ -274,13 +281,14 @@ class ScoreboardManager:
                     
                     self.last_round = current_round
             
-            time.sleep(9)
+            time.sleep(20)
 
 def handle_client(manager, client_socket, addr):
     manager.add_client(client_socket)
     # We don't need a loop here anymore; the manager pushes updates.
     # We just keep the thread alive to detect when the client closes the connection.
     try:
+        logger.info(f"/handle_client - new netcat client connected from {addr}")
         while True:
             # If recv returns empty, client disconnected
             if not client_socket.recv(1024): break
@@ -290,9 +298,13 @@ def handle_client(manager, client_socket, addr):
         with manager.lock:
             if client_socket in manager.clients:
                 manager.clients.remove(client_socket)
+        logger.info(f"/handle_client - client {addr} disconnected")
         client_socket.close()
 
 def start_nc_server(manager, port=9000):
+
+    logger.info(f"/start_nc_server - starting netcat server on port {port}")
+
     # Start the broadcaster in its own thread
     threading.Thread(target=manager.broadcast_loop, daemon=True).start()
 
@@ -305,14 +317,12 @@ def start_nc_server(manager, port=9000):
         client, addr = server.accept()
         threading.Thread(target=handle_client, args=(manager, client, addr), daemon=True).start()
 
-# === Main ===
-
 if __name__ == "__main__":
-    logger = setup_logging("server_worker")
+    create_db_tables()
     logger.info("Starting server worker threads...")
     notifier = sdnotify.SystemdNotifier()
+
     manager = ScoreboardManager()
-    #start_nc_server(manager,NETCAT_PORT)
     
     # Start the same threads you had before
     threads = [
@@ -325,7 +335,7 @@ if __name__ == "__main__":
 
     for t in threads:
         t.start()
-    
+
     notifier.notify("READY=1")
     logger.info("READY signal sent to systemd.")
 
@@ -334,4 +344,4 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        logger.info("Worker shutting down...")
+        logger.warning("Worker exiting")

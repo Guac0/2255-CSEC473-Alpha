@@ -55,12 +55,13 @@ app.config.update(
     SESSION_USE_SIGNER=True # Protects the session cookie from tampering
 )
 # Enable write ahead logging
-@event.listens_for(db.engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.execute("PRAGMA synchronous=NORMAL")
-    cursor.close()
+# TODO app.context
+#@event.listens_for(db.engine, "connect")
+#def set_sqlite_pragma(dbapi_connection, connection_record):
+#    cursor = dbapi_connection.cursor()
+#    cursor.execute("PRAGMA journal_mode=WAL")
+#    cursor.execute("PRAGMA synchronous=NORMAL")
+#    cursor.close()
 
 # === Initialize Misc Vars ===
 start_time = time.time()
@@ -112,6 +113,69 @@ def insert_initial_data():
             )
             db.session.add(new_user)
         
+
+        # 1. Create the Host
+        ponyville = Host(
+            hostname="ponyville",
+            os="debian",
+            ip="10.0.10.3"
+        )
+        db.session.add(ponyville)
+        
+        # We flush here so the host gets an ID, which we need for the foreign keys
+        db.session.flush()
+
+        # 2. Create the Scoring Teams
+        teams_to_create = ["blue", "red", "offline"]
+        team_objects = {}
+        for team_name in teams_to_create:
+            team = ScoringTeams(
+                team_name=team_name,
+                score=0,
+                multiplier=1
+            )
+            db.session.add(team)
+            team_objects[team_name] = team
+        
+        db.session.flush()
+
+        # 3. Create Scoring Users for the ponyville host
+        users = ["fluttershy", "rarity", "applejack"]
+        for name in users:
+            new_user = ScoringUser(
+                username=name,
+                password="password123", # Assuming a default password is needed
+                host=ponyville # Uses the relationship backref
+            )
+            db.session.add(new_user)
+
+        # 4. Create the http service for the ponyville host
+        http_service = Service(
+            scorecheck_name="http",
+            host=ponyville
+        )
+        db.session.add(http_service)
+        db.session.flush()
+
+        # 5. Create the Scoring Criteria
+        # Note: Using team_objects['blue'].id for the team column
+        criteria = ScoringCriteria(
+            host=ponyville,
+            service=http_service,
+            location="80",
+            content="Index of /",
+            team_id=team_objects['blue'].id
+        )
+        db.session.add(criteria)
+
+        # Commit all changes to the database
+        try:
+            db.session.commit()
+            print("Database successfully populated!")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error populating database: {e}")
+            
         db.session.commit()
         logger.info("Successfully inserted initial database values.")
 
@@ -238,7 +302,7 @@ def get_scoring_data_latest():
             .first()
 
         if not recent_round_query:
-            logger.info("/get_hosts - No complete scoring rounds found.")
+            logger.info("/get_scoring_data_latest - No complete scoring rounds found.")
             return [], 0
 
         latest_round = recent_round_query[0]
@@ -270,7 +334,7 @@ def get_scoring_data_latest():
         return host_list, latest_round
 
     except Exception as e:
-        logger.warning(f"Exception when running get_scoring_json_latest(): {e}")
+        logger.warning(f"/get_scoring_data_latest: Exception - {e}")
         return [], 0
     
 # =================================
@@ -1217,4 +1281,4 @@ if __name__ == "__main__":
     #threading.Thread(target=webhook_main, daemon=True).start()
 
     # Start main app. Do not put any code below this line. Comment out when using gunicorn
-    start_server()
+    #start_server()
