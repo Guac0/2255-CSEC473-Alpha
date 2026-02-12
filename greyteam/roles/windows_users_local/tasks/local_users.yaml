@@ -54,7 +54,7 @@
     username: "{{ item }}"
     state: present
   loop:
-    "{{ local_users + local_admins + ['Admin']}}"
+    "{{ local_users + local_admins + ['Admin', greyteam_user, redteam_user]}}"
 
 - name: Force Windows to transition profiles from Transient to Permanent
   ansible.windows.win_powershell:
@@ -76,4 +76,4 @@
         Write-Warning "Could not process $User"
       }
   loop:
-    "{{ local_users + local_admins + ['Admin']}}"
+    "{{ local_users + local_admins + ['Admin', greyteam_user, redteam_user] }}"
