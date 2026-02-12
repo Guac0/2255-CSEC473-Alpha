@@ -5,6 +5,9 @@
 - name: Install Python
   ansible.builtin.include_tasks: install_python.yaml
 
+- name: Cleanup existing deploy
+  ansible.builtin.include_tasks: cleanup.yaml
+
 - name: Copy files
   ansible.builtin.include_tasks: copy_files.yaml
 
