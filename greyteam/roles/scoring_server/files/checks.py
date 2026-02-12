@@ -11,7 +11,7 @@ class Criterion:
 
     def __init__(self, criterion:ScoringCriteria) -> None:
         try:
-            self.team = criterion.team
+            self.team = criterion.team_id
             self.loc = criterion.location
             self.content = criterion.content
         except Exception as e:
