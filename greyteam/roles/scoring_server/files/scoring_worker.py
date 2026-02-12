@@ -88,6 +88,8 @@ def run_scoring_round(round_num:int, services:list[Service]):
             except Exception as e:
                 res = (0, "Something went wrong with scoring multiprocessing")
 
+            logger.info(f"Inserting score for Service {services[i].scorecheck_name}: {res}")
+
             # Construct score
             new_score = ScoringHistory (
                 service_id = services[i].id,
