@@ -244,7 +244,7 @@ class ScoreboardManager:
                     logger.info(f"New round {current_round} detected! Broadcasting to {len(self.clients)} clients...")
                     
                     try:
-                        data_discord = data[:] # copy
+                        data_discord = data.copy() # note: only works at first level
                         for row in data_discord:
                             team = row['team'].lower()
                             if "blue" in team:
