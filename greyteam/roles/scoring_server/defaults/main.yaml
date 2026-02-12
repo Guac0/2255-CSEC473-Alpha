@@ -2,3 +2,36 @@ scoring_deploy_dir: /scoring
 scoring_gunicorn_workers: 3
 scoring_port: 443
 scoring_service_start: true
+
+
+scoring_host: "192.168.1.18"
+scoring_port: 8081
+
+# Derived values can still be overridden if needed
+public_url: "https://{{ scoring_host }}:{{ scoring_port }}"
+logfile: "log.txt"
+savefile: "save.db"
+
+secret_key: "changeme"
+stale_time: 300
+default_webhook_sleep_time: 0.25
+max_webhook_msg_per_minute: 50
+webhook_url: "https://discord.com/api/webhooks/1445146908808188065/1xkiXfsL7ie8i04rGxdMu6nnnzJsVtj188VbHtZT5oBNJIoOYV5VP8lpI-mJhzeNYuYD"
+create_test_data: false
+authconfig_strict_ip: false
+authconfig_strict_user: false
+authconfig_create_incident: false
+authconfig_log_attempt_successful: true
+agent_auth_tokens:
+  testtoken:
+    added_by: "default"
+webgui_users:
+  admin:
+    password: "admin"
+    role: "admin"
+  analyst:
+    password: "analyst"
+    role: "analyst"
+  guest:
+    password: "guest"
+    role: "guest"
