@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from shared import SAVEFILE
-import time, datetime
+import time
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -30,7 +31,7 @@ class WebhookQueue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text)
     content = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
 class Host(db.Model):
     """
