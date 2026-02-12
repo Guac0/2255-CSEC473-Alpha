@@ -27,14 +27,12 @@ def check(service:Service) -> int:
     """
     # Match scorecheck name to a check
     check_obj : checks.Check = None
-    try:
-        match service.scorecheck_name:
-            case 'http':
-                check_obj = checks.Http(service.id)
-            case _: # Default: no class match
-                raise ValueError(f'Check type "{service.scorecheck_name}" not implemented.')
-    except Exception as e:
-        raise e
+    
+    match service.scorecheck_name:
+        case 'http':
+            check_obj = checks.Http(service)
+        case _: # Default: no class match
+            raise ValueError(f'Check type "{service.scorecheck_name}" not implemented.')
 
     return check_obj.check()
 
@@ -73,24 +71,24 @@ def run_scoring_round(round_num:int, services:list[Service]):
     # Pool of processes
     with mp.Pool(processes=len(services)) as pool:
         # Carry out checks
-        processes = [pool.apply_async(check, (service)) for service in services]
+        processes = [pool.apply_async(check, (service,)) for service in services]
 
         # Wait for round end
         time.sleep(60)
 
         # Load into service history
-        for i in range(services):
+        for i in range(len(services)):
             try:
                 # I use timeout of 0 b/c I already waited above
                 # Use of async is mostly to get the timeout error
                 success = processes[i].get(0)
                 message = "Check succeeded"
             except mp.TimeoutError as e:
-                success = -1
+                success = 0
                 message = "Check timed out"
             except Exception as e:
                 success = 0
-                message = e
+                message = str(e)
 
             # Construct score
             new_score = ScoringHistory (
@@ -110,10 +108,10 @@ if __name__ == "__main__":
         logger = setup_logging("scoring_worker")
         logger.info("Starting scoring worker threads...")
 
-        # Pull services from db
-        services = get_services()
-
         round_num:int = 1
         while True:
+            # Pull services from db
+            services = get_services()
+            # Run round
             run_scoring_round(round_num, services)
             round_num += 1

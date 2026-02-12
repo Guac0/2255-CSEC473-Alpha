@@ -1,7 +1,7 @@
 import subprocess
 import random
 from server import (
-    Service, ScoringUser, ScoringCriteria
+    Service, ScoringUser, ScoringCriteria, Host
 )
 
 class Criterion:
@@ -29,12 +29,14 @@ class Check:
     '''
     check_id:int
     host:str
+    host_ip:int
     criteria:list[Criterion]
 
     def __init__(self, check:Service) -> None:
         try:
             self.check_id = check.id
             self.host = check.host_id
+            self.host_ip = Host.query.filter_by(id = self.host).first().ip
             self.criteria = [Criterion(criterion) for criterion in ScoringCriteria.query.filter_by(service_id = self.check_id)]
         except Exception as e:
             raise e
@@ -67,7 +69,7 @@ class Http (Check):
         err = []
         for criterion in self.criteria:
             res = subprocess.run(
-                ["curl", criterion.loc],
+                ["curl", f"{self.host}:{criterion.loc}"],
                 capture_output=True,
                 text=True
             )
