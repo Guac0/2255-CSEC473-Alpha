@@ -1,0 +1,206 @@
+---
+- name: Install MariaDB
+  apt:
+    name:
+      - mariadb-server
+      - python3-pymysql
+    state: present
+    update_cache: yes
+    
+- name: Ensure MariaDB service is running and enabled
+  systemd:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Wait for MariaDB to be ready
+  wait_for:
+    port: 3306
+    delay: 5
+    timeout: 60
+
+- name: Check if MariaDB is actually running
+  command: systemctl status mariadb
+  register: mariadb_status
+  failed_when: false
+  changed_when: false
+
+# My three features are Securing MariaDB, configuring file with permissions, and Create a database and a user
+# Secure MariaDB 
+- name: Check if root password is already set
+  shell: mysql -u root -e "SELECT 1" 2>&1
+  register: root_password_check
+  failed_when: false
+  changed_when: false
+
+- name: Set MariaDB root password (when no password is set)
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
+    name: root
+    password: "{{ team_password }}"
+    host_all: true
+    state: present
+  when: root_password_check.rc == 0
+
+- name: Update MariaDB root password (when password already exists)
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: root
+    password: "{{ team_password }}"
+    host_all: true
+    state: present
+  when: root_password_check.rc != 0
+
+- name: Remove anonymous MariaDB users
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: ''
+    host_all: true
+    state: absent
+
+- name: Remove test database
+  mysql_db:
+    login_user: root
+    login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: test
+    state: absent
+
+# Configure MariaDB file with permissions 
+- name: Deploy MariaDB configuration file
+  copy:
+    dest: "{{ mariadb_config_file }}"
+    content: |
+      [mysqld]
+      bind-address = 0.0.0.0
+      max_connections = 100
+    owner: root
+    group: root
+    mode: '0644'
+  register: config_deployed
+
+- name: Restart MariaDB to apply configuration
+  systemd:
+    name: mariadb
+    state: restarted
+  when: config_deployed.changed
+
+- name: Wait a moment for restart to complete
+  pause:
+    seconds: 10
+  when: config_deployed.changed
+
+- name: Check MariaDB status after restart
+  command: systemctl status mariadb
+  register: mariadb_status_after
+  failed_when: false
+  changed_when: false
+  when: config_deployed.changed
+
+- name: Display MariaDB status
+  debug:
+    var: mariadb_status_after.stdout_lines
+  when: config_deployed.changed
+
+- name: Check MariaDB error log
+  command: tail -n 100 /var/log/mysql/error.log
+  register: mariadb_error_log
+  failed_when: false
+  changed_when: false
+  when: config_deployed.changed
+
+- name: Display MariaDB error log
+  debug:
+    var: mariadb_error_log.stdout_lines
+  when: config_deployed.changed and mariadb_error_log is defined
+
+- name: Wait for MariaDB port after restart
+  wait_for:
+    port: 3306
+    delay: 2
+    timeout: 60
+    state: started
+  when: config_deployed.changed
+
+- name: Verify MariaDB is running
+  command: systemctl is-active mariadb
+  register: mariadb_active
+  failed_when: mariadb_active.stdout != "active"
+  changed_when: false
+
+# Create database and user
+- name: Create database
+  mysql_db:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ db_name }}"
+    state: present
+    
+# CREATE SQL FILE
+- name: Create ponies SQL data file
+  copy:
+    dest: /tmp/ponies.sql
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      CREATE TABLE IF NOT EXISTS ponies (
+       id INT AUTO_INCREMENT PRIMARY KEY,
+       name VARCHAR(50) NOT NULL,
+       type VARCHAR(50),
+       element_of_harmony VARCHAR(50)
+      );
+
+      INSERT INTO ponies (name, type, element_of_harmony) VALUES
+        ('Twilight Sparkle', 'Alicorn', 'Magic'),
+        ('Rainbow Dash', 'Pegasus', 'Loyalty'),
+        ('Pinkie Pie', 'Earth Pony', 'Laughter'),
+        ('Fluttershy', 'Pegasus', 'Kindness'),
+        ('Applejack', 'Earth Pony', 'Honesty'),
+        ('Rarity', 'Unicorn', 'Generosity');
+
+# IMPORT SQL INTO DATABASE
+- name: Populate Ponies database
+  mysql_db:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ db_name }}"
+    state: import
+    target: /tmp/ponies.sql
+
+- name: Create database user
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ db_user }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+
+- name: Create database users for local_users
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+  loop: "{{ local_users }}"
+
+- name: Create database users for local_admins
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+  loop: "{{ local_admins }}"
