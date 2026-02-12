@@ -18,7 +18,8 @@ import socket
 import threading
 import time
 from tabulate import tabulate
-from server import app, get_scoring_data_latest, create_db_tables
+from server import app, get_scoring_data_latest
+from data import create_db_tables
 
 logger = setup_logging("server_worker")
 
@@ -318,13 +319,12 @@ def start_nc_server(manager, port=9000):
         threading.Thread(target=handle_client, args=(manager, client, addr), daemon=True).start()
 
 if __name__ == "__main__":
-    create_db_tables()
     logger.info("Starting server worker threads...")
     notifier = sdnotify.SystemdNotifier()
-
+    with app.app_context:
+        create_db_tables(logger)
     manager = ScoreboardManager()
     
-    # Start the same threads you had before
     threads = [
         threading.Thread(target=webhook_main, daemon=True),
         threading.Thread(target=start_nc_server, args=(manager,NETCAT_PORT,), daemon=True),

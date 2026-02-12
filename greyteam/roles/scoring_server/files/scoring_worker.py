@@ -9,6 +9,7 @@ from models import (
 db, AuthToken, WebUser, WebhookQueue, Host,
 ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
 )
+from data import create_db_tables
 from sqlalchemy import func
 
 import checks
@@ -105,6 +106,7 @@ def run_scoring_round(round_num:int, services:list[Service]):
 if __name__ == "__main__":
     logger.info("Scoring worker started")
     with app.app_context():
+        create_db_tables(logger)
         logger = setup_logging("scoring_worker")
         logger.info("Starting scoring worker threads...")
 

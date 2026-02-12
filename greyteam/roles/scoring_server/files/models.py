@@ -135,7 +135,8 @@ class Service(db.Model):
     """
     __tablename__ = 'services'
     id = db.Column(db.Integer, primary_key=True)
-    scorecheck_name = db.Column(db.String(64), index=True, nullable=False)
+    scorecheck_name = db.Column(db.String(64), index=True, nullable=False) #aka scorecheck type
+    scorecheck_display_name = db.Column(db.String(64), index=True, nullable=False)
     host_id = db.Column(db.Integer, db.ForeignKey('hosts.id'), nullable=False)
     
     scoringhistories = db.relationship('ScoringHistory', backref='service')

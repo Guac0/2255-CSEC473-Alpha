@@ -29,6 +29,7 @@ from models import (
 db, AuthToken, WebUser, WebhookQueue, Host,
 ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
 )
+from data import create_db_tables
 
 # =================================
 # ==== INITIALIZE VARS/SETTINGS ===
@@ -85,118 +86,6 @@ logger = setup_logging("server")
 # =================================
 
 # === DATABASE ====
-
-def insert_initial_data():
-    """
-    Inserts initial configuration data (auth tokens and users) into the database.
-    This should only be run after the tables have been created via db.create_all().
-    """
-    try:
-        # --- Insert Auth Tokens ---
-        for token_value, data in INITIAL_AGENT_AUTH_TOKENS.items():
-            # In a real app, you would first check if the token already exists 
-            # to prevent duplicates, but for a first run, direct insert is fine.
-            new_token = AuthToken(
-                token=token_value,
-                timestamp=time.time(),
-                added_by=data["added_by"]
-            )
-            db.session.add(new_token)
-
-        # --- Insert Web Users ---
-        for username, data in INITIAL_WEBGUI_USERS.items():
-            hashed_password = generate_password_hash(data["password"])
-            new_user = WebUser(
-                username=username,
-                password=hashed_password, # WARNING: Hash passwords in production!
-                role=data["role"]
-            )
-            db.session.add(new_user)
-        
-
-        # 1. Create the Host
-        ponyville = Host(
-            hostname="ponyville",
-            os="debian",
-            ip="10.0.10.3"
-        )
-        db.session.add(ponyville)
-        
-        # We flush here so the host gets an ID, which we need for the foreign keys
-        db.session.flush()
-
-        # 2. Create the Scoring Teams
-        teams_to_create = ["blue", "red", "offline"]
-        team_objects = {}
-        for team_name in teams_to_create:
-            team = ScoringTeams(
-                team_name=team_name,
-                score=0,
-                multiplier=1
-            )
-            db.session.add(team)
-            team_objects[team_name] = team
-        
-        db.session.flush()
-
-        # 3. Create Scoring Users for the ponyville host
-        users = ["fluttershy", "rarity", "applejack"]
-        for name in users:
-            new_user = ScoringUser(
-                username=name,
-                password="password123", # Assuming a default password is needed
-                host=ponyville # Uses the relationship backref
-            )
-            db.session.add(new_user)
-
-        # 4. Create the http service for the ponyville host
-        http_service = Service(
-            scorecheck_name="http",
-            host=ponyville
-        )
-        db.session.add(http_service)
-        db.session.flush()
-
-        # 5. Create the Scoring Criteria
-        # Note: Using team_objects['blue'].id for the team column
-        criteria = ScoringCriteria(
-            host=ponyville,
-            service=http_service,
-            location="80",
-            content="Index of /",
-            team_id=team_objects['blue'].id
-        )
-        db.session.add(criteria)
-
-        # Commit all changes to the database
-        try:
-            db.session.commit()
-            print("Database successfully populated!")
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error populating database: {e}")
-            
-        db.session.commit()
-        logger.info("Successfully inserted initial database values.")
-
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"FATAL: Failed to insert initial data into DB: {e}")
-
-def create_db_tables():
-
-    db_exists = os.path.exists(os.path.join("instance",SAVEFILE))
-    # Use the application context to ensure Flask extensions are configured
-    with app.app_context():
-        # This checks the database file defined in SQLALCHEMY_DATABASE_URI.
-        # If the file (server.db) doesn't exist, it creates it.
-        # If the tables defined in your models don't exist, it creates them.
-        db.create_all()
-        if not db_exists:
-            insert_initial_data()
-            logger.info(f"Initialized database with initial data at {SAVEFILE}")
-        else:
-            logger.info(f"Initialized database at {SAVEFILE}")
 
 def serialize_model(instance):
     """
@@ -1268,14 +1157,16 @@ def update_criteria_locations():
 # =================================
 
 logger.info(f"Starting server on {HOST}:{PORT}")
-create_db_tables()
+with app.app_context:
+    create_db_tables(logger)
 
 def start_server():
     app.run(host=HOST, port=PORT, ssl_context='adhoc', use_reloader=False, debug=False)
 
 if __name__ == "__main__":
     pass
-    #create_db_tables()
+    #with app.app_context:
+    #    create_db_tables()
 
     # Start threads before test data to avoid delays
     #threading.Thread(target=webhook_main, daemon=True).start()
