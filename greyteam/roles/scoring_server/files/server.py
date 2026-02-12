@@ -164,7 +164,7 @@ def insert_initial_data():
             service=http_service,
             location="80",
             content="Index of /",
-            team=team_objects['blue'].id
+            team_id=team_objects['blue'].id
         )
         db.session.add(criteria)
 
