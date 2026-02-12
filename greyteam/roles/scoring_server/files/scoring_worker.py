@@ -73,7 +73,7 @@ def run_scoring_round(round_num:int, services:list[Service]):
     # Pool of processes
     with mp.Pool(processes=len(services)) as pool:
         # Carry out checks
-        processes = [pool.apply_async(check, (service.id)) for service in services]
+        processes = [pool.apply_async(check, (service)) for service in services]
 
         # Wait for round end
         time.sleep(60)
