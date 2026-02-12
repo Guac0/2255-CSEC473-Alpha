@@ -6,5 +6,6 @@
     state: restarted
     enabled: yes
   loop:
-    - scoring-worker.service
+    - scoring-server-worker.service
     - scoring-server.service
+    - scoring-worker.service
