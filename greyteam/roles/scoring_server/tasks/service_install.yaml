@@ -24,8 +24,8 @@
     content: |
       [Unit]
       Description=Scoring Gunicorn Server
-      After=network.target scoring-worker.service
-      Requires=scoring-worker.service
+      After=network.target scoring-server-worker.service
+      Requires=scoring-server-worker.service
 
       [Service]
       User=root

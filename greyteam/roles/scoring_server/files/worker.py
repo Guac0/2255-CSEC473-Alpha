@@ -311,3 +311,29 @@ def start_nc_server(manager, port=9000):
 
 if __name__ == "__main__":
     create_db_tables()
+    logger.info("Starting server worker threads...")
+    notifier = sdnotify.SystemdNotifier()
+
+    manager = ScoreboardManager()
+    
+    # Start the same threads you had before
+    threads = [
+        threading.Thread(target=webhook_main, daemon=True),
+        threading.Thread(target=start_nc_server, args=(manager,NETCAT_PORT,), daemon=True),
+        # testing only!
+        #threading.Thread(target=start_server, daemon=True)
+        #gunicorn --certfile=cert.pem --keyfile=key.pem --workers 4 --bind 0.0.0.0:8080 server:app 
+    ]
+
+    for t in threads:
+        t.start()
+
+    notifier.notify("READY=1")
+    logger.info("READY signal sent to systemd.")
+
+    # Keep the main process alive
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logger.warning("Worker exiting")

@@ -55,12 +55,13 @@ app.config.update(
     SESSION_USE_SIGNER=True # Protects the session cookie from tampering
 )
 # Enable write ahead logging
-@event.listens_for(db.engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.execute("PRAGMA synchronous=NORMAL")
-    cursor.close()
+# TODO app.context
+#@event.listens_for(db.engine, "connect")
+#def set_sqlite_pragma(dbapi_connection, connection_record):
+#    cursor = dbapi_connection.cursor()
+#    cursor.execute("PRAGMA journal_mode=WAL")
+#    cursor.execute("PRAGMA synchronous=NORMAL")
+#    cursor.close()
 
 # === Initialize Misc Vars ===
 start_time = time.time()

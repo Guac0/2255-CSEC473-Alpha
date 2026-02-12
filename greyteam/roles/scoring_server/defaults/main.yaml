@@ -4,11 +4,10 @@ scoring_port: 443
 scoring_service_start: true
 
 
-scoring_host: "192.168.1.18"
-scoring_port: 8081
+scoring_host: "0.0.0.0"
 
 # Derived values can still be overridden if needed
-public_url: "https://{{ scoring_host }}:{{ scoring_port }}"
+public_url: "https://{{ scoring_host }}:{{ scoring_port }}" # TODO
 logfile: "log.txt"
 savefile: "save.db"
 
