@@ -20,7 +20,7 @@ import time
 from tabulate import tabulate
 from server import app, get_scoring_data_latest, create_db_tables
 
-logger = setup_logging("server-worker")
+logger = setup_logging("server_worker")
 
 # === WEBHOOK ===
 
@@ -30,6 +30,8 @@ def webhook_main():
         return
 
     last_60_seconds = []
+
+    logger.info("/webhook_main - starting main loop")
     
     while True:
         sleep_time = 0
@@ -50,7 +52,7 @@ def webhook_main():
                     bodyDict = json.loads(body)
                     sleep_time = float(bodyDict["retry_after"])
 
-                    logger.warning(f"/webhook_main - Retry_After succeeded, re-queued incident and sleeping for {sleep_time}.")
+                    logger.warning(f"/webhook_main - message {task.id}: Retry_After detected, re-queued message {task.id} and sleeping for {sleep_time}.")
                 else:
                     db.session.delete(task)
                     db.session.commit()
@@ -66,20 +68,20 @@ def webhook_main():
 
                             if remaining_int == 0:
                                 sleep_time = reset_after_float
-                                logger.info(f"/webhook_main - incident {task.id}: 0 responses remaining, sleeping for {sleep_time}.")
+                                logger.info(f"/webhook_main - message {task.id}: 0 responses remaining, sleeping for {sleep_time}.")
                         except ValueError:
                             sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                            logger.warning(f"/webhook_main - incident {task.id}: failed to parse headers, sleeping {sleep_time}.")
+                            logger.warning(f"/webhook_main - message {task.id}: failed to parse headers, sleeping {sleep_time}.")
                     else:
                         sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                        logger.warning(f"/webhook_main - Missing rate limit headers, sleeping {sleep_time}.")
+                        logger.warning(f"/webhook_main - message {task.id}: Missing rate limit headers, sleeping {sleep_time}.")
 
             except Exception as e:
                 db.session.rollback()
                 sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
                 db.session.delete(task)
                 db.session.commit()
-                logger.error(f"/webhook_main - caught unknown error from discord_webhook, deleting incident {task.id} from webhook queue - {e}.")
+                logger.error(f"/webhook_main - caught unknown error from discord_webhook, deleting message {task.id} from webhook queue - {e}.")
 
         last_60_seconds.append(time.time())
 
@@ -293,9 +295,12 @@ def handle_client(manager, client_socket, addr):
         with manager.lock:
             if client_socket in manager.clients:
                 manager.clients.remove(client_socket)
+        logger.info(f"/handle_client - client {addr} disconnected")
         client_socket.close()
 
 def start_nc_server(manager, port=9000):
+
+    logger.info(f"/start_nc_server - starting netcat server on port {port}")
 
     # Start the broadcaster in its own thread
     threading.Thread(target=manager.broadcast_loop, daemon=True).start()
