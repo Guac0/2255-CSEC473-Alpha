@@ -9,6 +9,7 @@ from models import (
 db, AuthToken, WebUser, WebhookQueue, Host,
 ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
 )
+from sqlalchemy import func
 
 import checks
 import multiprocessing as mp
@@ -108,7 +109,15 @@ if __name__ == "__main__":
         logger = setup_logging("scoring_worker")
         logger.info("Starting scoring worker threads...")
 
-        round_num:int = 1
+        # Get starting round number from database
+        total_services_count = db.session.query(func.count(Service.id)).scalar()
+        highest_complete_round = db.session.query(ScoringHistory.round) \
+            .group_by(ScoringHistory.round) \
+            .having(func.count(ScoringHistory.service_id.distinct()) == total_services_count) \
+            .order_by(ScoringHistory.round.desc()) \
+            .first()
+        round_num = (highest_complete_round[0] if highest_complete_round else 0) + 1
+
         while True:
             # Pull services from db
             services = get_services()
