@@ -119,5 +119,6 @@ if __name__ == "__main__":
             # Pull services from db
             services = get_services()
             # Run round
+            logger.info(f"Starting scorechecks for Round {round_num}")
             run_scoring_round(round_num, services)
             round_num += 1

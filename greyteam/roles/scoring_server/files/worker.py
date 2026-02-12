@@ -27,6 +27,7 @@ logger = setup_logging("server_worker")
 def webhook_main():
     """Dedicated rate-limited sender thread with dynamic rate limiting."""
     if not WEBHOOK_URL:
+        logger.error(f"/webhook main - no WEBHOOK URL provided, exiting! {WEBHOOK_URL}")
         return
 
     last_60_seconds = []
@@ -220,7 +221,8 @@ class ScoreboardManager:
         for row in data:
             team = row['team'].lower()
             if "blue" in team:
-                row['message'] = f"\033[92m{row['team']}\033[0m" # Green
+                #row['team'] = f"\033[92m{row['team']}\033[0m" # Green
+                row['team'] = f"\033[94m{row['team']}\033[0m" # Blue
             elif "red" in team:
                 row['team'] = f"\033[91m{row['team']}\033[0m" # Red
             elif "offline" in team:
@@ -229,7 +231,7 @@ class ScoreboardManager:
         clear_screen = "\033[H\033[2J"
         header = f"\033[1m=== LIVE SCOREBOARD - ROUND {round_num} ===\033[0m\n"
         table = tabulate(data, headers="keys", tablefmt="grid")
-        footer = f"\nUpdated: {time.strftime('%H:%M:%S')} | Active Users: {len(self.clients)}\n"
+        footer = f"\nUpdated: {time.strftime('%H:%M:%S')} | Active Clients: {len(self.clients)}\n"
         return clear_screen + header + table + footer
 
     def broadcast_loop(self):
@@ -239,14 +241,14 @@ class ScoreboardManager:
                 data, current_round = get_scoring_data_latest()
 
                 if current_round and current_round > self.last_round:
-                    logger.info(f"New round {current_round} detected! Broadcasting...")
+                    logger.info(f"New round {current_round} detected! Broadcasting to {len(self.clients)} clients...")
                     
                     try:
-                        data_discord = data
+                        data_discord = data[:] # copy
                         for row in data_discord:
                             team = row['team'].lower()
                             if "blue" in team:
-                                row['team'] = f"🟩{row['team']}" # Green
+                                row['team'] = f"🟦{row['team']}" # Blue # Green🟩
                             elif "red" in team:
                                 row['team'] = f"🟥{row['team']}" # Red
                             elif "offline" in team:
@@ -279,13 +281,14 @@ class ScoreboardManager:
                     
                     self.last_round = current_round
             
-            time.sleep(9)
+            time.sleep(20)
 
 def handle_client(manager, client_socket, addr):
     manager.add_client(client_socket)
     # We don't need a loop here anymore; the manager pushes updates.
     # We just keep the thread alive to detect when the client closes the connection.
     try:
+        logger.info(f"/handle_client - new netcat client connected from {addr}")
         while True:
             # If recv returns empty, client disconnected
             if not client_socket.recv(1024): break

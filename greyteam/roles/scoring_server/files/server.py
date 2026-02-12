@@ -302,7 +302,7 @@ def get_scoring_data_latest():
             .first()
 
         if not recent_round_query:
-            logger.info("/get_hosts - No complete scoring rounds found.")
+            logger.info("/get_scoring_data_latest - No complete scoring rounds found.")
             return [], 0
 
         latest_round = recent_round_query[0]
@@ -334,7 +334,7 @@ def get_scoring_data_latest():
         return host_list, latest_round
 
     except Exception as e:
-        logger.warning(f"Exception when running get_scoring_json_latest(): {e}")
+        logger.warning(f"/get_scoring_data_latest: Exception - {e}")
         return [], 0
     
 # =================================
