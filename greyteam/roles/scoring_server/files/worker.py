@@ -28,7 +28,7 @@ logger = setup_logging("server_worker")
 def webhook_main():
     """Dedicated rate-limited sender thread with dynamic rate limiting."""
     if not WEBHOOK_URL:
-        logger.error(f"/webhook main - no WEBHOOK URL provided, exiting! {WEBHOOK_URL}")
+        logger.error(f"/webhook_main - no WEBHOOK URL provided, exiting! {WEBHOOK_URL}")
         return
 
     last_60_seconds = []
@@ -42,6 +42,7 @@ def webhook_main():
             task = WebhookQueue.query.order_by(WebhookQueue.created_at.asc()).first()
             
             if not task:
+                logger.info("/webhook_main - no webhooks in queue, sleeping.")
                 time.sleep(2) # Wait a bit before checking for new tasks again
                 continue
 

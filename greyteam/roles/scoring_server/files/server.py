@@ -206,6 +206,7 @@ def get_scoring_data_latest():
             Service.scorecheck_name
         ).join(Host, ScoringHistory.host_id == Host.id)\
          .join(ScoringTeams, ScoringHistory.value == ScoringTeams.id)\
+         .join(Service, ScoringHistory.service_id == Service.id)\
          .filter(ScoringHistory.round == latest_round)\
          .all()
 
