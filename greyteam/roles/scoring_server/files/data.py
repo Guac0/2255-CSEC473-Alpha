@@ -3,13 +3,14 @@ db, AuthToken, WebUser, WebhookQueue, Host,
 ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
 )
 from shared import (
-CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE,
+CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE, CREATE_TEST_DATA,
 DEFAULT_WEBHOOK_SLEEP_TIME, MAX_WEBHOOK_MSG_PER_MINUTE, WEBHOOK_URL,
 INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, SECRET_KEY, 
 setup_logging)
 from werkzeug.security import generate_password_hash, check_password_hash
 import time
 import os
+import random
 
 def insert_initial_data(logger):
     """
@@ -176,6 +177,61 @@ def insert_initial_data(logger):
         db.session.rollback()
         logger.fatal(f"Failed to insert initial data into DB: {e}")
 
+def insert_test_rounds(logger, num_rounds=10):
+    """
+    Inserts dummy scoring history data for 10 rounds.
+    Assumes insert_initial_data() has already been run to create hosts/services.
+    """
+    try:
+        logger.info(f"Starting insertion of {num_rounds} rounds of test data...")
+        
+        # 1. Get all services and teams
+        services = Service.query.all()
+        blue_team = ScoringTeams.query.filter_by(team_name="blue").first()
+        offline_team = ScoringTeams.query.filter_by(team_name="offline").first()
+
+        if not services or not blue_team or not offline_team:
+            logger.error("Required initial data (services/teams) missing. Run insert_initial_data first.")
+            return
+
+        # 2. Loop through rounds
+        for round_num in range(1, num_rounds + 1):
+            round_entries = []
+            
+            for service in services:
+                # Randomly decide if the service is "Up" or "Down"
+                # 70% chance of success (Blue Team), 30% chance of failure (Offline)
+                is_up = random.random() > 0.3
+                
+                if is_up:
+                    assigned_team_id = blue_team.id
+                    msg = "Service responding normally."
+                    # Increment the actual team score for realism
+                    blue_team.score += 1
+                else:
+                    assigned_team_id = offline_team.id
+                    msg = "Connection timed out / Service unreachable."
+
+                history_entry = ScoringHistory(
+                    service_id=service.id,
+                    host_id=service.host_id,
+                    round=round_num,
+                    value=assigned_team_id,
+                    message=msg
+                )
+                round_entries.append(history_entry)
+            
+            db.session.add_all(round_entries)
+            logger.info(f"Round {round_num}: Inserted {len(round_entries)} service results.")
+
+        # 3. Commit all changes
+        db.session.commit()
+        logger.info("Successfully committed 10 rounds of test data to the database.")
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Failed to insert test rounds: {e}")
+
 def create_db_tables(logger):
     # must be called in app context
 
@@ -186,6 +242,8 @@ def create_db_tables(logger):
     db.create_all()
     if not db_exists:
         insert_initial_data(logger)
+        if CREATE_TEST_DATA:
+            insert_test_rounds(logger,10)
         #logger.info(f"Initialized database with initial data at {SAVEFILE}")
     else:
         logger.info(f"Initialized database at {SAVEFILE}")

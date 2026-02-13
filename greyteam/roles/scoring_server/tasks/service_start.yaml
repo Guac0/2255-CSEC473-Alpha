@@ -1,5 +1,5 @@
 ---
-- name: Reload systemd and start services
+- name: Reload systemd and start services for server
   systemd:
     daemon_reload: yes
     name: "{{ item }}"
@@ -8,4 +8,14 @@
   loop:
     - scoring-server-worker.service
     - scoring-server.service
+  when: scoring_server_start
+
+- name: Reload systemd and start services for scorer
+  systemd:
+    daemon_reload: yes
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  loop:
     - scoring-worker.service
+  when: scoring_worker_start

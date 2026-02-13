@@ -1,8 +1,8 @@
 scoring_deploy_dir: /scoring
 scoring_gunicorn_workers: 3
 scoring_port: 443
-scoring_service_start: true
-
+scoring_server_start: true
+scoring_worker_start: false
 
 scoring_host: "0.0.0.0"
 

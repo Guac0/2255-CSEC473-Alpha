@@ -19,7 +19,6 @@
 
 - name: Start Services
   ansible.builtin.include_tasks: service_start.yaml
-  when: scoring_service_start
 
 #- name: Start scheduled task
 #  ansible.builtin.include_tasks: scheduled_task.yaml
