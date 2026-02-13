@@ -17,7 +17,7 @@
     mode: '0755'
   with_items:
     - blueteam
-    - "{{ grayteam_user }}"
+    - "{{ greyteam_user }}"
 
 - name: Add Firefox Desktop Link
   ansible.builtin.file:
@@ -27,7 +27,7 @@
     mode: '0755'
   with_items:
     - blueteam
-    - "{{ grayteam_user }}"
+    - "{{ greyteam_user }}"
 
 - name: Add Chromium Desktop Link
   ansible.builtin.file:
@@ -37,4 +37,4 @@
     mode: '0755'
   with_items:
     - blueteam
-    - "{{ grayteam_user }}"
+    - "{{ greyteam_user }}"
