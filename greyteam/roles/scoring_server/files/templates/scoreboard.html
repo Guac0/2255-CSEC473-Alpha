@@ -72,60 +72,52 @@
 
         async function fetchScoreboardData() {
             try {
+                // 1. Fetch Latest Services
                 const response = await fetch('/get_scoring_latest');
-                if (!response.ok) throw new Error("Network response was not ok");
-                
+                if (!response.ok) throw new Error("Latest services fetch failed");
                 const result = await response.json();
                 
-                // Extract data and round from the JSON object
-                const data = result.data;
+                const serviceData = result.data;
                 const roundNum = result.round;
-                
-                if (!data || data.length === 0) {
-                    console.warn("No data returned for current round.");
+
+                if (!serviceData || serviceData.length === 0) {
+                    console.warn("No data returned for current round - services.");
                     return;
                 }
 
+                // 2. Fetch Scoring Summary
                 const response2 = await fetch('/get_scoring_summary');
-                if (!response2.ok) throw new Error("Network response was not ok");
-                
+                if (!response2.ok) throw new Error("Summary fetch failed");
                 const result2 = await response2.json();
                 
-                // Extract data and round from the JSON object
-                const data2 = result2.data;
+                // FIX: Access 'teams' instead of 'data'
+                const teamData = result2.teams; 
                 const roundNum2 = result2.round;
-                
-                if (!data2 || data2.length === 0) {
-                    console.warn("No data returned for current round.");
+
+                if (!teamData || teamData.length === 0) {
+                    console.warn("No data returned for current round - summary.");
                     return;
                 }
 
-                updateStats(data2);
-                renderGraphicalBoard(data);
-                renderTextTable(data);
+                // 3. Update UI
+                updateStats(result2); // Pass the whole object as updateStats expects .teams
+                renderGraphicalBoard(serviceData);
+                renderTextTable(serviceData);
 
-                // --- NEW: Update Timestamp ---
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit', 
-                    second: '2-digit' 
-                });
-                
+                // Update Sync Status
                 const statusElement = document.getElementById('last-updated');
-                statusElement.innerText = `Last Sync: ${timeString} (Round ${roundNum})`;
+                statusElement.innerText = `Last Sync: ${new Date().toLocaleTimeString()} (Round ${roundNum})`;
                 
-                // Visual feedback: brief flash to show data refreshed
-                statusElement.classList.add('text-blue-400');
-                setTimeout(() => statusElement.classList.remove('text-blue-400'), 1000);
-
             } catch (err) {
                 console.error("Failed to fetch scoreboard:", err);
-                document.getElementById('last-updated').innerText = "Sync Error - Retrying...";
-                document.getElementById('last-updated').classList.add('text-red-500');
+                const statusElement = document.getElementById('last-updated');
+                if (statusElement) {
+                    statusElement.innerText = "Sync Error - Retrying...";
+                    statusElement.className = "text-red-500";
+                }
             }
         }
-
+        
         function updateStats(data) {
             const container = document.getElementById('team-stats-container');
             

@@ -212,9 +212,11 @@ def insert_test_rounds(logger, num_rounds=10):
                 elif is_up > 0.8:
                     assigned_team_id = offline_team.id
                     msg = "Connection timed out / Service unreachable."
+                    offline_team.score += 1
                 else:
                     assigned_team_id = red_team.id
                     msg = "Malicious content check succeeded."
+                    red_team.score += 1
 
                 history_entry = ScoringHistory(
                     service_id=service.id,
