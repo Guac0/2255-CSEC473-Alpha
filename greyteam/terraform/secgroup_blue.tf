@@ -128,6 +128,15 @@ resource "openstack_networking_secgroup_rule_v2" "secgroup_blue_rule_10" {
   security_group_id = openstack_networking_secgroup_v2.secgroup_blue.id
 }
 
+resource "openstack_networking_secgroup_rule_v2" "secgroup_blue_rule_11" {
+  direction         = "egress"
+  ethertype         = "IPv4"
+  protocol          = "tcp"
+  port_range_min    = 444
+  port_range_max    = 444
+  remote_ip_prefix  = "172.20.0.100/32"
+  security_group_id = openstack_networking_secgroup_v2.secgroup_blue.id
+}
 /*
 resource "openstack_networking_secgroup_rule_v2" "secgroup_blue_rule_3" {
   direction         = "egress"
