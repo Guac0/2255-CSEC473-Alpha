@@ -11,8 +11,8 @@
 
 - name: Add Remmina Desktop Link
   ansible.builtin.file:
-    src: /usr/share/applications/remmina_gnome.desktop
-    dest: "/home/{{ item }}/Desktop/remmina_gnome.desktop"
+    src: /usr/share/applications/remmina-gnome.desktop
+    dest: "/home/{{ item }}/Desktop/remmina-gnome.desktop"
     state: link
     mode: '0755'
   with_items:
