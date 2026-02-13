@@ -8,3 +8,33 @@
     append: yes
     shell: /bin/bash
     create_home: yes 
+
+- name: Add Remmina Desktop Link
+  ansible.builtin.file:
+    src: /usr/share/applications/remmina_gnome.desktop
+    dest: "/home/{{ item }}/Desktop/remmina_gnome.desktop"
+    state: link
+    mode: '0755'
+  with_items:
+    - blueteam
+    - "{{ grayteam_user }}"
+
+- name: Add Firefox Desktop Link
+  ansible.builtin.file:
+    src: /var/lib/snapd/desktop/applications/firefox_firefox.desktop
+    dest: "/home/{{ item }}/Desktop/firefox_firefox.desktop"
+    state: link
+    mode: '0755'
+  with_items:
+    - blueteam
+    - "{{ grayteam_user }}"
+
+- name: Add Chromium Desktop Link
+  ansible.builtin.file:
+    src: /var/lib/snapd/desktop/applications/chromium_chromium.desktop
+    dest: "/home/{{ item }}/Desktop/chromium_chromium.desktop"
+    state: link
+    mode: '0755'
+  with_items:
+    - blueteam
+    - "{{ grayteam_user }}"

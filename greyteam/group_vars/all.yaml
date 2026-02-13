@@ -5,7 +5,7 @@ greyteam_user: greyteam
 greyteam_password: ponyuploc0!
 
 redteam_user: redteam
-redteam_password: sugarcubes4doom!
+redteam_password: SugarCubes4Doom!
 
 ansible_user: "{{ greyteam_user }}"
 ansible_password: "{{ greyteam_password }}"
