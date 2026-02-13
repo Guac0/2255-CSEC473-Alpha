@@ -79,14 +79,20 @@
 
         async function fetchScoreboardData() {
             try {
-                const response = await fetch('/get_scoring_data_latest');
-                
-                // Ensure the response is okay before proceeding
+                const response = await fetch('/get_scoring_latest');
                 if (!response.ok) throw new Error("Network response was not ok");
                 
-                const [data, roundNum] = await response.json();
+                const result = await response.json();
                 
-                // Update data as before
+                // Extract data and round from the JSON object
+                const data = result.data;
+                const roundNum = result.round;
+                
+                if (!data || data.length === 0) {
+                    console.warn("No data returned for current round.");
+                    return;
+                }
+
                 updateStats(data);
                 renderGraphicalBoard(data);
                 renderTextTable(data);

@@ -234,13 +234,13 @@ def get_scoring_data_latest():
 
 # === BASIC WEBSITE FUNCTIONALITY ===
 
-@app.route("/")
 @app.route("/dashboard")
 @login_required
 def page_dashboard():
     logger.info(f"/dashboard - Successful connection from {current_user.id} at {request.remote_addr}")
     return render_template("dashboard.html")
 
+@app.route("/")
 @app.route("/scoreboard")
 @login_required
 def page_scoreboard():
@@ -843,19 +843,14 @@ def get_scoring_users_with_pwd():
 @app.route("/get_scoring_latest", methods=["GET"])
 def get_scoring_latest():
     try:
-        # Get the highest round number currently in the database
-        latest_round = db.session.query(func.max(ScoringHistory.round)).scalar()
+        logger.info(f"/get_scoring_latest - Success from {current_user.id} at {request.remote_addr}.")
+        host_list, latest_round = get_scoring_data_latest()
         
-        if latest_round is None:
-            logger.info(f"/get_scoring_latest - Success from {current_user.id} at {request.remote_addr}. No history found.")
-            return jsonify([])
-
-        # Fetch all service results for that specific round
-        results = ScoringHistory.query.filter_by(round=latest_round).all()
-        history_list = [h.to_dict() for h in results]
-
-        logger.info(f"/get_scoring_latest - Success from {current_user.id} at {request.remote_addr}. Round: {latest_round}, Count: {len(history_list)}")
-        return jsonify(history_list)
+        # Wrap them in a single JSON response
+        return jsonify({
+            "data": host_list,
+            "round": latest_round
+        })
     except Exception as e:
         logger.error(f"/get_scoring_latest - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}")
         return jsonify({"error": "Database error while fetching latest scores"}), 500

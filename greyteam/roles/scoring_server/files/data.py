@@ -243,6 +243,7 @@ def create_db_tables(logger):
     if not db_exists:
         insert_initial_data(logger)
         if CREATE_TEST_DATA:
+            logger.info(f"Inserting test data into database.")
             insert_test_rounds(logger,10)
         #logger.info(f"Initialized database with initial data at {SAVEFILE}")
     else:
