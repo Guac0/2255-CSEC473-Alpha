@@ -20,6 +20,7 @@ import time
 from tabulate import tabulate
 from server import app, get_scoring_data_latest
 from data import create_db_tables
+import copy
 
 logger = setup_logging("server_worker")
 
@@ -214,11 +215,14 @@ class ScoreboardManager:
                 payload = self.format_payload(data, current_round)
                 try:
                     client_socket.sendall(payload.encode('utf-8'))
-                except:
-                    pass
+                except Exception as E:
+                    logger.error(f"/push_to_single - error when sending data to client - {E}.")
+            else:
+                logger.error(f"/push_to_single - error when sending data to client - did not return any data.")
 
-    def format_payload(self, data, round_num):
+    def format_payload(self, input_data, round_num):
         """Standardized formatting for CLI clients."""
+        data = copy.deepcopy(input_data)
         # Add ANSI Colors
         for row in data:
             team = row['team'].lower()
@@ -246,7 +250,7 @@ class ScoreboardManager:
                     logger.info(f"New round {current_round} detected! Broadcasting to {len(self.clients)} clients...")
                     
                     try:
-                        data_discord = data.copy() # note: only works at first level
+                        data_discord = copy.deepcopy(data)
                         for row in data_discord:
                             team = row['team'].lower()
                             if "blue" in team:
