@@ -25,18 +25,11 @@
         <div class="flex flex-wrap justify-between items-center mb-4">
             <h1 class="text-3xl font-bold tracking-tight">COMPETITION SCOREBOARD</h1>
             <div class="space-x-4">
-                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Reports (Placeholder)</button>
-                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Admin (Placeholder)</button>
-                <div class="flex flex-wrap justify-between items-center mb-4">
-                    <h1 class="text-3xl font-bold tracking-tight">COMPETITION SCOREBOARD</h1>
-                    <div class="flex items-center space-x-4">
-                        <span id="last-updated" class="text-xs font-mono text-gray-500 bg-gray-900 px-3 py-1 rounded border border-gray-800">
-                            Last Sync: Never
-                        </span>
-                        <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Reports</button>
-                        <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Admin</button>
-                    </div>
-                </div>
+                <span id="last-updated" class="text-xs font-mono text-gray-500 bg-gray-900 px-3 py-1 rounded border border-gray-800">
+                    Last Sync: Never
+                </span>
+                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Reports</button>
+                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Admin</button>
             </div>
         </div>
         
@@ -56,18 +49,18 @@
     <section>
         <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Latest Round Details</h2>
         <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full table-auto text-left border-collapse">
                 <thead class="bg-gray-700 text-gray-300 uppercase text-xs">
                     <tr>
-                        <th class="p-4">Hostname</th>
-                        <th class="p-4">IP Address</th>
-                        <th class="p-4">OS</th>
-                        <th class="p-4">Service</th>
-                        <th class="p-4 text-center">Status</th>
+                        <th class="p-4 whitespace-nowrap w-px">Hostname</th>
+                        <th class="p-4 whitespace-nowrap w-px">IP Address</th>
+                        <th class="p-4 whitespace-nowrap w-px">OS</th>
+                        <th class="p-4 whitespace-nowrap w-px">Service</th>
+                        <th class="p-4 whitespace-nowrap w-px text-center">Status</th>
                         <th class="p-4">Message</th>
                     </tr>
                 </thead>
-                <tbody id="text-table-body">
+                <tbody id="text-table-body" class="text-gray-300">
                     </tbody>
             </table>
         </div>
@@ -93,7 +86,21 @@
                     return;
                 }
 
-                updateStats(data);
+                const response2 = await fetch('/get_scoring_summary');
+                if (!response2.ok) throw new Error("Network response was not ok");
+                
+                const result2 = await response.json();
+                
+                // Extract data and round from the JSON object
+                const data2 = result.data;
+                const roundNum2 = result.round;
+                
+                if (!data2 || data2.length === 0) {
+                    console.warn("No data returned for current round.");
+                    return;
+                }
+
+                updateStats(data2);
                 renderGraphicalBoard(data);
                 renderTextTable(data);
 
@@ -122,30 +129,47 @@
         function updateStats(data) {
             const container = document.getElementById('team-stats-container');
             
-            // Calculate scores based on the current round results
-            const total = data.length;
-            const counts = {
-                blue: data.filter(h => h.team === 'blue').length,
-                red: data.filter(h => h.team === 'red').length,
-                offline: data.filter(h => h.team === 'offline').length
+            if (!data || !data.teams) {
+                console.error("Invalid summary data received");
+                return;
+            }
+
+            // Map backend team names to specific frontend styling
+            const teamStyles = {
+                'blue': { label: 'Blue Team', border: 'border-blue-600', text: 'text-blue-400' },
+                'red': { label: 'Red Team', border: 'border-red-600', text: 'text-red-400' },
+                'offline': { label: 'Offline', border: 'border-yellow-500', text: 'text-yellow-500' }
             };
 
-            const teams = [
-                { name: 'Blue Team', id: 'blue', color: 'bg-blue-600', count: counts.blue, mult: 1.0 },
-                { name: 'Red Team', id: 'red', color: 'bg-red-600', count: counts.red, mult: 1.0 },
-                { name: 'Offline', id: 'offline', color: 'bg-yellow-500', count: counts.offline, mult: 0.0 }
-            ];
-
-            container.innerHTML = teams.map(team => `
-                <div class="bg-gray-900 border-l-4 border-${team.id === 'offline' ? 'yellow-500' : team.id + '-600'} p-4 rounded shadow">
-                    <div class="text-xs uppercase text-gray-500 font-bold">${team.name}</div>
-                    <div class="flex justify-between items-end">
-                        <div class="text-2xl font-mono">${team.count} <span class="text-sm text-gray-500">pts</span></div>
-                        <div class="text-sm font-semibold text-gray-400">${((team.count / total) * 100).toFixed(1)}%</div>
+            container.innerHTML = data.teams.map(team => {
+                const style = teamStyles[team.team_name.toLowerCase()] || 
+                            { label: team.team_name, border: 'border-gray-600', text: 'text-gray-400' };
+                
+                return `
+                    <div class="bg-gray-800 border-l-4 ${style.border} p-4 rounded-lg shadow-lg">
+                        <div class="flex justify-between items-start">
+                            <div class="text-xs uppercase text-gray-500 font-bold">${style.label}</div>
+                            <div class="text-[10px] bg-gray-900 px-2 py-0.5 rounded border border-gray-700 text-gray-400">
+                                <span class="text-white">${team.services_owned}</span> Services
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-end mt-2">
+                            <div class="text-3xl font-mono font-bold text-white">
+                                ${team.score.toLocaleString()} 
+                                <span class="text-xs text-gray-500 uppercase">pts</span>
+                            </div>
+                            <div class="text-xs font-semibold ${style.text}">
+                                x${team.multiplier.toFixed(1)} <span class="text-gray-600">mult</span>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full bg-gray-900 h-1 mt-3 rounded-full overflow-hidden">
+                            <div class="bg-gray-700 h-full" style="width: 100%"></div>
+                        </div>
                     </div>
-                    <div class="text-[10px] mt-1 text-gray-600">Multiplier: x${team.mult.toFixed(1)}</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function renderGraphicalBoard(data) {
@@ -180,16 +204,18 @@
             const tbody = document.getElementById('text-table-body');
             tbody.innerHTML = data.map(h => `
                 <tr class="border-b border-gray-700 hover:bg-gray-750 transition">
-                    <td class="p-4 font-semibold text-sm">${h.hostname}</td>
-                    <td class="p-4 font-mono text-xs text-blue-400">${h.ip}</td>
-                    <td class="p-4 text-xs text-gray-400">${h.os}</td>
-                    <td class="p-4 text-sm">${h.service}</td>
-                    <td class="p-4 text-center">
+                    <td class="p-4 font-semibold text-sm whitespace-nowrap">${h.hostname}</td>
+                    <td class="p-4 font-mono text-xs text-blue-400 whitespace-nowrap">${h.ip}</td>
+                    <td class="p-4 text-xs text-gray-400 whitespace-nowrap">${h.os}</td>
+                    <td class="p-4 text-sm whitespace-nowrap">${h.service}</td>
+                    <td class="p-4 text-center whitespace-nowrap">
                         <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${getBgClass(h.team)}">
                             ${h.team}
                         </span>
                     </td>
-                    <td class="p-4 text-xs italic text-gray-500">${h.message || 'No data'}</td>
+                    <td class="p-4 text-xs italic text-gray-500 min-w-[200px] break-words">
+                        ${h.message || 'No data'}
+                    </td>
                 </tr>
             `).join('');
         }

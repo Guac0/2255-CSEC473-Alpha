@@ -122,11 +122,11 @@ def insert_initial_data(logger):
                 generic_name="http"
                 crit_location="80"
                 crit_content=""
-            elif ("workstation windows" in service_name_simple):
+            elif (("workstation" in service_name_simple) and ("windows" in os_name.lower().strip())):
                 generic_name="workstation windows"
                 crit_location=""
                 crit_content=""
-            elif ("workstation linux" in service_name_simple):
+            elif (("workstation" in service_name_simple) and ("windows" not in os_name.lower().strip())):
                 generic_name="workstation linux"
                 crit_location=""
                 crit_content=""
@@ -188,6 +188,7 @@ def insert_test_rounds(logger, num_rounds=10):
         # 1. Get all services and teams
         services = Service.query.all()
         blue_team = ScoringTeams.query.filter_by(team_name="blue").first()
+        red_team = ScoringTeams.query.filter_by(team_name="red").first()
         offline_team = ScoringTeams.query.filter_by(team_name="offline").first()
 
         if not services or not blue_team or not offline_team:
@@ -200,17 +201,20 @@ def insert_test_rounds(logger, num_rounds=10):
             
             for service in services:
                 # Randomly decide if the service is "Up" or "Down"
-                # 70% chance of success (Blue Team), 30% chance of failure (Offline)
-                is_up = random.random() > 0.3
+                # 50% chance of success (Blue Team), 30% chance of failure (red), 20% offline
+                is_up = random.random()
                 
-                if is_up:
+                if is_up < 0.5:
                     assigned_team_id = blue_team.id
-                    msg = "Service responding normally."
+                    msg = "Legitimate content check succeeded."
                     # Increment the actual team score for realism
                     blue_team.score += 1
-                else:
+                elif is_up > 0.8:
                     assigned_team_id = offline_team.id
                     msg = "Connection timed out / Service unreachable."
+                else:
+                    assigned_team_id = red_team.id
+                    msg = "Malicious content check succeeded."
 
                 history_entry = ScoringHistory(
                     service_id=service.id,

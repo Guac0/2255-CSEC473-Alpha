@@ -989,6 +989,37 @@ def set_scoring():
         db.session.rollback()
         logger.error(f"/set_scoring - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}. Data: {data}")
         return jsonify({"error": "Database error while setting score"}), 500
+
+@app.route('/get_scoring_summary')
+def get_scoring_summary():
+    with app.app_context():
+        # 1. Get the latest round number
+        latest_round = db.session.query(db.func.max(ScoringHistory.round)).scalar() or 0
+        
+        # 2. Get all teams
+        teams = ScoringTeams.query.all()
+        
+        # 3. Count owned services for the latest round
+        # This counts how many services were assigned to each team in the most recent round
+        service_counts = db.session.query(
+            ScoringHistory.value, db.func.count(ScoringHistory.id)
+        ).filter(ScoringHistory.round == latest_round).group_group_by(ScoringHistory.value).all()
+        
+        counts_dict = {team_id: count for team_id, count in service_counts}
+
+        summary = []
+        for team in teams:
+            summary.append({
+                "team_name": team.team_name,
+                "score": team.score,
+                "multiplier": team.multiplier,
+                "services_owned": counts_dict.get(team.id, 0)
+            })
+
+        return jsonify({
+            "round": latest_round,
+            "teams": summary
+        })
     
 # --- ScoringCriteria Endpoints ---
 
