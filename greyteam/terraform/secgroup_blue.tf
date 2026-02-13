@@ -203,20 +203,3 @@ resource "openstack_networking_secgroup_rule_v2" "blue_inscope_icmp" {
   remote_ip_prefix  = "10.0.0.0/16"
   security_group_id = openstack_networking_secgroup_v2.secgroup_blue.id
 }
-resource "openstack_networking_secgroup_rule_v2" "blue_inscope_udp" {
-  direction         = "ingress"
-  ethertype         = "IPv4"
-  protocol          = "udp"
-  port_range_min    = 1
-  port_range_max    = 65535
-  remote_ip_prefix  = "10.0.0.0/16"
-  security_group_id = openstack_networking_secgroup_v2.secgroup_blue.id
-}
-
-resource "openstack_networking_secgroup_rule_v2" "blue_inscope_icmp" {
-  direction         = "ingress"
-  ethertype         = "IPv4"
-  protocol          = "icmp"
-  remote_ip_prefix  = "10.0.0.0/16"
-  security_group_id = openstack_networking_secgroup_v2.secgroup_blue.id
-}
