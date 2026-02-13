@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Scoring Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Team Color Variables */
+        .bg-team-blue { background-color: #2563eb; color: white; }    /* Blue Team */
+        .bg-team-red { background-color: #dc2626; color: white; }     /* Red Team */
+        .bg-team-yellow { background-color: #facc15; color: black; }  /* Offline/Down */
+        
+        .service-square {
+            transition: transform 0.2s;
+            min-width: 140px;
+            min-height: 100px;
+        }
+        .service-square:hover { transform: scale(1.05); cursor: pointer; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans p-6">
+
+    <header id="stats-header" class="mb-8 bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+        <div class="flex flex-wrap justify-between items-center mb-4">
+            <h1 class="text-3xl font-bold tracking-tight">COMPETITION SCOREBOARD</h1>
+            <div class="space-x-4">
+                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Reports (Placeholder)</button>
+                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Admin (Placeholder)</button>
+                <div class="flex flex-wrap justify-between items-center mb-4">
+                    <h1 class="text-3xl font-bold tracking-tight">COMPETITION SCOREBOARD</h1>
+                    <div class="flex items-center space-x-4">
+                        <span id="last-updated" class="text-xs font-mono text-gray-500 bg-gray-900 px-3 py-1 rounded border border-gray-800">
+                            Last Sync: Never
+                        </span>
+                        <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Reports</button>
+                        <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Admin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="team-stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+        </div>
+    </header>
+
+    <section class="mb-12">
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Infrastructure Status (By Subnet)</h2>
+        <div id="graphical-scoreboard" class="space-y-6">
+            </div>
+    </section>
+
+    <section>
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Latest Round Details</h2>
+        <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-700 text-gray-300 uppercase text-xs">
+                    <tr>
+                        <th class="p-4">Hostname</th>
+                        <th class="p-4">IP Address</th>
+                        <th class="p-4">OS</th>
+                        <th class="p-4">Service</th>
+                        <th class="p-4 text-center">Status</th>
+                        <th class="p-4">Message</th>
+                    </tr>
+                </thead>
+                <tbody id="text-table-body">
+                    </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        // CONFIGURATION
+        const REFRESH_RATE = 10000; // Refresh every 10 seconds
+
+        async function fetchScoreboardData() {
+            try {
+                const response = await fetch('/get_scoring_data_latest');
+                
+                // Ensure the response is okay before proceeding
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const [data, roundNum] = await response.json();
+                
+                // Update data as before
+                updateStats(data);
+                renderGraphicalBoard(data);
+                renderTextTable(data);
+
+                // --- NEW: Update Timestamp ---
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+                
+                const statusElement = document.getElementById('last-updated');
+                statusElement.innerText = `Last Sync: ${timeString} (Round ${roundNum})`;
+                
+                // Visual feedback: brief flash to show data refreshed
+                statusElement.classList.add('text-blue-400');
+                setTimeout(() => statusElement.classList.remove('text-blue-400'), 1000);
+
+            } catch (err) {
+                console.error("Failed to fetch scoreboard:", err);
+                document.getElementById('last-updated').innerText = "Sync Error - Retrying...";
+                document.getElementById('last-updated').classList.add('text-red-500');
+            }
+        }
+
+        function updateStats(data) {
+            const container = document.getElementById('team-stats-container');
+            
+            // Calculate scores based on the current round results
+            const total = data.length;
+            const counts = {
+                blue: data.filter(h => h.team === 'blue').length,
+                red: data.filter(h => h.team === 'red').length,
+                offline: data.filter(h => h.team === 'offline').length
+            };
+
+            const teams = [
+                { name: 'Blue Team', id: 'blue', color: 'bg-blue-600', count: counts.blue, mult: 1.0 },
+                { name: 'Red Team', id: 'red', color: 'bg-red-600', count: counts.red, mult: 1.0 },
+                { name: 'Offline', id: 'offline', color: 'bg-yellow-500', count: counts.offline, mult: 0.0 }
+            ];
+
+            container.innerHTML = teams.map(team => `
+                <div class="bg-gray-900 border-l-4 border-${team.id === 'offline' ? 'yellow-500' : team.id + '-600'} p-4 rounded shadow">
+                    <div class="text-xs uppercase text-gray-500 font-bold">${team.name}</div>
+                    <div class="flex justify-between items-end">
+                        <div class="text-2xl font-mono">${team.count} <span class="text-sm text-gray-500">pts</span></div>
+                        <div class="text-sm font-semibold text-gray-400">${((team.count / total) * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="text-[10px] mt-1 text-gray-600">Multiplier: x${team.mult.toFixed(1)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderGraphicalBoard(data) {
+            const board = document.getElementById('graphical-scoreboard');
+            
+            // Group data by subnet (e.g., 10.0.10.x)
+            const subnets = {};
+            data.forEach(item => {
+                const parts = item.ip.split('.');
+                const subnet = `${parts[0]}.${parts[1]}.${parts[2]}.0/24`;
+                if (!subnets[subnet]) subnets[subnet] = [];
+                subnets[subnet].push(item);
+            });
+
+            board.innerHTML = Object.keys(subnets).sort().map(subnet => `
+                <div class="flex items-center gap-4">
+                    <div class="w-32 text-sm font-bold text-gray-500 border-r border-gray-800 pr-4">${subnet}</div>
+                    <div class="flex flex-wrap gap-3">
+                        ${subnets[subnet].map(h => `
+                            <div class="service-square p-3 rounded-lg shadow-md flex flex-col justify-center text-center ${getBgClass(h.team)}">
+                                <div class="text-[10px] font-bold opacity-80 uppercase">${h.service}</div>
+                                <div class="text-sm font-bold truncate">${h.hostname}</div>
+                                <div class="text-[10px] font-mono opacity-90">${h.ip}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTextTable(data) {
+            const tbody = document.getElementById('text-table-body');
+            tbody.innerHTML = data.map(h => `
+                <tr class="border-b border-gray-700 hover:bg-gray-750 transition">
+                    <td class="p-4 font-semibold text-sm">${h.hostname}</td>
+                    <td class="p-4 font-mono text-xs text-blue-400">${h.ip}</td>
+                    <td class="p-4 text-xs text-gray-400">${h.os}</td>
+                    <td class="p-4 text-sm">${h.service}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${getBgClass(h.team)}">
+                            ${h.team}
+                        </span>
+                    </td>
+                    <td class="p-4 text-xs italic text-gray-500">${h.message || 'No data'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function getBgClass(team) {
+            if (team === 'blue') return 'bg-team-blue';
+            if (team === 'red') return 'bg-team-red';
+            return 'bg-team-yellow';
+        }
+
+        // Initial load and set interval
+        fetchScoreboardData();
+        setInterval(fetchScoreboardData, REFRESH_RATE);
+    </script>
+</body>
+</html>

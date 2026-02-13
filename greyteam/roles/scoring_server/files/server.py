@@ -202,7 +202,8 @@ def get_scoring_data_latest():
             Host.ip,
             Host.os,
             ScoringTeams.team_name,
-            ScoringHistory.message
+            ScoringHistory.message,
+            Service.scorecheck_name
         ).join(Host, ScoringHistory.host_id == Host.id)\
          .join(ScoringTeams, ScoringHistory.value == ScoringTeams.id)\
          .filter(ScoringHistory.round == latest_round)\
@@ -215,7 +216,8 @@ def get_scoring_data_latest():
                 "ip": r.ip,
                 "os": r.os,
                 "team": r.team_name,
-                "message": r.message
+                "message": r.message,
+                "service": r.scorecheck_name
             } for r in results
         ]
         host_list.sort(key=lambda x: ipaddress.ip_address(x['ip']))
@@ -238,6 +240,12 @@ def get_scoring_data_latest():
 def page_dashboard():
     logger.info(f"/dashboard - Successful connection from {current_user.id} at {request.remote_addr}")
     return render_template("dashboard.html")
+
+@app.route("/scoreboard")
+@login_required
+def page_scoreboard():
+    logger.info(f"/scoreboard - Successful connection from {current_user.id} at {request.remote_addr}")
+    return render_template("scoreboard.html")
 
 @app.route("/management")
 @login_required
