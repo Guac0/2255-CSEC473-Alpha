@@ -1165,7 +1165,7 @@ def update_criteria_locations():
 # =================================
 
 logger.info(f"Starting server on {HOST}:{PORT}")
-with app.app_context:
+with app.app_context():
     create_db_tables(logger)
 
 def start_server():
@@ -1173,7 +1173,7 @@ def start_server():
 
 if __name__ == "__main__":
     pass
-    #with app.app_context:
+    #with app.app_context():
     #    create_db_tables()
 
     # Start threads before test data to avoid delays

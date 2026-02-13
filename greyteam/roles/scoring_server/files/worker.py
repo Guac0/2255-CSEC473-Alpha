@@ -321,7 +321,7 @@ def start_nc_server(manager, port=9000):
 if __name__ == "__main__":
     logger.info("Starting server worker threads...")
     notifier = sdnotify.SystemdNotifier()
-    with app.app_context:
+    with app.app_context():
         create_db_tables(logger)
     manager = ScoreboardManager()
     
