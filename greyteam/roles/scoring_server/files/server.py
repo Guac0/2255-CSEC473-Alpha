@@ -993,33 +993,38 @@ def set_scoring():
 @app.route('/get_scoring_summary')
 def get_scoring_summary():
     with app.app_context():
-        # 1. Get the latest round number
-        latest_round = db.session.query(db.func.max(ScoringHistory.round)).scalar() or 0
-        
-        # 2. Get all teams
-        teams = ScoringTeams.query.all()
-        
-        # 3. Count owned services for the latest round
-        # This counts how many services were assigned to each team in the most recent round
-        service_counts = db.session.query(
-            ScoringHistory.value, db.func.count(ScoringHistory.id)
-        ).filter(ScoringHistory.round == latest_round).group_group_by(ScoringHistory.value).all()
-        
-        counts_dict = {team_id: count for team_id, count in service_counts}
+        try:
+            # 1. Get the latest round number
+            latest_round = db.session.query(db.func.max(ScoringHistory.round)).scalar() or 0
+            
+            # 2. Get all teams
+            teams = ScoringTeams.query.all()
+            
+            # 3. Count owned services for the latest round
+            # This counts how many services were assigned to each team in the most recent round
+            service_counts = db.session.query(
+                ScoringHistory.value, db.func.count(ScoringHistory.id)
+            ).filter(ScoringHistory.round == latest_round).group_by(ScoringHistory.value).all()
+            
+            counts_dict = {team_id: count for team_id, count in service_counts}
 
-        summary = []
-        for team in teams:
-            summary.append({
-                "team_name": team.team_name,
-                "score": team.score,
-                "multiplier": team.multiplier,
-                "services_owned": counts_dict.get(team.id, 0)
+            summary = []
+            for team in teams:
+                summary.append({
+                    "team_name": team.team_name,
+                    "score": team.score,
+                    "multiplier": team.multiplier,
+                    "services_owned": counts_dict.get(team.id, 0)
+                })
+
+            logger.info(f"/get_scoring_summary - Success from {current_user.id} at {request.remote_addr}.")
+            return jsonify({
+                "round": latest_round,
+                "teams": summary
             })
-
-        return jsonify({
-            "round": latest_round,
-            "teams": summary
-        })
+        except Exception as E:
+            logger.error(f"/get_scoring_summary - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}")
+            return jsonify({"error": "Database error while fetching latest scores"}), 500
     
 # --- ScoringCriteria Endpoints ---
 

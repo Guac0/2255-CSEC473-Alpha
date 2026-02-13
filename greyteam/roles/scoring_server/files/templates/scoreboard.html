@@ -23,7 +23,7 @@
 
     <header id="stats-header" class="mb-8 bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
         <div class="flex flex-wrap justify-between items-center mb-4">
-            <h1 class="text-3xl font-bold tracking-tight">COMPETITION SCOREBOARD</h1>
+            <h1 class="text-3xl font-bold tracking-tight">SERVICE SCOREBOARD</h1>
             <div class="space-x-4">
                 <span id="last-updated" class="text-xs font-mono text-gray-500 bg-gray-900 px-3 py-1 rounded border border-gray-800">
                     Last Sync: Never
@@ -41,13 +41,13 @@
     </header>
 
     <section class="mb-12">
-        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Infrastructure Status (By Subnet)</h2>
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Service Status</h2>
         <div id="graphical-scoreboard" class="space-y-6">
             </div>
     </section>
 
     <section>
-        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Latest Round Details</h2>
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Service Details</h2>
         <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700">
             <table class="w-full table-auto text-left border-collapse">
                 <thead class="bg-gray-700 text-gray-300 uppercase text-xs">
@@ -89,11 +89,11 @@
                 const response2 = await fetch('/get_scoring_summary');
                 if (!response2.ok) throw new Error("Network response was not ok");
                 
-                const result2 = await response.json();
+                const result2 = await response2.json();
                 
                 // Extract data and round from the JSON object
-                const data2 = result.data;
-                const roundNum2 = result.round;
+                const data2 = result2.data;
+                const roundNum2 = result2.round;
                 
                 if (!data2 || data2.length === 0) {
                     console.warn("No data returned for current round.");
