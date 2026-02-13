@@ -33,7 +33,7 @@
   with_items:
     - remmina
     - firefox
-    - chromium-browsers
+    - chromium-browser
   when: "'gui' in group_names"
 
 #- name: Install python packages
