@@ -26,6 +26,7 @@
   changed_when: "'CREATED' in zone_create.stdout"
 
 # --- Configure forwarder to mgmt DNS
+# Note: configures it to the second mgmt dns available as the first one is this local dns server
 - name: Ensure DNS forwarder includes secondary mgmt DNS
   ansible.windows.win_shell: |
     $existing = @()
@@ -41,7 +42,6 @@
   register: fwd_result
   changed_when: "'CHANGED' in fwd_result.stdout"
   when: mgmt_dns is defined and (mgmt_dns | length) > 1
-
 
 - name: List of inscope hosts
   ansible.builtin.set_fact:
@@ -59,11 +59,11 @@
     - hostvars[item] is defined
     - hostvars[item].ansible_host is defined
 
-- name: Create NS record for inscope.local
+- name: Create NS record for local domain
   ansible.windows.win_dns_record:
-    zone: "inscope.local"
+    zone: "{{ domain }}"
     name: "@"
     type: "NS"
     values:
-      - "canterlot.inscope.local"
+      - "canterlot.{{ domain }}"
     state: present
