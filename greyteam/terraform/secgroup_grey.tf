@@ -2,15 +2,15 @@ resource "openstack_networking_secgroup_v2" "secgroup_grey" {
   name        = "secgroup_grey"
 }
 
-############
-# all outbound
-############
-resource "openstack_networking_secgroup_rule_v2" "grey_egress_all" {
-  direction         = "egress"
-  ethertype         = "IPv4"
-  remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = openstack_networking_secgroup_v2.secgroup_grey.id
-}
+# ############
+# # all outbound
+# ############
+# resource "openstack_networking_secgroup_rule_v2" "grey_egress_all" {
+#   direction         = "egress"
+#   ethertype         = "IPv4"
+#   remote_ip_prefix  = "0.0.0.0/0"
+#   security_group_id = openstack_networking_secgroup_v2.secgroup_grey.id
+# }
 ############
 # inbound 443
 ############
@@ -59,16 +59,16 @@ resource "openstack_networking_secgroup_rule_v2" "grey_ingress_444" {
 # }
 
 
-# resource "openstack_networking_secgroup_rule_v2" "secgroup_grey_rule_3" {
-#   direction         = "egress"
-#   ethertype         = "IPv4"
-#   #protocol          = ""
-#   #port_range_min    = 0
-#   #port_range_max    = 0
-#   #remote_ip_prefix  = "0.0.0.0/0"
-#   #remote_group_id   = ""
-#   security_group_id = openstack_networking_secgroup_v2.secgroup_grey.id
-# }
+resource "openstack_networking_secgroup_rule_v2" "secgroup_grey_rule_3" {
+  direction         = "egress"
+  ethertype         = "IPv4"
+  #protocol          = ""
+  #port_range_min    = 0
+  #port_range_max    = 0
+  #remote_ip_prefix  = "0.0.0.0/0"
+  #remote_group_id   = ""
+  security_group_id = openstack_networking_secgroup_v2.secgroup_grey.id
+}
 
 # resource "openstack_networking_secgroup_rule_v2" "secgroup_grey_rule_4" {
 #   direction         = "egress"
