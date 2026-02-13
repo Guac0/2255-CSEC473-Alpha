@@ -9,32 +9,32 @@
     shell: /bin/bash
     create_home: yes 
 
-- name: Add Remmina Desktop Link
+- name: Ensure Desktop directories exist
   ansible.builtin.file:
-    src: /usr/share/applications/remmina-gnome.desktop
-    dest: "/home/{{ item }}/Desktop/remmina-gnome.desktop"
-    state: link
+    path: "/home/{{ item }}/Desktop"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
     mode: '0755'
-  with_items:
+  loop:
     - blueteam
     - "{{ greyteam_user }}"
 
-- name: Add Firefox Desktop Link
+- name: Create Desktop Shortcuts
   ansible.builtin.file:
-    src: /var/lib/snapd/desktop/applications/firefox_firefox.desktop
-    dest: "/home/{{ item }}/Desktop/firefox_firefox.desktop"
+    src: "{{ item.src }}"
+    dest: "/home/{{ item.user }}/Desktop/{{ item.src | basename }}"
     state: link
+    owner: "{{ item.user }}"
+    group: "{{ item.user }}"
     mode: '0755'
-  with_items:
-    - blueteam
-    - "{{ greyteam_user }}"
-
-- name: Add Chromium Desktop Link
-  ansible.builtin.file:
-    src: /var/lib/snapd/desktop/applications/chromium_chromium.desktop
-    dest: "/home/{{ item }}/Desktop/chromium_chromium.desktop"
-    state: link
-    mode: '0755'
-  with_items:
-    - blueteam
-    - "{{ greyteam_user }}"
+  loop: "{{ q('nested', ['blueteam', greyteam_user], shortcuts) }}"
+  vars:
+    shortcuts:
+      - src: "/usr/share/applications/org.remmina.Remmina.desktop"
+      - src: "/usr/share/applications/firefox.desktop"
+      - src: "/usr/share/applications/chromium.desktop"
+  loop_control:
+    label: "Linking {{ item.1.src | basename }} for {{ item.0 }}"
+  register: link_result
+  #ignore_errors: yes # Helpful if one browser name varies between Debian/Lubuntu
