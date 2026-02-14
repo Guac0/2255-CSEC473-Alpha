@@ -20,21 +20,34 @@
     - blueteam
     - "{{ greyteam_user }}"
 
-- name: Create Desktop Shortcuts
+- name: Create Desktop Symbolic Links
   ansible.builtin.file:
-    src: "{{ item.src }}"
-    dest: "/home/{{ item.user }}/Desktop/{{ item.src | basename }}"
+    src: "{{ item.1.src }}"
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.src | basename }}"
     state: link
-    owner: "{{ item.user }}"
-    group: "{{ item.user }}"
+    owner: "{{ item.0 }}"
+    group: "{{ item.0 }}"
     mode: '0755'
   loop: "{{ q('nested', ['blueteam', greyteam_user], shortcuts) }}"
   vars:
     shortcuts:
       - src: "/usr/share/applications/org.remmina.Remmina.desktop"
-      - src: "/usr/share/applications/firefox.desktop"
-      - src: "/usr/share/applications/chromium.desktop"
-  loop_control:
-    label: "Linking {{ item.1.src | basename }} for {{ item.0 }}"
-  register: link_result
-  #ignore_errors: yes # Helpful if one browser name varies between Debian/Lubuntu
+      - src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop"
+      - src: "/usr/share/applications/chromium-browser.desktop"
+  ignore_errors: yes
+  register: desktop_links
+
+- name: Set metadata trust via GIO
+  ansible.builtin.command:
+    cmd: "gio set -t string /home/{{ item.0 }}/Desktop/{{ item.1.src | basename }} metadata::trusted true"
+  loop: "{{ q('nested', ['blueteam', greyteam_user], shortcuts) }}"
+  vars:
+    shortcuts:
+      - src: "/usr/share/applications/org.remmina.Remmina.desktop"
+      - src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop"
+      - src: "/usr/share/applications/chromium-browser.desktop"
+  # We use become_user because gio metadata is stored in the user's gvfs database
+  become: yes
+  become_user: "{{ item.0 }}"
+  ignore_errors: yes
+  when: desktop_links.changed
