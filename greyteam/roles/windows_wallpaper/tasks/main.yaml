@@ -1,111 +1,25 @@
-# ---
-# # Alpha – Anny Hua
-# # Feature: Windows wallpaper theming 
+---
+# Alpha – Anny Hua
+# Feature: Windows wallpaper theming 
 
-# - name: Determine wallpaper filename for this host (prefer hostname.jpg)
-#   ansible.builtin.set_fact:
-#     wallpaper_host_file: "{{ inventory_hostname.split('.')[0] }}.jpg"
-#     wallpaper_default_file: "wallpaper.jpg"
+- name: Create wallpaper directory
+  ansible.windows.win_file:
+    path: C:\ProgramData\Inscope\Branding
+    state: directory
 
-# - name: Check if hostname-specific wallpaper exists on controller
-#   ansible.builtin.stat:
-#     path: "{{ role_path }}/files/{{ wallpaper_host_file }}"
-#   register: wallpaper_check
-#   delegate_to: localhost
-#   run_once: false
+- name: Copy wallpaper to host
+  ansible.windows.win_copy:
+    src: "{{ wallpaper_src }}"
+    dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
 
-# - name: Choose wallpaper source file (host-specific or default)
-#   ansible.builtin.set_fact:
-#     wallpaper_src: "{{ wallpaper_host_file if wallpaper_check.stat.exists else wallpaper_default_file }}"
+- name: Copy wallpaper script to host
+  ansible.windows.win_copy:
+    src: "wallpaper_script.ps1"
+    dest: "C:\\ProgramData\\Inscope\\"
 
-# - name: Ensure wallpaper directory exists
-#   ansible.windows.win_file:
-#     path: "C:\\ProgramData\\Inscope\\Branding"
-#     state: directory
-
-# - name: Copy wallpaper to host
-#   ansible.windows.win_copy:
-#     src: "{{ wallpaper_src }}"
-#     dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
-
-# - name: Ensure all users can read wallpaper
-#   ansible.windows.win_acl:
-#     path: C:\ProgramData\Inscope\Branding\wallpaper.jpg
-#     user: Users
-#     rights: Read
-#     type: allow
-#     state: present
-
-# - name: Configure wallpaper registry values
-#   ansible.windows.win_regedit:
-#     path: HKLM:\Software\Policies\Microsoft\Windows\Personalization
-#     name: "{{ item.name }}"
-#     data: "{{ item.data }}"
-#     type: string
-#   loop:
-#     - { name: "Wallpaper",      data: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg" }
-#     - { name: "TileWallpaper", data: "0"}
-#     - { name: "WallpaperStyle", data: "10" }
-
-# - name: Refresh desktop settings (apply wallpaper)
-#   ansible.windows.win_shell: gpupdate /force
-#   changed_when: false
-
-# - name: Verify wallpaper registry points to expected file
-#   ansible.windows.win_shell: |
-#     (Get-ItemProperty "HKLM:\Software\Policies\Microsoft\Windows\Personalization").Wallpaper
-#   register: wallpaper_reg
-#   changed_when: false
-
-# - name: Show applied wallpaper path
-#   ansible.builtin.debug:
-#     msg: "Wallpaper set to: {{ wallpaper_reg.stdout | trim }}"
-
-# - name: Force wallpaper for currently logged-in users
-#   ansible.windows.win_shell: |
-#     $users = Get-ChildItem Registry::HKEY_USERS | Where-Object { $_.Name -match "S-1-5-21" }
-#     foreach ($u in $users) {
-#       $desktopPath = "$($u.Name)\Control Panel\Desktop"
-#       $explorerPath = "$($u.Name)\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers"
-
-#       Set-ItemProperty -Path $desktopPath -Name Wallpaper -Value "C:\ProgramData\Inscope\Branding\wallpaper.jpg"
-#       Set-ItemProperty -Path $desktopPath -Name WallpaperStyle -Value "10"
-#       Set-ItemProperty -Path $desktopPath -Name TileWallpaper -Value "0"
-
-#       New-Item -Path $explorerPath -Force | Out-Null
-#       Set-ItemProperty -Path $explorerPath -Name BackgroundType -Value 0
-#     }
-#     RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters
-
-
-- name: Force wallpaper for all local user profiles (loaded + unloaded)
-  ansible.windows.win_shell: |
-    $wallpaper = "C:\ProgramData\Inscope\Branding\wallpaper.jpg"
-    $profiles = Get-ChildItem "C:\Users" -Directory | Where-Object {
-        $_.Name -notin @("Public","Default","Default User","All Users")
-    }
-
-    foreach ($profile in $profiles) {
-
-        $ntuser = "$($profile.FullName)\NTUSER.DAT"
-        if (Test-Path $ntuser) {
-
-            reg.exe LOAD HKU\TempHive $ntuser 2>$null
-
-            $desktopPath = "Registry::HKEY_USERS\TempHive\Control Panel\Desktop"
-            $explorerPath = "Registry::HKEY_USERS\TempHive\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers"
-
-            if (Test-Path $desktopPath) {
-                Set-ItemProperty -Path $desktopPath -Name Wallpaper -Value $wallpaper
-                Set-ItemProperty -Path $desktopPath -Name WallpaperStyle -Value "10"
-                Set-ItemProperty -Path $desktopPath -Name TileWallpaper -Value "0"
-            }
-
-            New-Item -Path $explorerPath -Force | Out-Null
-            Set-ItemProperty -Path $explorerPath -Name BackgroundType -Value 0
-
-            reg.exe UNLOAD HKU\TempHive 2>$null
-        }
-    }
-
-    RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters
+- name: Register Wallpaper Script to run at logon
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run
+    name: "wallpaperChange"
+    data: 'powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Inscope\wallpaper_script.ps1"'
+    type: string
