@@ -10,10 +10,6 @@ USER="scorebot 0 * :Score Bot"
 CHANNEL="#operations"
 TEST_MESSAGE ="scorecheck"
 
-SSH_ENABLED=False  #make True for systemctl check
-SSH_USER="cadence"
-SSH_PASSWORD="FriendshipIsMagic0!" 
-
 def send_recv(sock, msg, wait=1):
     sock.sendall((msg + "\r\n").encode())
     time.sleep(wait)
