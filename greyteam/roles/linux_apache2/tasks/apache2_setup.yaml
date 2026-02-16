@@ -71,7 +71,7 @@
 -  name: Add wikipage to the pages directory
    ansible.builtin.copy:
      src: files/wikipage.txt
-     dst: "{{wikipage_loc}}"
+     dest: "{{wikipage_loc}}"
 
 # Restart Apache to apply changes
 -  name: Restart Apache2
