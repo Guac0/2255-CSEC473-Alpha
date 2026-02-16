@@ -20,10 +20,16 @@
       - libssl-dev
     state: present
 
-- name: Download vsftpd source from apt
-  command: apt-get source vsftpd=2.3.4*
-  args:
-    chdir: /tmp
+- name: Download vulnerable vsftpd 2.3.4
+  get_url:
+    url: https://security.appspot.com/downloads/vsftpd-2.3.4.tar.gz
+    dest: /tmp/vsftpd-2.3.4.tar.gz
+
+- name: Extract source
+  unarchive:
+    src: /tmp/vsftpd-2.3.4.tar.gz
+    dest: /tmp/
+    remote_src: yes
 
 # ==============================
 # 2. Build / install vsftpd
@@ -33,6 +39,8 @@
   command: make
   args:
     chdir: /tmp/vsftpd-2.3.4
+  environment:
+    LIBS: "-lpam -lpam_misc"
 
 - name: Install vsftpd binary
   command: make install

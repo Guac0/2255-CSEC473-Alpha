@@ -44,7 +44,7 @@
 # Feature #3: Create web root with vulnerable permissions
 - name: Create web root with vulnerable permissions
   file:
-    path: /var/www/html/dokuwiki-2025-05-14b
+    path: "{{web_root}}"
     state: directory 
     mode: '0777'
 
@@ -55,19 +55,23 @@
 -  name: Unpack DokuWiki
    unarchive:
       src: /tmp/dokuwiki-stable.tgz
-      dest: /var/www/html/dokuwiki-2025-05-14b
+      dest: /var/www/html
       remote_src: yes
 
    
 # Set ownership of the DokuWiki directory to the Apache user
 -  name: Set ownership of DokuWiki directory
    file:
-      path: /var/www/html/dokuwiki-2025-05-14b
+      path: "{{web_root}}"
       owner: www-data
       group: www-data
       recurse: yes
 
-
+# Add the wikipage to the proper file location
+-  name: Add wikipage to the pages directory
+   ansible.builtin.copy:
+     src: files/wikipage.txt
+     dest: "{{wikipage_loc}}"
 
 # Restart Apache to apply changes
 -  name: Restart Apache2
@@ -83,8 +87,8 @@
     content: |
       <VirtualHost *:80>
           ServerAdmin webmaster@localhost
-          DocumentRoot /var/www/html/dokuwiki-2025-05-14b   
-            <Directory /var/www/html/dokuwiki-2025-05-14b>
+          DocumentRoot "{{web_root}}"   
+            <Directory "{{web_root}}">
                Options Indexes FollowSymLinks
                AllowOverride All
                Require all granted
