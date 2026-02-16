@@ -79,6 +79,13 @@
     mode: '0644'
   register: config_deployed
 
+- name: Allow MariaDB through firewall
+  ufw:
+    rule: allow
+    port: '3306'
+    proto: tcp
+    comment: 'Allow MariaDB remote connections'
+
 - name: Restart MariaDB to apply configuration
   systemd:
     name: mariadb
