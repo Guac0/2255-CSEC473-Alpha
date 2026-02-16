@@ -1,5 +1,5 @@
 ---
-# Alpha – Anny Hua
+# Created by Anny Hua and modified by Han
 # Feature: Custom cursor theme (ship cursor files)
 
 - name: Create cursor directory
@@ -12,26 +12,26 @@
     src: "cursors/"
     dest: "C:\\ProgramData\\Inscope\\Cursors\\"
 
-- name: Set cursor registry paths to custom cursors
+- name: Prepare Encoded PowerShell Script
+  set_fact:
+    encoded_cursor_script: "{{ lookup('template', role_path + '/templates/cursor_script.ps1.j2').encode('utf-16-le') | b64encode }}"
+
+- name: Configure Active Setup for Cursors
   ansible.windows.win_regedit:
     path: HKLM:\Software\Microsoft\Active Setup\Installed Components\InscopeCursors
     name: "{{ item.name }}"
     data: "{{ item.data }}"
-    type: string
+    type: "{{ item.type | default('string') }}"
   loop:
-    - name: Version
-      data: "1"
-    - name: StubPath
-      data: |
-        powershell -NoProfile -ExecutionPolicy Bypass -Command "
-        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name Arrow -Value 'C:\ProgramData\Inscope\Cursors\Arrow.cur';
-        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name IBeam -Value 'C:\ProgramData\Inscope\Cursors\IBeam.ani';
-        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name Hand  -Value 'C:\ProgramData\Inscope\Cursors\Hand.ani';
-        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name SchemeSource -Value 2;
-        rundll32.exe user32.dll,UpdatePerUserSystemParameters
-        "
+    - name: "Version"
+      data: "1,1,1,1" # Increment this to force a re-run on all users
+    - name: "StubPath"
+      data: "powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand {{ encoded_cursor_script }}"
 
-- name: Notify user a logoff/login may be needed to fully apply cursor changes
-  ansible.windows.win_shell: |
-    Write-Output "Custom cursor files deployed. Logoff/login may be required to refresh."
-  changed_when: false
+#- name: Notify user a logoff/login may be needed to fully apply cursor changes
+#  ansible.windows.win_shell: |
+#    Write-Output "Custom cursor files deployed. Logoff/login may be required to refresh."
+#  changed_when: false
+
+
+#         rundll32.exe user32.dll,UpdatePerUserSystemParameters
