@@ -62,10 +62,16 @@
 
 - name: Force wallpaper for currently logged-in users
   ansible.windows.win_shell: |
-    $users = Get-ChildItem HKU: | Where-Object { $_.Name -match "S-1-5-21" }
+    $users = Get-ChildItem Registry::HKEY_USERS | Where-Object { $_.Name -match "S-1-5-21" }
     foreach ($u in $users) {
-      Set-ItemProperty "$($u.Name)\Control Panel\Desktop" -Name Wallpaper -Value "C:\ProgramData\Inscope\Branding\wallpaper.jpg"
-      Set-ItemProperty "$($u.Name)\Control Panel\Desktop" -Name WallpaperStyle -Value "10"
-      Set-ItemProperty "$($u.Name)\Control Panel\Desktop" -Name TileWallpaper -Value "0"
+      $desktopPath = "$($u.Name)\Control Panel\Desktop"
+      $explorerPath = "$($u.Name)\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers"
+
+      Set-ItemProperty -Path $desktopPath -Name Wallpaper -Value "C:\ProgramData\Inscope\Branding\wallpaper.jpg"
+      Set-ItemProperty -Path $desktopPath -Name WallpaperStyle -Value "10"
+      Set-ItemProperty -Path $desktopPath -Name TileWallpaper -Value "0"
+
+      New-Item -Path $explorerPath -Force | Out-Null
+      Set-ItemProperty -Path $explorerPath -Name BackgroundType -Value 0
     }
     RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters
