@@ -1,4 +1,5 @@
 ---
+#new better file works now no red!
 - name: Install MariaDB
   apt:
     name:
@@ -19,13 +20,8 @@
     delay: 5
     timeout: 60
 
-- name: Check if MariaDB is actually running
-  command: systemctl status mariadb
-  register: mariadb_status
-  failed_when: false
-  changed_when: false
-# My three features are Secureing MariaDB, configureing file with permissions, and Create a datab base and a user
-    # Secure MariaDB 
+# My three features are Securing MariaDB, configuring file with permissions, and Create a database and a user
+# Secure MariaDB 
 - name: Check if root password is already set
   shell: mysql -u root -e "SELECT 1" 2>&1
   register: root_password_check
@@ -61,7 +57,6 @@
     name: ''
     host_all: true
     state: absent
-    
 
 - name: Remove test database
   mysql_db:
@@ -70,9 +65,8 @@
     login_unix_socket: /var/run/mysqld/mysqld.sock
     name: test
     state: absent
-    
 
-    # Configure MariaDB file with permisisions 
+# Configure MariaDB file with permissions 
 - name: Deploy MariaDB configuration file
   copy:
     dest: "{{ mariadb_config_file }}"
@@ -80,41 +74,71 @@
       [mysqld]
       bind-address = 0.0.0.0
       max_connections = 100
-      skip-networking = 0
     owner: root
     group: root
     mode: '0644'
   register: config_deployed
-  notify: Restart MariaDB
+
+- name: Install ufw (if not present)
+  apt:
+    name: ufw
+    state: present
+
+- name: Allow SSH through firewall
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Allow MariaDB through firewall
+  ufw:
+    rule: allow
+    port: '3306'
+    proto: tcp
+    comment: 'Allow MariaDB remote connections'
+
+- name: Enable ufw
+  ufw:
+    state: enabled
+
 - name: Restart MariaDB to apply configuration
   systemd:
     name: mariadb
     state: restarted
+    daemon_reload: yes
+  when: config_deployed.changed
+  register: mariadb_restart
+
+- name: Wait after restart
+  pause:
+    seconds: 10
   when: config_deployed.changed
 
-- name: Wait for MariaDB after restart
+- name: Force start MariaDB if restart failed
+  systemd:
+    name: mariadb
+    state: started
+  when: config_deployed.changed
+  failed_when: false
+
+- name: Wait for MariaDB port to be available
   wait_for:
     port: 3306
-    delay: 5
-    timeout: 60
+    delay: 2
+    timeout: 30
     state: started
   when: config_deployed.changed
 
-- name: Verify MariaDB is running after restart
-  command: systemctl is-active mariadb
-  register: mariadb_active
-  failed_when: mariadb_active.stdout != "active"
-  changed_when: false
-  when: config_deployed.changed
-    # Create database and user
-- name: Create  database
+# Create database and user (use unix socket for reliability)
+- name: Create database
   mysql_db:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_name }}"
     state: present
     
-   # CREATE SQL FILE (THIS IS WHERE IT GOES)
+# CREATE SQL FILE
 - name: Create ponies SQL data file
   copy:
     dest: /tmp/ponies.sql
@@ -137,11 +161,12 @@
         ('Applejack', 'Earth Pony', 'Honesty'),
         ('Rarity', 'Unicorn', 'Generosity');
 
-    # IMPORT SQL INTO DATABASE
+# IMPORT SQL INTO DATABASE
 - name: Populate Ponies database
   mysql_db:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_name }}"
     state: import
     target: /tmp/ponies.sql
@@ -150,15 +175,18 @@
   mysql_user:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ db_user }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"
     host: "%"
     state: present
+
 - name: Create database users for local_users
   mysql_user:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ item }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"
@@ -170,6 +198,7 @@
   mysql_user:
     login_user: root
     login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ item }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"

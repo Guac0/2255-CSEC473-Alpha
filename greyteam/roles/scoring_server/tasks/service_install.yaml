@@ -1,5 +1,5 @@
 ---
-- name: Deploy Scoring Worker Service
+- name: Deploy Server Worker Service
   copy:
     dest: /etc/systemd/system/scoring-server-worker.service
     content: |
@@ -24,8 +24,8 @@
     content: |
       [Unit]
       Description=Scoring Gunicorn Server
-      After=network.target scoring-worker.service
-      Requires=scoring-worker.service
+      After=network.target scoring-server-worker.service
+      Requires=scoring-server-worker.service
 
       [Service]
       User=root
@@ -37,6 +37,24 @@
         --bind 0.0.0.0:{{ scoring_port }} \
         server:app
       Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Deploy Scoring Worker Service
+  copy:
+    dest: /etc/systemd/system/scoring-worker.service
+    content: |
+      [Unit]
+      Description=Scoring Worker
+      After=network.target
+
+      [Service]
+      User=root
+      WorkingDirectory={{ scoring_deploy_dir }}
+      ExecStart={{ scoring_deploy_dir }}/venv/bin/python3 scoring_worker.py
+      Restart=always
+      TimeoutStartSec=30
 
       [Install]
       WantedBy=multi-user.target

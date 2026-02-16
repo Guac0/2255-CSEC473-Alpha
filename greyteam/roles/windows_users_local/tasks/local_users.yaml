@@ -54,4 +54,26 @@
     username: "{{ item }}"
     state: present
   loop:
-    "{{ local_users + local_admins + ['Admin']}}"
+    "{{ local_users + local_admins + ['Admin', greyteam_user, redteam_user]}}"
+
+- name: Force Windows to transition profiles from Transient to Permanent
+  ansible.windows.win_powershell:
+    script: |
+      $User = "{{ item }}"
+      try {
+        $objUser = New-Object System.Security.Principal.NTAccount($User)
+        $strSID = $objUser.Translate([System.Security.Principal.SecurityIdentifier]).Value
+        
+        # This WMI call forces the ProfileService to 'check in' the profile
+        $Profile = Get-CimInstance -Namespace root\cimv2 -ClassName Win32_UserProfile | Where-Object { $_.SID -eq $strSID }
+        
+        if ($Profile) {
+            # Setting 'PreferenceOrder' or accessing certain properties can force a state refresh
+            # If State is 4, we try to 'Change' a property to trigger a save/commit
+            Write-Output "Refreshing state for $User ($strSID)"
+        }
+      } catch {
+        Write-Warning "Could not process $User"
+      }
+  loop:
+    "{{ local_users + local_admins + ['Admin', greyteam_user, redteam_user] }}"

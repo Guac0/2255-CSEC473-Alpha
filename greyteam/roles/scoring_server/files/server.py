@@ -21,7 +21,7 @@ from sqlalchemy import func, event
 import ipaddress
 
 from shared import (
-CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE,
+CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE, CREATE_TEST_DATA,
 DEFAULT_WEBHOOK_SLEEP_TIME, MAX_WEBHOOK_MSG_PER_MINUTE, WEBHOOK_URL,
 INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, SECRET_KEY, 
 setup_logging)
@@ -29,6 +29,7 @@ from models import (
 db, AuthToken, WebUser, WebhookQueue, Host,
 ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
 )
+from data import create_db_tables
 
 # =================================
 # ==== INITIALIZE VARS/SETTINGS ===
@@ -55,12 +56,13 @@ app.config.update(
     SESSION_USE_SIGNER=True # Protects the session cookie from tampering
 )
 # Enable write ahead logging
-@event.listens_for(db.engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.execute("PRAGMA synchronous=NORMAL")
-    cursor.close()
+# TODO app.context
+#@event.listens_for(db.engine, "connect")
+#def set_sqlite_pragma(dbapi_connection, connection_record):
+#    cursor = dbapi_connection.cursor()
+#    cursor.execute("PRAGMA journal_mode=WAL")
+#    cursor.execute("PRAGMA synchronous=NORMAL")
+#    cursor.close()
 
 # === Initialize Misc Vars ===
 start_time = time.time()
@@ -84,55 +86,6 @@ logger = setup_logging("server")
 # =================================
 
 # === DATABASE ====
-
-def insert_initial_data():
-    """
-    Inserts initial configuration data (auth tokens and users) into the database.
-    This should only be run after the tables have been created via db.create_all().
-    """
-    try:
-        # --- Insert Auth Tokens ---
-        for token_value, data in INITIAL_AGENT_AUTH_TOKENS.items():
-            # In a real app, you would first check if the token already exists 
-            # to prevent duplicates, but for a first run, direct insert is fine.
-            new_token = AuthToken(
-                token=token_value,
-                timestamp=time.time(),
-                added_by=data["added_by"]
-            )
-            db.session.add(new_token)
-
-        # --- Insert Web Users ---
-        for username, data in INITIAL_WEBGUI_USERS.items():
-            hashed_password = generate_password_hash(data["password"])
-            new_user = WebUser(
-                username=username,
-                password=hashed_password, # WARNING: Hash passwords in production!
-                role=data["role"]
-            )
-            db.session.add(new_user)
-        
-        db.session.commit()
-        logger.info("Successfully inserted initial database values.")
-
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"FATAL: Failed to insert initial data into DB: {e}")
-
-def create_db_tables():
-
-    db_exists = os.path.exists(os.path.join("instance",SAVEFILE))
-    # Use the application context to ensure Flask extensions are configured
-    with app.app_context():
-        # This checks the database file defined in SQLALCHEMY_DATABASE_URI.
-        # If the file (server.db) doesn't exist, it creates it.
-        # If the tables defined in your models don't exist, it creates them.
-        db.create_all()
-        if not db_exists:
-            insert_initial_data()
-            logger.info(f"Initialized database with initial data at {SAVEFILE}")
-        else:
-            logger.info(f"Initialized database at {SAVEFILE}")
 
 def serialize_model(instance):
     """
@@ -238,7 +191,7 @@ def get_scoring_data_latest():
             .first()
 
         if not recent_round_query:
-            logger.info("/get_hosts - No complete scoring rounds found.")
+            logger.info("/get_scoring_data_latest - No complete scoring rounds found.")
             return [], 0
 
         latest_round = recent_round_query[0]
@@ -249,9 +202,11 @@ def get_scoring_data_latest():
             Host.ip,
             Host.os,
             ScoringTeams.team_name,
-            ScoringHistory.message
+            ScoringHistory.message,
+            Service.scorecheck_name
         ).join(Host, ScoringHistory.host_id == Host.id)\
          .join(ScoringTeams, ScoringHistory.value == ScoringTeams.id)\
+         .join(Service, ScoringHistory.service_id == Service.id)\
          .filter(ScoringHistory.round == latest_round)\
          .all()
 
@@ -262,7 +217,8 @@ def get_scoring_data_latest():
                 "ip": r.ip,
                 "os": r.os,
                 "team": r.team_name,
-                "message": r.message
+                "message": r.message,
+                "service": r.scorecheck_name
             } for r in results
         ]
         host_list.sort(key=lambda x: ipaddress.ip_address(x['ip']))
@@ -270,7 +226,7 @@ def get_scoring_data_latest():
         return host_list, latest_round
 
     except Exception as e:
-        logger.warning(f"Exception when running get_scoring_json_latest(): {e}")
+        logger.warning(f"/get_scoring_data_latest: Exception - {e}")
         return [], 0
     
 # =================================
@@ -279,12 +235,18 @@ def get_scoring_data_latest():
 
 # === BASIC WEBSITE FUNCTIONALITY ===
 
-@app.route("/")
 @app.route("/dashboard")
 @login_required
 def page_dashboard():
     logger.info(f"/dashboard - Successful connection from {current_user.id} at {request.remote_addr}")
     return render_template("dashboard.html")
+
+@app.route("/")
+@app.route("/scoreboard")
+@login_required
+def page_scoreboard():
+    logger.info(f"/scoreboard - Successful connection from {current_user.id} at {request.remote_addr}")
+    return render_template("scoreboard.html")
 
 @app.route("/management")
 @login_required
@@ -882,19 +844,14 @@ def get_scoring_users_with_pwd():
 @app.route("/get_scoring_latest", methods=["GET"])
 def get_scoring_latest():
     try:
-        # Get the highest round number currently in the database
-        latest_round = db.session.query(func.max(ScoringHistory.round)).scalar()
+        logger.info(f"/get_scoring_latest - Success from {current_user.id} at {request.remote_addr}.")
+        host_list, latest_round = get_scoring_data_latest()
         
-        if latest_round is None:
-            logger.info(f"/get_scoring_latest - Success from {current_user.id} at {request.remote_addr}. No history found.")
-            return jsonify([])
-
-        # Fetch all service results for that specific round
-        results = ScoringHistory.query.filter_by(round=latest_round).all()
-        history_list = [h.to_dict() for h in results]
-
-        logger.info(f"/get_scoring_latest - Success from {current_user.id} at {request.remote_addr}. Round: {latest_round}, Count: {len(history_list)}")
-        return jsonify(history_list)
+        # Wrap them in a single JSON response
+        return jsonify({
+            "data": host_list,
+            "round": latest_round
+        })
     except Exception as e:
         logger.error(f"/get_scoring_latest - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}")
         return jsonify({"error": "Database error while fetching latest scores"}), 500
@@ -1032,6 +989,42 @@ def set_scoring():
         db.session.rollback()
         logger.error(f"/set_scoring - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}. Data: {data}")
         return jsonify({"error": "Database error while setting score"}), 500
+
+@app.route('/get_scoring_summary')
+def get_scoring_summary():
+    with app.app_context():
+        try:
+            # 1. Get the latest round number
+            latest_round = db.session.query(db.func.max(ScoringHistory.round)).scalar() or 0
+            
+            # 2. Get all teams
+            teams = ScoringTeams.query.all()
+            
+            # 3. Count owned services for the latest round
+            # This counts how many services were assigned to each team in the most recent round
+            service_counts = db.session.query(
+                ScoringHistory.value, db.func.count(ScoringHistory.id)
+            ).filter(ScoringHistory.round == latest_round).group_by(ScoringHistory.value).all()
+            
+            counts_dict = {team_id: count for team_id, count in service_counts}
+
+            summary = []
+            for team in teams:
+                summary.append({
+                    "team_name": team.team_name,
+                    "score": team.score,
+                    "multiplier": team.multiplier,
+                    "services_owned": counts_dict.get(team.id, 0)
+                })
+
+            logger.info(f"/get_scoring_summary - Success from {current_user.id} at {request.remote_addr}.")
+            return jsonify({
+                "round": latest_round,
+                "teams": summary
+            })
+        except Exception as E:
+            logger.error(f"/get_scoring_summary - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}")
+            return jsonify({"error": "Database error while fetching latest scores"}), 500
     
 # --- ScoringCriteria Endpoints ---
 
@@ -1204,17 +1197,19 @@ def update_criteria_locations():
 # =================================
 
 logger.info(f"Starting server on {HOST}:{PORT}")
-create_db_tables()
+with app.app_context():
+    create_db_tables(logger)
 
 def start_server():
     app.run(host=HOST, port=PORT, ssl_context='adhoc', use_reloader=False, debug=False)
 
 if __name__ == "__main__":
     pass
-    #create_db_tables()
+    #with app.app_context():
+    #    create_db_tables()
 
     # Start threads before test data to avoid delays
     #threading.Thread(target=webhook_main, daemon=True).start()
 
     # Start main app. Do not put any code below this line. Comment out when using gunicorn
-    start_server()
+    #start_server()
