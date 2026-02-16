@@ -68,7 +68,7 @@ def check_ponies_count(connection) -> Tuple[bool, str]:
         count = cursor.fetchone()[0]
         cursor.close()
         
-        if count == 6:
+        if count == 30:
             return True, f"✓ Ponies table has correct count: {count} rows"
         else:
             return False, f"✗ Ponies table has incorrect count: {count} rows (expected 6)"
@@ -81,7 +81,7 @@ def check_twilight_sparkle(connection) -> Tuple[bool, str]:
     """Verify Twilight Sparkle's element_of_harmony is 'Magic'"""
     try:
         cursor = connection.cursor()
-        cursor.execute("SELECT element_of_harmony FROM ponies WHERE name='Twilight Sparkle'")
+        cursor.execute("SELECT DISTINCT element_of_harmony FROM ponies WHERE name='Twilight Sparkle'")
         result = cursor.fetchone()
         cursor.close()
         
