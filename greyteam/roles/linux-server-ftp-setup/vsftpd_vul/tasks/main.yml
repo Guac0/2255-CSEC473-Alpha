@@ -65,6 +65,52 @@
 # 3. FEATURE SETS
 # ==============================
 
+- name: Create vsftpd config file
+  copy:
+    dest: /etc/vsftpd.conf
+    content: |
+      listen=YES
+      listen_ipv6=NO
+      anonymous_enable=NO
+      local_enable=YES
+      write_enable=NO
+      chroot_local_user=YES
+      dirmessage_enable=YES
+      use_localtime=YES
+      xferlog_enable=YES
+      connect_from_port_20=YES
+      secure_chroot_dir=/var/run/vsftpd/empty
+      pam_service_name=vsftpd
+      rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+      rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create secure chroot directory
+  file:
+    path: /var/run/vsftpd/empty
+    state: directory
+    mode: '0755'
+
+- name: Create systemd service for vsftpd
+  copy:
+    dest: /etc/systemd/system/vsftpd.service
+    content: |
+      [Unit]
+      Description=vsftpd FTP server
+      After=network.target
+
+      [Service]
+      ExecStart=/usr/local/sbin/vsftpd /etc/vsftpd.conf
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Reload systemd
+  command: systemctl daemon-reexec
+
 # -------- Feature Set 1 --------
 - name: Feature 1 – Enable anonymous FTP
   lineinfile:
