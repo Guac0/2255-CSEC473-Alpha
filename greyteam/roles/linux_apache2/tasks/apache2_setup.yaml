@@ -69,7 +69,7 @@
 
 # Add the wikipage to the proper file location
 -  name: Add wikipage to the pages directory
-   ansible.bulitin.copy:
+   ansible.builtin.copy:
      src: files/wikipage.txt
      dst: "{{wikipage_loc}}"
 
