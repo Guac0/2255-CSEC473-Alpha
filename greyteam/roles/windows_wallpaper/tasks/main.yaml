@@ -44,6 +44,7 @@
     type: string
   loop:
     - { name: "Wallpaper",      data: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg" }
+    - { name: "TileWallpaper", data: "0"}
     - { name: "WallpaperStyle", data: "10" }
 
 - name: Refresh desktop settings (apply wallpaper)
