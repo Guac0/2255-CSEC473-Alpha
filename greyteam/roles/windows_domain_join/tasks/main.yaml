@@ -1,0 +1,3 @@
+---
+- name: Join Windows hosts to AD
+  ansible.builtin.include_tasks: join.yaml

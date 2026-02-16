@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Scoring Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Team Color Variables */
+        .bg-team-blue { background-color: #2563eb; color: white; }    /* Blue Team */
+        .bg-team-red { background-color: #dc2626; color: white; }     /* Red Team */
+        .bg-team-yellow { background-color: #facc15; color: black; }  /* Offline/Down */
+        
+        .service-square {
+            transition: transform 0.2s;
+            min-width: 140px;
+            min-height: 100px;
+        }
+        .service-square:hover { transform: scale(1.05); cursor: pointer; }
+        .service-grid {
+            display: grid;
+            /* This creates as many columns as possible, at least 140px wide, 
+            sharing the remaining space equally (1fr) */
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            width: 100%; /* Ensure the container stretches */
+        }
+
+        .service-square {
+            aspect-ratio: 1 / 1; /* Forces a perfect square regardless of width */
+            min-width: 0;        /* Prevents content from pushing the square wider */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans p-6">
+
+    <header id="stats-header" class="mb-8 bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+        <div class="flex flex-wrap justify-between items-center mb-4">
+            <h1 class="text-3xl font-bold tracking-tight">SERVICE SCOREBOARD</h1>
+            <div class="space-x-4">
+                <span id="last-updated" class="text-xs font-mono text-gray-500 bg-gray-900 px-3 py-1 rounded border border-gray-800">
+                    Last Sync: Never
+                </span>
+                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Reports</button>
+                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Admin</button>
+            </div>
+        </div>
+        
+        <div id="team-stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+        </div>
+    </header>
+
+    <section class="mb-12">
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Service Status</h2>
+        <div id="graphical-scoreboard" class="space-y-6">
+            </div>
+    </section>
+
+    <section>
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Latest Round Details</h2>
+        <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-700 text-gray-300 uppercase text-xs">
+                    <tr>
+                        <th class="p-4">Hostname</th>
+                        <th class="p-4">IP Address</th>
+                        <th class="p-4">OS</th>
+                        <th class="p-4">Service</th>
+                        <th class="p-4 text-center">Status</th>
+                        <th class="p-4">Message</th>
+                    </tr>
+                </thead>
+                <tbody id="text-table-body">
+                    </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        // CONFIGURATION
+        const REFRESH_RATE = 10000; // Refresh every 10 seconds
+
+        async function fetchScoreboardData() {
+            try {
+                // 1. Fetch Latest Services
+                const response = await fetch('/get_scoring_latest');
+                if (!response.ok) throw new Error("Latest services fetch failed");
+                const result = await response.json();
+                
+                const serviceData = result.data;
+                const roundNum = result.round;
+
+                if (!serviceData || serviceData.length === 0) {
+                    console.warn("No data returned for current round - services.");
+                    return;
+                }
+
+                // 2. Fetch Scoring Summary
+                const response2 = await fetch('/get_scoring_summary');
+                if (!response2.ok) throw new Error("Summary fetch failed");
+                const result2 = await response2.json();
+                
+                // FIX: Access 'teams' instead of 'data'
+                const teamData = result2.teams; 
+                const roundNum2 = result2.round;
+
+                if (!teamData || teamData.length === 0) {
+                    console.warn("No data returned for current round - summary.");
+                    return;
+                }
+
+                // 3. Update UI
+                updateStats(result2); // Pass the whole object as updateStats expects .teams
+                renderGraphicalBoard(serviceData);
+                renderTextTable(serviceData);
+
+                // Update Sync Status
+                const statusElement = document.getElementById('last-updated');
+                statusElement.innerText = `Last Sync: ${new Date().toLocaleTimeString()} (Round ${roundNum})`;
+                
+            } catch (err) {
+                console.error("Failed to fetch scoreboard:", err);
+                const statusElement = document.getElementById('last-updated');
+                if (statusElement) {
+                    statusElement.innerText = "Sync Error - Retrying...";
+                    statusElement.className = "text-red-500";
+                }
+            }
+        }
+
+        function updateStats(data) {
+            const container = document.getElementById('team-stats-container');
+            
+            if (!data || !data.teams) {
+                console.error("Invalid summary data received");
+                return;
+            }
+
+            const teamStyles = {
+                'blue': { label: 'BLUE TEAM', border: 'border-blue-500', glow: 'shadow-blue-900/20', text: 'text-blue-400' },
+                'red': { label: 'RED TEAM', border: 'border-red-500', glow: 'shadow-red-900/20', text: 'text-red-400' },
+                'offline': { label: 'OFFLINE', border: 'border-yellow-500', glow: 'shadow-yellow-900/20', text: 'text-yellow-500' }
+            };
+
+            container.innerHTML = data.teams.map(team => {
+                const style = teamStyles[team.team_name.toLowerCase()] || 
+                            { label: team.team_name, border: 'border-gray-600', glow: '', text: 'text-gray-400' };
+                
+                return `
+                    <div class="bg-gray-800/50 border-t-2 ${style.border} ${style.glow} p-6 rounded-xl shadow-2xl backdrop-blur-sm">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-black tracking-widest ${style.text} opacity-80">${style.label}</span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs font-mono text-gray-500 uppercase tracking-tighter">Multiplier</span>
+                                    <span class="text-lg font-bold text-white">×${team.multiplier.toFixed(1)}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-5xl font-black font-mono text-white tracking-tighter">
+                                    ${team.score.toLocaleString()}
+                                </span>
+                                <span class="text-xs font-bold text-gray-600 uppercase">pts</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 rounded-full ${team.services_owned > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-600'}"></div>
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-tight">Active Services</span>
+                            </div>
+                            <span class="text-2xl font-mono font-bold text-gray-300">
+                                ${team.services_owned.toString().padStart(2, '0')}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGraphicalBoard(data) {
+            const board = document.getElementById('graphical-scoreboard');
+            
+            const subnets = {};
+            data.forEach(item => {
+                const parts = item.ip.split('.');
+                const subnet = `${parts[0]}.${parts[1]}.${parts[2]}.0/24`;
+                if (!subnets[subnet]) subnets[subnet] = [];
+                subnets[subnet].push(item);
+            });
+
+            board.innerHTML = Object.keys(subnets).sort().map(subnet => `
+                <div class="flex items-start gap-4 mb-8">
+                    <div class="w-32 text-sm font-bold text-gray-500 border-r border-gray-800 pr-4 mt-2">
+                        ${subnet}
+                    </div>
+                    
+                    <div class="service-grid flex-1">
+                        ${subnets[subnet].map(h => `
+                            <div class="service-square p-2 rounded-lg shadow-md flex flex-col justify-center items-center text-center ${getBgClass(h.team)}">
+                                <div class="text-[9px] font-bold opacity-70 uppercase leading-tight mb-1">${h.service}</div>
+                                <div class="text-xs font-bold truncate w-full px-1">${h.hostname}</div>
+                                <div class="text-[10px] font-mono opacity-80 mt-1">${h.ip}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTextTable(data) {
+            const tbody = document.getElementById('text-table-body'); //<td class="p-4 font-mono text-xs text-blue-400">${h.ip}</td>
+            tbody.innerHTML = data.map(h => `
+                <tr class="border-b border-gray-700 hover:bg-gray-750 transition">
+                    <td class="p-4 font-semibold text-sm">${h.hostname}</td>
+                    <td class="p-4 font-mono text-xs text-blue-400 whitespace-nowrap cursor-pointer hover:text-blue-300" 
+                        onclick="navigator.clipboard.writeText('${h.ip}')">
+                        ${h.ip}
+                    </td>
+                    <td class="p-4 text-xs text-gray-400">${h.os}</td>
+                    <td class="p-4 text-sm">${h.service}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${getBgClass(h.team)}">
+                            ${h.team}
+                        </span>
+                    </td>
+                    <td class="p-4 text-xs italic text-gray-500">${h.message || 'No data'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function getBgClass(team) {
+            if (team === 'blue') return 'bg-team-blue';
+            if (team === 'red') return 'bg-team-red';
+            return 'bg-team-yellow';
+        }
+
+        // Initial load and set interval
+        fetchScoreboardData();
+        setInterval(fetchScoreboardData, REFRESH_RATE);
+    </script>
+</body>
+</html>

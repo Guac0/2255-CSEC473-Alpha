@@ -3,7 +3,7 @@ resource "openstack_compute_instance_v2" "win10" {
   for_each = var.win10
 
   name        = each.value.hostname
-  flavor_name = "medium"
+  flavor_name = "large"
   key_pair    = "cdt"
 
   block_device {

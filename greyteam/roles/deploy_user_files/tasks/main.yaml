@@ -1,0 +1,16 @@
+---
+- name: Deploy generic user files for Windows
+  include_tasks: deploy_files_generic_windows.yaml
+  when: "'windows' in group_names"
+
+- name: Deploy custom user files for Windows
+  include_tasks: deploy_files_custom_windows.yaml
+  when: "'windows' in group_names"
+
+- name: Deploy generic user files for Linux
+  include_tasks: deploy_files_generic_linux.yaml
+  when: "'linux' in group_names"
+
+- name: Deploy custom user files for Linux
+  include_tasks: deploy_files_custom_linux.yaml
+  when: "'linux' in group_names"

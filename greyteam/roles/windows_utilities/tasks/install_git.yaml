@@ -6,4 +6,4 @@
       dest: "{{ working_dir }}\\Git-2.53.0-64-bit.exe"
 
 -   name: Install git-client
-    ansible.windows.win_command: "{{ working_dir }}\\Git-2.53.0-64-bit.exe" 
+    ansible.windows.win_command: "{{ working_dir }}\\Git-2.53.0-64-bit.exe /VERYSILENT /NORESTART /SP-" 

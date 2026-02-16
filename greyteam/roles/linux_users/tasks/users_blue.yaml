@@ -8,3 +8,31 @@
     append: yes
     shell: /bin/bash
     create_home: yes 
+
+- name: Ensure Desktop directories exist
+  ansible.builtin.file:
+    path: "/home/{{ item }}/Desktop"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+  loop:
+    - blueteam
+    - "{{ greyteam_user }}"
+
+- name: Create Desktop Symbolic Links
+  ansible.builtin.file:
+    src: "{{ item.1.src }}"
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.src | basename }}"
+    state: link
+    owner: "{{ item.0 }}"
+    group: "{{ item.0 }}"
+    mode: '0755'
+  loop: "{{ q('nested', ['blueteam', greyteam_user], shortcuts) }}"
+  vars:
+    shortcuts:
+      - src: "/usr/share/applications/org.remmina.Remmina.desktop"
+      - src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop"
+      - src: "/usr/share/applications/chromium-browser.desktop"
+  ignore_errors: yes
+  register: desktop_links

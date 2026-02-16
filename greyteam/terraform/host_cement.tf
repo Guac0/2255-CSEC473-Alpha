@@ -6,7 +6,8 @@ resource "openstack_compute_instance_v2" "fillydelphia" {
   key_pair        = "cdt"
 
   block_device {
-    uuid                  = "f848941a-64d7-41b4-9c3d-bbddf657ef51" #windows 10, need to change to cement
+    #uuid                  = "f848941a-64d7-41b4-9c3d-bbddf657ef51" #windows 10, need to change to cement
+    uuid                  = "d05fa605-c188-45b8-a3d4-5bb0fe4560fa" #winserver22
     source_type           = "image"
     destination_type      = "volume"
     volume_size           = 60
@@ -17,7 +18,7 @@ resource "openstack_compute_instance_v2" "fillydelphia" {
 
   network {
     uuid        = openstack_networking_network_v2.network_internal.id
-    fixed_ip_v4 = "10.0.30.6"
+    fixed_ip_v4 = "10.0.30.3"
   }
 
   security_groups = ["secgroup_blue"]

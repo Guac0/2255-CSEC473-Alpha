@@ -1,6 +1,6 @@
 ---
 # See templates/config.ini.j2 for a full explanation of each of these parameters
-mssql_sqlsvcaccount: "domain\admin"
+mssql_sqlsvcaccount: "{{ domain }}\\{{ domain_admins[0] }}"
 mssql_sqlsvcpassword: "{{ team_password }}"
 mssql_sqlsysadminaccounts: "Administrators" #"domain\admin"
 mssql_database_name: "db"

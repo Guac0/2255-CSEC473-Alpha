@@ -13,19 +13,57 @@
     start_mode: auto
     state: started
 
-- name: Ensure DNS server A record exists
-  ansible.windows.win_dns_record:
-    zone: "inscope.local"
-    name: "canterlot"
-    type: "A"
-    value: "10.0.10.1"
-    state: present
+# --- Ensure forward lookup zone exists (file-backed primary) ---
+- name: Ensure forward lookup zone exists for {{ domain }}
+  ansible.windows.win_shell: |
+    if (-not (Get-DnsServerZone -Name "{{ domain }}" -ErrorAction SilentlyContinue)) {
+      Add-DnsServerPrimaryZone -Name "{{ domain }}" -ZoneFile "{{ domain }}.dns"
+      "CREATED"
+    } else {
+      "EXISTS"
+    }
+  register: zone_create
+  changed_when: "'CREATED' in zone_create.stdout"
 
-- name: Create NS record for inscope.local
+# --- Configure forwarder to mgmt DNS
+# Note: configures it to the second mgmt dns available as the first one is this local dns server
+- name: Ensure DNS forwarder includes secondary mgmt DNS
+  ansible.windows.win_shell: |
+    $existing = @()
+    try { $existing = (Get-DnsServerForwarder).IPAddress.IPAddressToString } catch { }
+
+    $target = "{{ mgmt_dns[1] }}"
+    if ($existing -notcontains $target) {
+      Set-DnsServerForwarder -IPAddress @($existing + $target) -UseRootHints $true
+      "CHANGED"
+    } else {
+      "OK"
+    }
+  register: fwd_result
+  changed_when: "'CHANGED' in fwd_result.stdout"
+  when: mgmt_dns is defined and (mgmt_dns | length) > 1
+
+- name: List of inscope hosts
+  ansible.builtin.set_fact:
+    inscope_hosts_unique: "{{ (groups['inscope'] | default([])) | unique }}"
+
+- name: Create A records for all inscope hosts in {{ domain }}
   ansible.windows.win_dns_record:
-    zone: "inscope.local"
+    zone: "{{ domain }}"
+    name: "{{ item }}"
+    type: "A"
+    value: "{{ hostvars[item].ansible_host }}"
+    state: present
+  loop: "{{ inscope_hosts_unique }}"
+  when:
+    - hostvars[item] is defined
+    - hostvars[item].ansible_host is defined
+
+- name: Create NS record for local domain
+  ansible.windows.win_dns_record:
+    zone: "{{ domain }}"
     name: "@"
     type: "NS"
     values:
-      - "canterlot.inscope.local"
+      - "canterlot.{{ domain }}"
     state: present

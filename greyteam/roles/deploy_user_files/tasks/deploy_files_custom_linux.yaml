@@ -1,0 +1,56 @@
+---
+- name: Ensure staging folder exists
+  ansible.builtin.file:
+    path: "{{ working_dir }}/user_files"
+    state: directory
+    mode: '0755'
+
+- name: Identify per-user folders on ansible controller
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ username }}"
+  register: controller_check
+  delegate_to: localhost
+  loop: "{{ local_users + local_admins + ['greyteam','Admin','Administrator'] }}"
+  loop_control:
+    loop_var: username
+
+# Failsafe: Check if the user's home directory exists on the Linux target
+- name: Check if user's home exists on target
+  ansible.builtin.stat:
+    path: "/home/{{ ctrl_result.username }}"
+  register: dest_check 
+  loop: "{{ controller_check.results }}" 
+  loop_control:
+    loop_var: ctrl_result
+  when: ctrl_result.stat.exists and ctrl_result.stat.isdir
+
+# Copy from controller to a central staging area on the target
+- name: Copy files to staging folder
+  ansible.builtin.copy:
+    src: "files/{{ target_result.ctrl_result.username }}"
+    dest: "{{ working_dir }}/user_files/"
+    mode: '0644'
+  loop: "{{ dest_check.results }}"
+  loop_control:
+    loop_var: target_result
+  when: 
+    - not target_result.skipped | default(false)
+    - target_result.stat.exists
+
+# Move from staging to actual home directory with correct ownership
+- name: Copy specific user folder to home directory
+  ansible.builtin.copy:
+    src: "{{ working_dir }}/user_files/{{ item.ctrl_result.username }}/"
+    dest: "/home/{{ item.ctrl_result.username }}/"
+    remote_src: yes
+    force: no
+    # Crucial for Linux: set ownership to the actual user
+    owner: "{{ item.ctrl_result.username }}"
+    group: "{{ item.ctrl_result.username }}"
+    mode: '0700'
+  loop: "{{ dest_check.results }}"
+  loop_control:
+    loop_var: item
+  when: 
+    - not item.skipped | default(false)
+    - item.stat.exists

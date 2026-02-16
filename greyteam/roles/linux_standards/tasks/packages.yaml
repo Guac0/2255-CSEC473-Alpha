@@ -22,12 +22,18 @@
     - "xz-utils"
     - "screen"
     - "pwgen"
+    - "mysql-client" #ubuntu
+    - "mariadb-client-compat" #debian
   ignore_errors: yes
 
-- name: Install Remmina for GUI hosts
+- name: Install Remmina and Web Browsers for GUI hosts
   package:
-    name: remmina
+    name: "{{ item }}"
     state: present
+  with_items:
+    - remmina
+    - firefox
+    - chromium-browser
   when: "'gui' in group_names"
 
 #- name: Install python packages

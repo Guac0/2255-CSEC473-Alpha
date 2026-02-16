@@ -2,8 +2,9 @@
 - name: Install Active Directory
   ansible.builtin.include_tasks: ad.yaml
 
+- name: Add greyteam domain admin
+  ansible.builtin.include_tasks: greyteam.yaml
+
 - name: Add Domain Users and Admins
   ansible.builtin.include_tasks: users.yaml
 
-- name: Add greyteam domain admin
-  ansible.builtin.include_tasks: greyteam.yaml

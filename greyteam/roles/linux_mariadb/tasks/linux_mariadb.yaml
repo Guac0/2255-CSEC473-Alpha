@@ -12,24 +12,52 @@
     name: mariadb
     state: started
     enabled: true
+
+- name: Wait for MariaDB to be ready
+  wait_for:
+    port: 3306
+    delay: 5
+    timeout: 60
+
+- name: Check if MariaDB is actually running
+  command: systemctl status mariadb
+  register: mariadb_status
+  failed_when: false
+  changed_when: false
 # My three features are Secureing MariaDB, configureing file with permissions, and Create a datab base and a user
     # Secure MariaDB 
-- name: Set MariaDB root password
+- name: Check if root password is already set
+  shell: mysql -u root -e "SELECT 1" 2>&1
+  register: root_password_check
+  failed_when: false
+  changed_when: false
+
+- name: Set MariaDB root password (when no password is set)
   mysql_user:
     login_unix_socket: /var/run/mysqld/mysqld.sock
-    check_implicit_admin: true
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
-    user: root
-    password: "{{ mariadb_root_password }}"
+    name: root
+    password: "{{ team_password }}"
     host_all: true
     state: present
-    update_password: always
+  when: root_password_check.rc == 0
+
+- name: Update MariaDB root password (when password already exists)
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: root
+    password: "{{ team_password }}"
+    host_all: true
+    state: present
+  when: root_password_check.rc != 0
 
 - name: Remove anonymous MariaDB users
   mysql_user:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: ''
     host_all: true
     state: absent
@@ -38,7 +66,8 @@
 - name: Remove test database
   mysql_db:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: test
     state: absent
     
@@ -51,16 +80,37 @@
       [mysqld]
       bind-address = 0.0.0.0
       max_connections = 100
+      skip-networking = 0
     owner: root
     group: root
     mode: '0644'
+  register: config_deployed
   notify: Restart MariaDB
+- name: Restart MariaDB to apply configuration
+  systemd:
+    name: mariadb
+    state: restarted
+  when: config_deployed.changed
 
+- name: Wait for MariaDB after restart
+  wait_for:
+    port: 3306
+    delay: 5
+    timeout: 60
+    state: started
+  when: config_deployed.changed
+
+- name: Verify MariaDB is running after restart
+  command: systemctl is-active mariadb
+  register: mariadb_active
+  failed_when: mariadb_active.stdout != "active"
+  changed_when: false
+  when: config_deployed.changed
     # Create database and user
 - name: Create  database
   mysql_db:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     name: "{{ db_name }}"
     state: present
     
@@ -91,7 +141,7 @@
 - name: Populate Ponies database
   mysql_db:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     name: "{{ db_name }}"
     state: import
     target: /tmp/ponies.sql
@@ -99,9 +149,30 @@
 - name: Create database user
   mysql_user:
     login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_password: "{{ team_password }}"
     name: "{{ db_user }}"
     password: "{{ team_password }}"
     priv: "{{ db_name }}.*:ALL"
     host: "%"
     state: present
+- name: Create database users for local_users
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+  loop: "{{ local_users }}"
+
+- name: Create database users for local_admins
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+  loop: "{{ local_admins }}"
