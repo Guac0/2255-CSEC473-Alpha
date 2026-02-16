@@ -84,10 +84,11 @@
     name: ufw
     state: present
 
-- name: Enable ufw
+- name: Allow SSH through firewall
   ufw:
-    state: enabled
-
+    rule: allow
+    port: '22'
+    proto: tcp
 
 - name: Allow MariaDB through firewall
   ufw:
@@ -95,6 +96,10 @@
     port: '3306'
     proto: tcp
     comment: 'Allow MariaDB remote connections'
+
+- name: Enable ufw
+  ufw:
+    state: enabled
 
 - name: Restart MariaDB to apply configuration
   systemd:
