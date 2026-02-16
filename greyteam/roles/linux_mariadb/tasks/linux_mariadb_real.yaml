@@ -79,6 +79,16 @@
     mode: '0644'
   register: config_deployed
 
+- name: Install ufw (if not present)
+  apt:
+    name: ufw
+    state: present
+
+- name: Enable ufw
+  ufw:
+    state: enabled
+
+
 - name: Allow MariaDB through firewall
   ufw:
     rule: allow
