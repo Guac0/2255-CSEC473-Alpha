@@ -9,6 +9,16 @@
 #  ansible.builtin.shell: pwgen -1 -A -0 -B
 #  register: generated_pw #to use: generated_pw.stdout
 
+- name: Set rustdesk password Grey
+  ansible.builtin.set_fact:
+    rustdesk_password: "{{ greyteam_password }}"
+  when: "'jumpgrey' in group_names"
+
+- name: Set rustdesk password Blue
+  ansible.builtin.set_fact:
+    rustdesk_password: "{{ team_password }}"
+  when: "'jumpblue' in group_names"
+
 - name: Copy deb file
   ansible.builtin.copy:
     src: 'files/rustdesk-{{ rustdesk_version }}-x86_64.deb'
@@ -32,6 +42,7 @@
   ansible.builtin.systemd:
     name: rustdesk
     state: restarted
+    enabled: true
 
 - name: Wait for service to settle
   ansible.builtin.pause:
