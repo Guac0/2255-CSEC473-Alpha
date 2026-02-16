@@ -6,30 +6,67 @@
     <title>Cyber Scoring Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Team Color Variables */
-        .bg-team-blue { background-color: #2563eb; color: white; }    /* Blue Team */
-        .bg-team-red { background-color: #dc2626; color: white; }     /* Red Team */
-        .bg-team-yellow { background-color: #facc15; color: black; }  /* Offline/Down */
-        
-        .service-square {
-            transition: transform 0.2s;
-            min-width: 140px;
-            min-height: 100px;
-        }
-        .service-square:hover { transform: scale(1.05); cursor: pointer; }
+        .bg-team-blue { background-color: #2563eb; color: white; }
+        .bg-team-red { background-color: #dc2626; color: white; }
+        .bg-team-yellow { background-color: #facc15; color: black; }
+
         .service-grid {
             display: grid;
-            /* This creates as many columns as possible, at least 140px wide, 
-            sharing the remaining space equally (1fr) */
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(var(--cols, 6), 1fr);
             gap: 0.75rem;
-            width: 100%; /* Ensure the container stretches */
+            width: 100%;
+        }
+
+        .service-square-container {
+            container-type: inline-size;
+            width: 100%;
+            max-width: 100%;
         }
 
         .service-square {
-            aspect-ratio: 1 / 1; /* Forces a perfect square regardless of width */
-            min-width: 0;        /* Prevents content from pushing the square wider */
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10%;
+            position: relative; /* Needed for absolute positioning of message */
+            transition: transform 0.2s ease;
+            overflow: hidden;
         }
+
+        .sq-hostname { font-size: 13cqw; font-weight: 900; line-height: 1; margin: 2% 0; }
+        .sq-service { font-size: 7cqw; font-weight: 400; text-transform: uppercase; opacity: 0.8; }
+        .sq-ip { font-size: 6cqw; font-weight: 400; font-family: monospace; opacity: 0.7; }
+
+        /* Message Overlay Style */
+        .sq-message {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10%;
+            font-size: 6cqw;
+            font-weight: 600;
+            background: inherit; /* Matches team color */
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        /* Hover Logic */
+        .service-square:hover { transform: scale(1.15); cursor: pointer; }
+        .service-square:hover .sq-hostname, 
+        .service-square:hover .sq-service, 
+        .service-square:hover .sq-ip { opacity: 0; }
+        .service-square:hover .sq-message { opacity: 1; }
+        .service-square:active {
+            transform: scale(1.20);
+            filter: brightness(1.2);
+        }
+
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans p-6">
@@ -46,7 +83,8 @@
             </div>
         </div>
         
-        <div id="team-stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!--<div id="team-stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">-->
+        <div id="team-stats-container" class="flex flex-row gap-2 w-full mb-6">
             <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
             <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
             <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
@@ -81,7 +119,27 @@
 
     <script>
         // CONFIGURATION
-        const REFRESH_RATE = 10000; // Refresh every 10 seconds
+        const REFRESH_RATE = 20000; // Refresh every 10 seconds
+        const SUBNET_ALIASES = {
+            "10.0.10.0/24": "Core Network",
+            "10.0.20.0/24": "DMZ Network",
+            "10.0.30.0/24": "Internal Network",
+            "fallback": "Unknown Segment"
+        };
+
+        function copyWithNotify(text, element) {
+            navigator.clipboard.writeText(text);
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-10 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded-full font-bold shadow-2xl z-50 animate-bounce text-sm";
+            toast.innerText = "📋 Message Copied!";
+            
+            document.body.appendChild(toast);
+            
+            // Remove toast after 2 seconds
+            setTimeout(() => toast.remove(), 2000);
+        }
 
         async function fetchScoreboardData() {
             try {
@@ -133,49 +191,42 @@
 
         function updateStats(data) {
             const container = document.getElementById('team-stats-container');
-            
-            if (!data || !data.teams) {
-                console.error("Invalid summary data received");
-                return;
-            }
+            if (!data || !data.teams) return;
 
             const teamStyles = {
-                'blue': { label: 'BLUE TEAM', border: 'border-blue-500', glow: 'shadow-blue-900/20', text: 'text-blue-400' },
-                'red': { label: 'RED TEAM', border: 'border-red-500', glow: 'shadow-red-900/20', text: 'text-red-400' },
-                'offline': { label: 'OFFLINE', border: 'border-yellow-500', glow: 'shadow-yellow-900/20', text: 'text-yellow-500' }
+                'blue': { label: 'BLUE TEAM', border: 'border-blue-500', text: 'text-blue-400' },
+                'red': { label: 'RED TEAM', border: 'border-red-500', text: 'text-red-400' },
+                'offline': { label: 'OFFLINE', border: 'border-yellow-500', text: 'text-yellow-500' }
             };
 
+            // 'flex-grow' on each internal block removes the "dead space" in the middle
             container.innerHTML = data.teams.map(team => {
                 const style = teamStyles[team.team_name.toLowerCase()] || 
-                            { label: team.team_name, border: 'border-gray-600', glow: '', text: 'text-gray-400' };
+                            { label: team.team_name, border: 'border-gray-600', text: 'text-gray-400' };
                 
                 return `
-                    <div class="bg-gray-800/50 border-t-2 ${style.border} ${style.glow} p-6 rounded-xl shadow-2xl backdrop-blur-sm">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                            <div class="flex flex-col">
-                                <span class="text-sm font-black tracking-widest ${style.text} opacity-80">${style.label}</span>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-xs font-mono text-gray-500 uppercase tracking-tighter">Multiplier</span>
-                                    <span class="text-lg font-bold text-white">×${team.multiplier.toFixed(1)}</span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-5xl font-black font-mono text-white tracking-tighter">
-                                    ${team.score.toLocaleString()}
-                                </span>
-                                <span class="text-xs font-bold text-gray-600 uppercase">pts</span>
-                            </div>
+                    <div class="flex-1 bg-gray-800/40 border-l-4 ${style.border} px-4 py-1 shadow-2xl flex items-center min-w-0 h-16">
+                        <div class="shrink-0 mr-4">
+                            <span class="text-sm font-black tracking-tighter ${style.text} block leading-none">${style.label}</span>
                         </div>
 
-                        <div class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <div class="h-2 w-2 rounded-full ${team.services_owned > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-600'}"></div>
-                                <span class="text-xs font-bold text-gray-400 uppercase tracking-tight">Active Services</span>
+                        <div class="flex flex-grow items-center justify-start gap-x-8">
+                            
+                            <div class="flex items-baseline">
+                                <span class="text-4xl font-mono font-black text-white leading-none">${team.score.toLocaleString()}</span>
+                                <span class="ml-1 text-[11px] font-bold text-gray-500 uppercase">points</span>
                             </div>
-                            <span class="text-2xl font-mono font-bold text-gray-300">
-                                ${team.services_owned.toString().padStart(2, '0')}
-                            </span>
+
+                            <div class="flex items-baseline">
+                                <span class="text-2xl font-black text-gray-200 leading-none">${team.multiplier.toFixed(1)}x</span>
+                                <span class="ml-1 text-[11px] font-bold text-gray-500 uppercase">multiplier</span>
+                            </div>
+
+                            <div class="flex items-baseline">
+                                <span class="text-2xl font-black text-white leading-none">${team.services_owned}</span>
+                                <span class="ml-1 text-[11px] font-bold text-gray-500 uppercase">services owned</span>
+                            </div>
+
                         </div>
                     </div>
                 `;
@@ -184,8 +235,9 @@
 
         function renderGraphicalBoard(data) {
             const board = document.getElementById('graphical-scoreboard');
-            
             const subnets = {};
+            let maxHosts = 0;
+
             data.forEach(item => {
                 const parts = item.ip.split('.');
                 const subnet = `${parts[0]}.${parts[1]}.${parts[2]}.0/24`;
@@ -193,23 +245,39 @@
                 subnets[subnet].push(item);
             });
 
-            board.innerHTML = Object.keys(subnets).sort().map(subnet => `
-                <div class="flex items-start gap-4 mb-8">
-                    <div class="w-32 text-sm font-bold text-gray-500 border-r border-gray-800 pr-4 mt-2">
-                        ${subnet}
+            Object.values(subnets).forEach(list => { if (list.length > maxHosts) maxHosts = list.length; });
+
+            board.innerHTML = Object.keys(subnets).sort().map(subnet => {
+                const alias = SUBNET_ALIASES[subnet] || SUBNET_ALIASES["fallback"];
+                
+                return `
+                <div class="flex items-center gap-6 mb-4"> 
+                    <div class="w-48 shrink-0 text-right">
+                        <div class="text-2xl font-black text-white uppercase tracking-tight leading-none">
+                            ${alias}
+                        </div>
+                        <div class="text-sm font-mono text-gray-600">${subnet}</div>
                     </div>
                     
-                    <div class="service-grid flex-1">
-                        ${subnets[subnet].map(h => `
-                            <div class="service-square p-2 rounded-lg shadow-md flex flex-col justify-center items-center text-center ${getBgClass(h.team)}">
-                                <div class="text-[9px] font-bold opacity-70 uppercase leading-tight mb-1">${h.service}</div>
-                                <div class="text-xs font-bold truncate w-full px-1">${h.hostname}</div>
-                                <div class="text-[10px] font-mono opacity-80 mt-1">${h.ip}</div>
+                    <div class="service-grid flex-grow" style="--cols: ${maxHosts}">
+                       ${subnets[subnet].map(h => `
+                            <div class="service-square-container">
+                                <div class="service-square rounded-xl shadow-lg ${getBgClass(h.team)}" 
+                                    onclick="copyWithNotify('${(h.message || 'No data').replace(/'/g, "\\'")}', this)">
+                                    
+                                    <div class="sq-service">${h.hostname}</div>
+                                    <div class="sq-hostname truncate px-2">${h.service}</div>
+                                    <div class="sq-ip">${h.ip}</div>
+                                    
+                                    <div class="sq-message italic">
+                                        ${h.message || 'No status available'}
+                                    </div>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function renderTextTable(data) {
@@ -218,7 +286,7 @@
                 <tr class="border-b border-gray-700 hover:bg-gray-750 transition">
                     <td class="p-4 font-semibold text-sm">${h.hostname}</td>
                     <td class="p-4 font-mono text-xs text-blue-400 whitespace-nowrap cursor-pointer hover:text-blue-300" 
-                        onclick="navigator.clipboard.writeText('${h.ip}')">
+                        onclick="copyWithNotify('${(h.ip).replace(/'/g, "\\'")}', this)">
                         ${h.ip}
                     </td>
                     <td class="p-4 text-xs text-gray-400">${h.os}</td>
@@ -228,7 +296,10 @@
                             ${h.team}
                         </span>
                     </td>
-                    <td class="p-4 text-xs italic text-gray-500">${h.message || 'No data'}</td>
+                    <td class="p-4 text-xs italic text-gray-500"
+                        onclick="copyWithNotify('${(h.message || 'No data').replace(/'/g, "\\'")}', this)">
+                        ${h.message || 'No data'}
+                        </td>
                 </tr>
             `).join('');
         }

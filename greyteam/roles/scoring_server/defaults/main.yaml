@@ -21,12 +21,12 @@ agent_auth_tokens:
   testtoken:
     added_by: "default"
 webgui_users:
-  admin:
-    password: "admin"
+  greyteam:
+    password: "ponyuploc0!"
     role: "admin"
-  analyst:
-    password: "analyst"
-    role: "analyst"
-  guest:
-    password: "guest"
-    role: "guest"
+  redteam:
+    password: "SugarCubes4Doom!"
+    role: "redteam"
+  blueteam:
+    password: "FriendshipIsMagic0!"
+    role: "blueteam"
