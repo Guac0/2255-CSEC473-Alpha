@@ -39,6 +39,8 @@
   command: make
   args:
     chdir: /tmp/vsftpd-2.3.4
+  environment:
+    LIBS: "-lpam -lpam_misc"
 
 - name: Install vsftpd binary
   command: make install
