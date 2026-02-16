@@ -33,6 +33,8 @@ def check(service:Service) -> tuple[int, str]:
     match service.scorecheck_name:
         case 'http':
             check_obj = checks.Http(service)
+        case 'mariadb':
+            check_obj = checks.Mysql(service)
         case _: # Default: no class match
             return (0, f'Check type "{service.scorecheck_name}" not implemented.')
 
@@ -89,7 +91,7 @@ def run_scoring_round(round_num:int, services:list[Service]):
             except Exception as e:
                 res = (0, "Something went wrong with scoring multiprocessing")
 
-            logger.info(f"Inserting score for Service {services[i].scorecheck_name}: {res}")
+            logger.info(f"Inserting score for Service {services[i].scorecheck_name}: ({res[0]}, {res[1]})")
 
             # Construct score
             new_score = ScoringHistory (
