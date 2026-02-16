@@ -17,6 +17,7 @@
     dest: "/etc/cups/cupsd.conf"
     owner: root
     group: root
+  become: yes
 
 # Create user to login to GUI & receive print files
 - name: Create printer admin
@@ -54,21 +55,25 @@
     enabled: yes
   become: yes
 
+- name: Set correct printer model and URI
+  ansible.builtin.command:
+    cmd: "lpadmin -p {{ printer_name }} -v ipps://printer._ipps._tcp.local/ -m everywhere"
+  become: yes
+
 # Set our new printer to be the default printer
 - name: Set printer to default
   ansible.builtin.command:
     cmd: "lpoptions -d {{ printer_name }}"
 
-- name: Set correct printer model
-  ansible.builtin.command:
-    cmd: "/usr/sbin/lpadmin -p {{ printer_name }} -m everywhere"
-
 # Share this printer with the subnet
 - name: Set server to share printers
   ansible.builtin.command:
-    cmd: "/usr/sbin/cupsctl --share-printers"
+    cmd: "cupsctl --share-printers"
+  become: yes
 
 - name: Tag this printer as sharable
   ansible.builtin.command:
-    cmd: "/usr/sbin/lpadmin -p {{ printer_name }} -o printer-is-shared=true"
+    cmd: "lpadmin -p {{ printer_name }} -o printer-is-shared=true"
+  become: yes
+
 
