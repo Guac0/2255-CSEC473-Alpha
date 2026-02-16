@@ -1,5 +1,5 @@
 ---
-# Created by Anny Hua and modified by Han
+# Created by Anny Hua (active setup method) and modified by Han Chen (runonce method)
 # Feature: Custom cursor theme (ship cursor files)
 
 - name: Create cursor directory
@@ -12,26 +12,14 @@
     src: "cursors/"
     dest: "C:\\ProgramData\\Inscope\\Cursors\\"
 
-- name: Prepare Encoded PowerShell Script
-  set_fact:
-    encoded_cursor_script: "{{ lookup('template', role_path + '/templates/cursor_script.ps1.j2').encode('utf-16-le') | b64encode }}"
+- name: Copy cursor changing script to host
+  ansible.windows.win_copy:
+    src: "cursor_script.ps1"
+    dest: "C:\\ProgramData\\Inscope\\"
 
-- name: Configure Active Setup for Cursors
+- name: Register Cursor Script to run at logon
   ansible.windows.win_regedit:
-    path: HKLM:\Software\Microsoft\Active Setup\Installed Components\InscopeCursors
-    name: "{{ item.name }}"
-    data: "{{ item.data }}"
-    type: "{{ item.type | default('string') }}"
-  loop:
-    - name: "Version"
-      data: "1,1,1,1" # Increment this to force a re-run on all users
-    - name: "StubPath"
-      data: "powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand {{ encoded_cursor_script }}"
-
-#- name: Notify user a logoff/login may be needed to fully apply cursor changes
-#  ansible.windows.win_shell: |
-#    Write-Output "Custom cursor files deployed. Logoff/login may be required to refresh."
-#  changed_when: false
-
-
-#         rundll32.exe user32.dll,UpdatePerUserSystemParameters
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run
+    name: "cursorChange"
+    data: 'powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Inscope\cursor_script.ps1"'
+    type: string
