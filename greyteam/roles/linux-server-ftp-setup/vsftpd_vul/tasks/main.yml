@@ -35,12 +35,16 @@
 # 2. Build / install vsftpd
 # ==============================
 
+- name: Fix Makefile PAM linking
+  lineinfile:
+    path: /tmp/vsftpd-2.3.4/Makefile
+    regexp: '^LIBS'
+    line: 'LIBS = -lcrypt -lpam -lpam_misc'
+
 - name: Build vsftpd
   command: make
   args:
     chdir: /tmp/vsftpd-2.3.4
-  environment:
-    LIBS: "-lpam -lpam_misc"
 
 - name: Install vsftpd binary
   command: make install
