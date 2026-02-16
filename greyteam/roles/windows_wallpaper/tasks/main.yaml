@@ -1,10 +1,25 @@
 ---
 # Alpha – Anny Hua
 # Feature: Windows wallpaper theming 
+- name: Determine wallpaper filename for this host (prefer hostname.jpg)
+  ansible.builtin.set_fact:
+    wallpaper_host_file: "{{ inventory_hostname.split('.')[0] }}.jpg"
+    wallpaper_default_file: "wallpaper.jpg"
 
-- name: Create wallpaper directory
+- name: Check if hostname-specific wallpaper exists on controller
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ wallpaper_host_file }}"
+  register: wallpaper_check
+  delegate_to: localhost
+  run_once: false
+
+- name: Choose wallpaper source file (host-specific or default)
+  ansible.builtin.set_fact:
+    wallpaper_src: "{{ wallpaper_host_file if wallpaper_check.stat.exists else wallpaper_default_file }}"
+
+- name: Ensure wallpaper directory exists
   ansible.windows.win_file:
-    path: C:\ProgramData\Inscope\Branding
+    path: "C:\\ProgramData\\Inscope\\Branding"
     state: directory
 
 - name: Copy wallpaper to host
