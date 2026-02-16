@@ -87,6 +87,7 @@
     group: "{{ item }}"
     mode: '0755'
   loop: "{{ linux_desktop_users }}"
+  when: item in ansible_facts.getent_passwd
   become: true
 
 # Create simple .desktop launchers that run each program by name
