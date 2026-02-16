@@ -397,9 +397,9 @@ def add_user():
         logger.warning(f"/add_user - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {[username, password, role]}")
         return "Missing data", 400
     
-    if role not in ["guest","analyst","admin"]:
-        logger.warning(f"/add_user - Failed connection from {current_user.id} at {request.remote_addr} - bad role value. Full details: {[username, password, role]}")
-        return "Bad role value", 400
+    #if role not in ["guest","analyst","admin"]:
+    #    logger.warning(f"/add_user - Failed connection from {current_user.id} at {request.remote_addr} - bad role value. Full details: {[username, password, role]}")
+    #    return "Bad role value", 400
 
     existing_user = WebUser.query.filter_by(username=username).first()
     if existing_user:
