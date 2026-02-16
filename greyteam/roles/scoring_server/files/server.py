@@ -203,7 +203,8 @@ def get_scoring_data_latest():
             Host.os,
             ScoringTeams.team_name,
             ScoringHistory.message,
-            Service.scorecheck_name
+            Service.scorecheck_name,
+            Service.scorecheck_display_name
         ).join(Host, ScoringHistory.host_id == Host.id)\
          .join(ScoringTeams, ScoringHistory.value == ScoringTeams.id)\
          .join(Service, ScoringHistory.service_id == Service.id)\
@@ -218,7 +219,7 @@ def get_scoring_data_latest():
                 "os": r.os,
                 "team": r.team_name,
                 "message": r.message,
-                "service": r.scorecheck_name
+                "service": r.scorecheck_display_name
             } for r in results
         ]
         host_list.sort(key=lambda x: ipaddress.ip_address(x['ip']))

@@ -201,15 +201,15 @@ def insert_test_rounds(logger, num_rounds=10):
             
             for service in services:
                 # Randomly decide if the service is "Up" or "Down"
-                # 50% chance of success (Blue Team), 30% chance of failure (red), 20% offline
+                # 50% chance of success (Blue Team), 30% chance of failure (red), 30% offline
                 is_up = random.random()
                 
-                if is_up < 0.5:
+                if is_up < 0.4:
                     assigned_team_id = blue_team.id
                     msg = "Legitimate content check succeeded."
                     # Increment the actual team score for realism
                     blue_team.score += 1
-                elif is_up > 0.8:
+                elif is_up > 0.7:
                     assigned_team_id = offline_team.id
                     msg = "Connection timed out / Service unreachable."
                     offline_team.score += 1
