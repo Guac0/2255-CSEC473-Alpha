@@ -86,6 +86,43 @@ class Http (Check):
         
         return (0, err[0])
 
+class Mysql (Check):
+    users:list[tuple[str,str]]
+
+    def __init__(self, check: Service) -> None:
+        super().__init__(check)
+
+        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+
+        for user in users:
+            self.users.append((user.username, user.password))
+    
+    def check (self):
+        user = random.choice(self.users)
+        
+        err = []
+        for criterion in self.criteria:
+            res = subprocess.run(
+                ["mysql", "-h", self.host_ip,
+                "-u", f"{user[0]}"
+                "-p", f"{user[1]}",
+                "Ponies", "-e", "\"SELECT ponies\""],
+                capture_output=True,
+                text=True
+            ) # Expected: 30
+            
+            # Check succeeded
+            if res.returncode == 0 and criterion.content in res.stdout:
+                return (criterion.team, "Generic success")
+            # Command failed
+            elif res.returncode != 0:
+                err.insert(0, res.stderr)
+            # Incorrect output
+            elif criterion.content not in res.stdout:
+                err.append("Content did not match expected value")
+        
+        return (0, err[0])
+
 class Ssh (Check):
     users:list[tuple[str,str]]
 
