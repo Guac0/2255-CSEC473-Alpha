@@ -7,7 +7,7 @@ import pymysql
 from typing import Tuple
 
 # Configuration - matches your Ansible variables
-DB_HOST = 'localhost'
+DB_HOST = '10.0.10.4'
 DB_PORT = 3306
 DB_NAME = 'Ponies'
 DB_USER = 'pony'
