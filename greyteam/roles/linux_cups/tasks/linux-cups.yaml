@@ -55,9 +55,9 @@
     enabled: yes
   become: yes
 
-- name: Set correct printer model and URI
+- name: Configure printer with model, URI, and sharing
   ansible.builtin.command:
-    cmd: "lpadmin -p {{ printer_name }} -v ipps://printer._ipps._tcp.local/ -m everywhere"
+    cmd: "lpadmin -p {{ printer_name }} -v ipps://printer._ipps._tcp.local/ -m everywhere -o printer-is-shared=true"
   become: yes
 
 # Set our new printer to be the default printer
@@ -70,10 +70,3 @@
   ansible.builtin.command:
     cmd: "cupsctl --share-printers"
   become: yes
-
-- name: Tag this printer as sharable
-  ansible.builtin.command:
-    cmd: "lpadmin -p {{ printer_name }} -o printer-is-shared=true"
-  become: yes
-
-
