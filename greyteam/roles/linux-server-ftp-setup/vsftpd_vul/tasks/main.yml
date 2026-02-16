@@ -46,6 +46,16 @@
   args:
     chdir: /tmp/vsftpd-2.3.4
 
+- name: Create man page directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /usr/local/man
+    - /usr/local/man/man5
+    - /usr/local/man/man8
+
 - name: Install vsftpd binary
   command: make install
   args:
