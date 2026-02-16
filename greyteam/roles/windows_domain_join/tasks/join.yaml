@@ -1,4 +1,11 @@
 ---
+- name: Ensure DNS Points to Management DNS
+  ansible.windows.win_dns_client:
+    adapter_names: '*'
+    dns_servers: "{{ mgmt_dns }}"
+  # Support mgmt dns having zero entries (why?)
+  when: mgmt_dns is defined and mgmt_dns | length > 0
+  
 - name: Join to domain
   microsoft.ad.membership:
     dns_domain_name: "{{ domain }}"
