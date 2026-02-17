@@ -2,7 +2,7 @@ resource "openstack_compute_instance_v2" "scoring" {
   depends_on = [openstack_networking_secgroup_v2.secgroup_grey]
 
   name            = "scoring"
-  flavor_name     = "large"
+  flavor_name     = "xxlarge"
   key_pair        = "cdt"
 
   block_device {

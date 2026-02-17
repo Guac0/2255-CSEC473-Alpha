@@ -3,7 +3,7 @@ resource "openstack_compute_instance_v2" "ubun24" {
   for_each = var.ubun24
 
   name            = each.value.hostname
-  flavor_name     = "medium"
+  flavor_name     = "large.12gb"
   key_pair        = "cdt"
 
   block_device {

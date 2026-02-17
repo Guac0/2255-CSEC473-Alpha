@@ -3,7 +3,7 @@ resource "openstack_compute_instance_v2" "deb13" {
   for_each = var.deb13
 
   name        = each.value.hostname
-  flavor_name     = "medium"
+  flavor_name     = "large"
   key_pair        = "cdt"
 
   block_device {
