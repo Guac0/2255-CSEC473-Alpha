@@ -16,6 +16,10 @@
 - name: repair sqlcmd if needed
   ansible.builtin.include_tasks: repair_sqlcmd.yaml
 
+- name: Setup mssql tools
+  ansible.builtin.include_tasks: mssql_tools.yaml
+  delegate_to: localhost
+
 - name: Add MSSQL Data
   ansible.builtin.include_tasks: data.yaml
 

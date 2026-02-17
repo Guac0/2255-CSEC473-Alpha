@@ -275,7 +275,7 @@ class Mssql (Check):
                 # -s"," sets comma as separator, -W removes trailing spaces, -h-1 removes headers
                 res = subprocess.run(
                     [
-                        'sqlcmd', '-E', '-C', 
+                        '/opt/mssql-tools18/bin/sqlcmd', '-E', '-C', 
                         '-S', target_host, 
                         '-d', db_name, 
                         '-Q', criterion.location, 
