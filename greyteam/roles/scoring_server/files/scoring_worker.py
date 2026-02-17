@@ -32,10 +32,14 @@ def check(service:Service) -> tuple[int, str]:
     check_obj : checks.Check = None
 
     match service.scorecheck_name:
-        case 'http':
+        case 'http': #nginx, apache
             check_obj = checks.Http(service)
         case 'mariadb':
             check_obj = checks.Mysql(service)
+        case 'mssql':
+            check_obj = checks.Mssql(service)
+        case 'workstation':
+            check_obj = checks.Mssql(service)
         case _: # Default: no class match
             return (0, f'Check type "{service.scorecheck_name}" not implemented.')
 

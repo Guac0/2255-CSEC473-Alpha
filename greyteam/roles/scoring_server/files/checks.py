@@ -210,3 +210,64 @@ class Mssql (Check):
                 err.append(f"{E[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
+    
+class Mssql (Check):
+    users:list[tuple[str,str]]  
+
+    def __init__(self, check: Service) -> None:
+        super().__init__(check)
+
+        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+
+        for user in users:
+            if user in ["celestia","discord","luna","starswirl"]: # only domain admins
+                self.users.append((user.username, user.password))
+
+    def check (self):
+        user = random.choice(self.users)
+
+        err = []
+        for criterion in self.criteria:
+            try:
+                username = user[0]
+                password = user[1]
+                domain = "MLP.LOCAL"
+                target_host = f"{criterion.content.split(":")[0]},{criterion.content.split(":")[1]}"
+                db_name = "db"
+
+                # Pipe the password to kinit using the input parameter
+                kinit_proc = subprocess.run(
+                    ['kinit', f"{username}@{domain}"],
+                    input=password.encode(),
+                    capture_output=True,
+                    check=True
+                )
+
+                # Execute sqlcmd using the Kerberos ticket (-E)
+                # -s"," sets comma as separator, -W removes trailing spaces, -h-1 removes headers
+                res = subprocess.run(
+                    [
+                        'sqlcmd', '-E', '-C', 
+                        '-S', target_host, 
+                        '-d', db_name, 
+                        '-Q', criterion.location, 
+                        '-s', ',', '-W', '-h-1'
+                    ],
+                    capture_output=True,
+                    text=True
+                )
+
+                # Check succeeded
+                if res.returncode == 0 and criterion.content in res.stdout:
+                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                # Command failed
+                elif res.returncode != 0:
+                    err.insert(0, res.stderr)
+                # Incorrect output
+                elif criterion.content not in res.stdout:
+                    err.append(f"Could not find expected content for check {criterion.id}")
+
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
+        
+        return (0, err[0])
