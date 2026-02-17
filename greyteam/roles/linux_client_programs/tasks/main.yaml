@@ -113,7 +113,8 @@
 
 # Create Desktop Symbolic Links for client programs
 - name: Create Desktop Symbolic Links (client programs)
-  ansible.builtin.file:
+  #ansible.builtin.file:
+  ansible.builtin.copy:
     remote_src: true
     src: "{{ item.1.src }}"
     dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest}}"
