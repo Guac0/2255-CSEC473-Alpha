@@ -97,6 +97,16 @@
       - "filezilla.desktop"
       - "HexChat.desktop"
       - "hexchat.desktop"
+      - "Remmina.desktop"
+      - "org.remmina.Remmina.desktop"
+      - "remmina.desktop"
+      - "Firefox.desktop"
+      - "firefox.desktop"
+      - "firefox_firefox.desktop"
+      - "Chromium.desktop"
+      - "chromium.desktop"
+      - "chromium-browser.desktop"
+      - "chromium_chromium.desktop"
 
 # Create Desktop Symbolic Links for client programs
 - name: Create Desktop Symbolic Links (client programs)
@@ -108,12 +118,17 @@
     group: "{{ item.0 }}"
     mode: "0755"
     force: true
-  loop: "{{ q('nested', linux_desktop_users, shortcuts) }}"
+  loop: "{{ q('nested', linux_desktop_users, desktop_shortcuts) }}"
   when: item.0 in ansible_facts.getent_passwd
   vars:
-    shortcuts:
-      - {src: "/usr/share/applications/thunderbird.desktop", dest: "Thunderbird.desktop"}
-      - {src: "/usr/share/applications/libreoffice-startcenter.desktop", dest: "LibreOffice.desktop"}
-      - {src: "/usr/share/applications/filezilla.desktop", dest: "FileZilla.desktop"}
-      - {src: "/usr/share/applications/hexchat.desktop", dest: "HexChat.desktop"}
+    desktop_shortcuts:
+       - { src: "/usr/share/applications/thunderbird.desktop",                 dest: "Thunderbird.desktop" }
+      - { src: "/usr/share/applications/libreoffice-startcenter.desktop",     dest: "LibreOffice.desktop" }
+      - { src: "/usr/share/applications/filezilla.desktop",                  dest: "FileZilla.desktop" }
+      - { src: "/usr/share/applications/hexchat.desktop",                    dest: "HexChat.desktop" }
   become: true
+
+- name: Note missing desktop shortcut sources
+  ansible.builtin.debug:
+    msg: "A .desktop source file was missing on this host. That shortcut did not get installed."
+  when: false
