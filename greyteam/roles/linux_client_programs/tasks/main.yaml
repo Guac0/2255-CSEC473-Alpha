@@ -122,10 +122,10 @@
   when: item.0 in ansible_facts.getent_passwd
   vars:
     desktop_shortcuts:
-       - { src: "/usr/share/applications/thunderbird.desktop",                 dest: "Thunderbird.desktop" }
-      - { src: "/usr/share/applications/libreoffice-startcenter.desktop",     dest: "LibreOffice.desktop" }
-      - { src: "/usr/share/applications/filezilla.desktop",                  dest: "FileZilla.desktop" }
-      - { src: "/usr/share/applications/hexchat.desktop",                    dest: "HexChat.desktop" }
+      - { src: "/usr/share/applications/thunderbird.desktop", dest: "Thunderbird.desktop" }
+      - { src: "/usr/share/applications/libreoffice-startcenter.desktop", dest: "LibreOffice.desktop" }
+      - { src: "/usr/share/applications/filezilla.desktop", dest: "FileZilla.desktop" }
+      - { src: "/usr/share/applications/hexchat.desktop", dest: "HexChat.desktop" }
   become: true
 
 - name: Note missing desktop shortcut sources
