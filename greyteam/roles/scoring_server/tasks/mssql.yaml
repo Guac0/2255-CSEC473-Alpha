@@ -39,7 +39,7 @@
     path: "{{ item }}"
     line: 'export PATH="$PATH:/opt/mssql-tools18/bin"'
     state: present
-  for:
+  loop:
     - "/root/.bashrc"
     - "/home/{{ greyteam_user }}/.bashrc"
     - "/home/{{ scoring_user }}/.bashrc"

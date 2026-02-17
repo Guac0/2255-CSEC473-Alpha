@@ -47,5 +47,5 @@
   loop:
     - "/root/.bashrc"
     - "/home/{{ greyteam_user }}/.bashrc"
-    - "/home/{{ scoring_user }}/.bashrc"
+    #- "/home/{{ scoring_user }}/.bashrc"
   delegate_to: localhost
