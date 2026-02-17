@@ -5,12 +5,18 @@
     dest: /usr/share/keyrings/microsoft-prod.asc
     mode: '0644'
   delegate_to: localhost
+  become: yes 
+  become_method: sudo
+  become_user: root
 
 - name: De-armor GPG key
   ansible.builtin.shell: gpg --dearmor < /usr/share/keyrings/microsoft-prod.asc | tee /usr/share/keyrings/microsoft-prod.gpg > /dev/null
   args:
     creates: /usr/share/keyrings/microsoft-prod.gpg
   delegate_to: localhost
+  become: yes 
+  become_method: sudo
+  become_user: root
 
 - name: Add MSSQL Repository
   ansible.builtin.apt_repository:
@@ -18,6 +24,9 @@
     state: present
     filename: mssql-release
   delegate_to: localhost
+  become: yes 
+  become_method: sudo
+  become_user: root
 
 - name: Install MSSQL Tools and Kerberos client
   ansible.builtin.apt:
@@ -29,6 +38,9 @@
   environment:
     ACCEPT_EULA: "Y"
   delegate_to: localhost
+  become: yes 
+  become_method: sudo
+  become_user: root
 
 - name: Configure Kerberos (krb5.conf)
   ansible.builtin.template:
@@ -38,6 +50,9 @@
     group: root
     mode: '0644'
   delegate_to: localhost
+  become: yes 
+  become_method: sudo
+  become_user: root
 
 - name: Add mssql-tools to PATH
   ansible.builtin.lineinfile:
@@ -49,3 +64,6 @@
     - "/home/{{ greyteam_user }}/.bashrc"
     #- "/home/{{ scoring_user }}/.bashrc"
   delegate_to: localhost
+  become: yes 
+  become_method: sudo
+  become_user: root
