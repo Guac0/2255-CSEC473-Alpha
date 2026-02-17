@@ -10,6 +10,12 @@
   ansible.builtin.include_tasks: firewall.yaml
   when: mssql_firewall
 
+- name: install SSMS
+  ansible.builtin.include_tasks: ssms_install.yaml
+
+- name: repair sqlcmd if needed
+  ansible.builtin.include_tasks: repair_sqlcmd.yaml
+
 - name: Add MSSQL Data
   ansible.builtin.include_tasks: data.yaml
 
