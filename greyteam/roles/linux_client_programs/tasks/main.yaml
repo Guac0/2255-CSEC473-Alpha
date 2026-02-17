@@ -90,62 +90,59 @@
   when: item in ansible_facts.getent_passwd
   become: true
 
-- name: Create Desktop Symbolic Links (all shortcuts)
-  ansible.builtin.file:
-    src: "{{ item.1.src }}"
-    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest }}"
-    state: link
+
+# Create simple .desktop launchers that run each program by name
+- name: Create app launchers in /etc/skel/Desktop
+  ansible.builtin.copy:
+    dest: "/etc/skel/Desktop/{{ item.filename }}"
+    mode: "0755"
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name={{ item.name }}
+      Exec={{ item.exec }}
+      Terminal=false
+  loop:
+    - { name: "Thunderbird", filename: "Thunderbird.desktop", exec: "thunderbird" }
+    - { name: "LibreOffice", filename: "LibreOffice.desktop", exec: "libreoffice" }
+    - { name: "FileZilla", filename: "FileZilla.desktop", exec: "filezilla" }
+    - { name: "HexChat", filename: "HexChat.desktop", exec: "hexchat" }
+  become: true
+
+# Copies the launcher templates from /etc/skel/Desktop into every existing user’s Desktop folder
+# Uses product() so we do each user times each launcher without writing 4 separate tasks
+- name: Copy launchers to each user Desktop
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/etc/skel/Desktop/{{ item.1 }}"
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1 }}"
     owner: "{{ item.0 }}"
     group: "{{ item.0 }}"
     mode: "0755"
-    force: true
-  loop: "{{ query('nested', linux_desktop_users, shortcuts) }}"
+  loop: "{{ linux_desktop_users | product(['Thunderbird.desktop','LibreOffice.desktop','FileZilla.desktop','HexChat.desktop']) | list }}"
   when: item.0 in ansible_facts.getent_passwd
-  vars:
-    shortcuts:
-      
-      - { src: "/usr/share/applications/thunderbird.desktop",              dest: "Thunderbird.desktop" }
-      - { src: "/usr/share/applications/libreoffice-startcenter.desktop",  dest: "LibreOffice.desktop" }
-      - { src: "/usr/share/applications/filezilla.desktop",                dest: "FileZilla.desktop" }
-      - { src: "/usr/share/applications/hexchat.desktop",                  dest: "HexChat.desktop" }
-
-      - { src: "/usr/share/applications/org.remmina.Remmina.desktop",      dest: "Remmina.desktop" }
-      - { src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop", dest: "Firefox.desktop" }
-      - { src: "/usr/share/applications/chromium-browser.desktop",         dest: "Chromium.desktop" }
-  ignore_errors: yes
-  register: desktop_links
   become: true
 
 
-## Create simple .desktop launchers that run each program by name
-#- name: Create app launchers in /etc/skel/Desktop
-#  ansible.builtin.copy:
-#    dest: "/etc/skel/Desktop/{{ item.filename }}"
-#    mode: "0755"
-#    content: |
-#      [Desktop Entry]
-#      Type=Application
-#      Name={{ item.name }}
-#      Exec={{ item.exec }}
-#      Terminal=false
-#  loop:
-#    - { name: "Thunderbird", filename: "Thunderbird.desktop", exec: "thunderbird" }
-#    - { name: "LibreOffice", filename: "LibreOffice.desktop", exec: "libreoffice" }
-#    - { name: "FileZilla", filename: "FileZilla.desktop", exec: "filezilla" }
-#    - { name: "HexChat", filename: "HexChat.desktop", exec: "hexchat" }
-#  become: true
-#
-## Copies the launcher templates from /etc/skel/Desktop into every existing user’s Desktop folder
-## Uses product() so we do each user times each launcher without writing 4 separate tasks
-#- name: Copy launchers to each user Desktop
-#  ansible.builtin.copy:
-#    remote_src: true
-#    src: "/etc/skel/Desktop/{{ item.1 }}"
-#    dest: "/home/{{ item.0 }}/Desktop/{{ item.1 }}"
+
+#- name: Create Desktop Symbolic Links (all shortcuts)
+#  ansible.builtin.file:
+#    src: "{{ item.1.src }}"
+#    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest }}"
+#    state: link
 #    owner: "{{ item.0 }}"
 #    group: "{{ item.0 }}"
 #    mode: "0755"
-#  loop: "{{ linux_desktop_users | product(['Thunderbird.desktop','LibreOffice.desktop','FileZilla.desktop','HexChat.desktop']) | list }}"
+#    force: true
+#  loop: "{{ query('nested', linux_desktop_users, shortcuts) }}"
 #  when: item.0 in ansible_facts.getent_passwd
+#  vars:
+#    shortcuts:
+#      
+#      - { src: "/usr/share/applications/thunderbird.desktop",              dest: "Thunderbird.desktop" }
+#      - { src: "/usr/share/applications/libreoffice-startcenter.desktop",  dest: "LibreOffice.desktop" }
+#      - { src: "/usr/share/applications/filezilla.desktop",                dest: "FileZilla.desktop" }
+#      - { src: "/usr/share/applications/hexchat.desktop",                  dest: "HexChat.desktop" }
+#  ignore_errors: yes
+#  register: desktop_links
 #  become: true
-#
