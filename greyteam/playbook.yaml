@@ -179,16 +179,16 @@
 
 ####### Finish #######
 
-- name: Deploy User Files (Windows) # needs domain users
-  hosts: windows:&inscope #:!cement
-  roles:
-    - deploy_user_files
-  tags:
-    - windows
-    - inscope
-    - files
-    - ad
-    - ad_join
+#- name: Deploy User Files (Windows) # needs domain users
+#  hosts: windows:&inscope #:!cement
+#  roles:
+#    - deploy_user_files
+#  tags:
+#    - windows
+#    - inscope
+#    - files
+#    - ad
+#    - ad_join
 
 - name: Post Deploy Cleanup
   hosts: windows #:!cement
@@ -252,15 +252,15 @@
     - rustdesk_linux
     - generic
 
-- name: Deploy User Files (Linux)
-  hosts: linux:&inscope
-  roles:
-    - deploy_user_files
-  tags:
-    - linux
-    - inscope
-    - files
-    - generic
+#- name: Deploy User Files (Linux)
+#  hosts: linux:&inscope
+#  roles:
+#    - deploy_user_files
+#  tags:
+#    - linux
+#    - inscope
+#    - files
+#    - generic
 
 ###### Services #######
 
