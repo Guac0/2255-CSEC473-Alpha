@@ -137,3 +137,63 @@
   ansible.builtin.debug:
     msg: "A .desktop source file was missing on this host. That shortcut did not get installed."
   when: false
+
+# 4) Scoring service checks (LibreOffice)
+
+- name: Ensure python3 is installed
+  ansible.builtin.apt:
+    name: python3
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Create app directory
+  ansible.builtin.file:
+    path: /opt/lo_score
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Copy lo_score_server.py
+  ansible.builtin.copy:
+    src: lo_score_server.py
+    dest: /opt/lo_score/lo_score_server.py
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Create systemd service file
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/lo-score.service
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=LibreOffice Scoring Server
+      After=network.target
+
+      [Service]
+      ExecStart=/usr/bin/python3 /opt/lo_score/lo_score_server.py
+      Restart=always
+      User=root
+      WorkingDirectory=/opt/lo_score
+
+      [Install]
+      WantedBy=multi-user.target
+  become: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: Enable and start service
+  ansible.builtin.systemd:
+    name: lo-score
+    enabled: true
+    state: started
+  become: true
