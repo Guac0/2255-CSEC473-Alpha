@@ -64,7 +64,7 @@
     ('celestia', 'Alicorn', 'Ruler of the Sun', @Canterlot),
     ('luna', 'Alicorn', 'Guardian of the Night', @Canterlot),
     ('discord', 'Draconequus', 'Lord of Chaos', @Everfree),
-    ('cadence', 'Alicorn', 'Princess of Love', @Crystal),
+    ('cadance', 'Alicorn', 'Princess of Love', @Crystal),
     ('starswirl', 'Unicorn', 'The Bearded Sorcerer', @Canterlot);
 
     /* 7. Assign The Elements of Harmony */
