@@ -33,16 +33,10 @@
     dest: "C:\\ProgramData\\Inscope\\"
 
 - name: Create wallpaper scheduled task (run at logon with delay)
-  ansible.windows.win_scheduled_task:
-    name: WallpaperInit
-    description: Apply custom wallpaper at first login
-    actions:
-      - path: powershell.exe
-        arguments: -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1
-    triggers:
-      - type: logon
-        delay: PT15S
-    username: SYSTEM
-    run_level: highest
-    state: present
-
+  ansible.windows.win_shell: >
+    schtasks /create /tn WallpaperInit
+    /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1"
+    /sc onlogon
+    /delay 0000:15
+    /rl highest
+    /f
