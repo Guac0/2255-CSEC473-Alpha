@@ -4,7 +4,6 @@
     kinit {{ domain_admins[0] }}@{{ domain | upper }} << 'EOF'
     {{ team_password }}
     EOF
-    /opt/mssql-tools18/bin/sqlcmd -S {{ mssql_host }},1433 -E -C -Q "CREATE DATABASE [{{ mssql_database_name }}]"
   delegate_to: localhost
   #no_log: true # Hide password from logs
 

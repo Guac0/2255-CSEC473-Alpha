@@ -54,12 +54,12 @@
   become_method: runas
   become_user: "{{ domain }}\\{{ greyteam_user }}" # needed for crypto
 
-- name: Register ESCAPEPOD MSSQLSvc with SPN
+- name: Register MSSQLSvc host with SPN
   ansible.windows.win_powershell:
     script: |
-      setspn -S MSSQLSvc/escapepod.team20.cosmic.war:1433 ESCAPEPOD
-      setspn -S MSSQLSvc/192.168.20.1:1433 ESCAPEPOD
-  when: not app_check.stat.exists
+      setspn -S MSSQLSvc/{{ inventory_hostname_short }}.{{ domain }}:1433 {{ inventory_hostname_short | upper }}
+      setspn -S MSSQLSvc/{{ mssql_host }}:1433 {{ inventory_hostname_short | upper }}
+  #when: not app_check.stat.exists
   
 - name: Enable TCP/IP for SQL Server
   ansible.windows.win_powershell:
