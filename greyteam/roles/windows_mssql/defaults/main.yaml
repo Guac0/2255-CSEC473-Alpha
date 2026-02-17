@@ -6,5 +6,6 @@ mssql_sqlsysadminaccounts: "Administrators" #"domain\admin"
 mssql_database_name: "db"
 mssql_agtsvcaccount: "NT AUTHORITY\NETWORK SERVICE" #NT Service\SQLSERVERAGENT"
 mssql_instancename: "MSSQLSERVER"
+mssql_firewall: false
 
 mssql_host: "{{ ansible_default_ipv4.address }}"

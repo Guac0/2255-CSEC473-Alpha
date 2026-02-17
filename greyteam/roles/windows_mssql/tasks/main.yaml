@@ -6,8 +6,9 @@
 - name: Install MSSQL
   ansible.builtin.include_tasks: install.yaml
 
-#- name: Configure Firewall for MSSQL
-#  ansible.builtin.include_tasks: firewall.yaml
+- name: Configure Firewall for MSSQL
+  ansible.builtin.include_tasks: firewall.yaml
+  when: mssql_firewall
 
 - name: Add MSSQL Data
   ansible.builtin.include_tasks: data.yaml
