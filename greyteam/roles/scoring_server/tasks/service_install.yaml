@@ -50,7 +50,7 @@
       After=network.target
 
       [Service]
-      User=root
+      User={{ scoring_user }}
       WorkingDirectory={{ scoring_deploy_dir }}
       ExecStart={{ scoring_deploy_dir }}/venv/bin/python3 scoring_worker.py
       Restart=always

@@ -11,6 +11,7 @@ ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringT
 )
 from data import create_db_tables
 from sqlalchemy import func
+import rotate_ips
 
 import checks
 import multiprocessing as mp
@@ -126,5 +127,6 @@ if __name__ == "__main__":
             services = get_services()
             # Run round
             logger.info(f"Starting scorechecks for Round {round_num}")
+            rotate_ips.setup_iptables(rotate_ips.get_next_ip())
             run_scoring_round(round_num, services)
             round_num += 1

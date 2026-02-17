@@ -5,7 +5,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0755'
+    mode: '0777'
   when: ansible_facts.os_family != "Windows" 
 
 - name: Copy all files executable to target
@@ -14,13 +14,18 @@
     dest: "{{ scoring_deploy_dir }}/"
     owner: root
     group: root
-    mode: '0755'
+    mode: '0777'
   when: ansible_facts.os_family != "Windows"
 
 - name: Render config.json from template
   template:
     src: "config.json.j2"
     dest: "{{ [scoring_deploy_dir, 'config.json'] | path_join }}"
+
+- name: Render rotate_ips.py from template
+  template:
+    src: "rotate_ips.py.j2"
+    dest: "{{ [scoring_deploy_dir, 'rotate_ips'] | path_join }}"
 
 - name: Create venv and install requirements
   ansible.builtin.pip:

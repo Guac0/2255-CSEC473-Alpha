@@ -3,11 +3,18 @@ scoring_gunicorn_workers: 3
 scoring_port: 443
 scoring_server_start: true
 scoring_worker_start: false
-
+scoring_user: scoring_worker
 scoring_host: "0.0.0.0"
+scoring_interface: eth0
+scoring_ips:
+  - 172.20.0.67/26
+  - 172.20.0.82/26
+  - 172.20.0.90/26
+  - 172.20.0.106/26
+  - 172.20.0.115/26
 
 # Derived values can still be overridden if needed
-public_url: "https://{{ scoring_host }}:{{ scoring_port }}" # TODO
+public_url: "https://{{ ansible_host }}:{{ scoring_port }}"
 logfile: "log.txt"
 savefile: "save.db"
 

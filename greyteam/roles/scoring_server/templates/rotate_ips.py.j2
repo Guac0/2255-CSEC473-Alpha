@@ -1,0 +1,64 @@
+import subprocess
+import os
+
+# import rotate_ips
+# rotate_ips.setup_iptables(rotate_ips.get_next_ip())
+
+# Configuration
+INTERFACE_IPS = {{ scoring_ips }}
+TEST_USER = "{{ scoring_user }}"  # The linux user running the python test suite
+STATE_FILE = "/tmp/scoring_test_ip_index"
+CHAIN_NAME = "SCORING_ROTATION"
+
+def run_cmd(cmd):
+    """Helper to run shell commands safely."""
+    sudo_cmd = f"sudo {cmd}"
+    try:
+        subprocess.run(sudo_cmd, check=True, shell=True, capture_output=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e.stderr.decode()}")
+
+def setup_iptables(target_ip):
+    # 1. Ensure the custom chain exists in the nat table
+    # We ignore errors here because it might already exist
+    subprocess.run(f"iptables -t nat -N {CHAIN_NAME}", shell=True, capture_output=True)
+
+    # 2. Ensure our custom chain is linked to POSTROUTING 
+    # check if it's already there first to avoid duplicates
+    check_link = subprocess.run(f"iptables -t nat -C POSTROUTING -j {CHAIN_NAME}", shell=True, capture_output=True)
+    if check_link.returncode != 0:
+        run_cmd(f"iptables -t nat -A POSTROUTING -j {CHAIN_NAME}")
+
+    # 3. Flush the custom chain to remove the previous round's IP
+    run_cmd(f"iptables -t nat -F {CHAIN_NAME}")
+
+    # 4. Add the new SNAT rule for the specific user
+    run_cmd(f"iptables -t nat -A {CHAIN_NAME} -m owner --uid-owner {TEST_USER} -j SNAT --to-source {target_ip}")
+    
+    print(f"Successfully rotated outbound IP to: {target_ip}")
+
+def get_next_ip():
+    # Read the last index used
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE, "r") as f:
+            try:
+                index = int(f.read().strip())
+            except ValueError:
+                index = 0
+    else:
+        index = 0
+
+    # Get the IP and calculate next index
+    target_ip = INTERFACE_IPS[index]
+    next_index = (index + 1) % len(INTERFACE_IPS)
+
+    # Save next index
+    with open(STATE_FILE, "w") as f:
+        f.write(str(next_index))
+    
+    return target_ip
+
+if __name__ == "__main__":
+    # This must be run with sudo/root privileges to modify iptables
+    selected_ip = get_next_ip()
+    setup_iptables(selected_ip)
