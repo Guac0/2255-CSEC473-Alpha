@@ -1,6 +1,14 @@
+# Wait until Explorer is actually running
+while (-not (Get-Process explorer -ErrorAction SilentlyContinue)) {
+    Start-Sleep -Milliseconds 500
+}
+
+# Small additional delay to let profile finish loading
+Start-Sleep -Seconds 5
+
 $wallpaper = "C:\ProgramData\Inscope\Branding\wallpaper.jpg"
 
-# Set registry values for current user
+# Apply wallpaper registry settings
 Set-ItemProperty "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value $wallpaper
 Set-ItemProperty "HKCU:\Control Panel\Desktop" -Name WallpaperStyle -Value "10"
 Set-ItemProperty "HKCU:\Control Panel\Desktop" -Name TileWallpaper -Value "0"
@@ -8,5 +16,17 @@ Set-ItemProperty "HKCU:\Control Panel\Desktop" -Name TileWallpaper -Value "0"
 New-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers" -Force | Out-Null
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers" -Name BackgroundType -Value 0
 
-# Refresh
-RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters
+# Force Windows API refresh
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class Wallpaper {
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+}
+"@
+
+[Wallpaper]::SystemParametersInfo(20, 0, $wallpaper, 3)
+
+# Delete the scheduled task 
+schtasks /delete /tn "WallpaperInit" /f
