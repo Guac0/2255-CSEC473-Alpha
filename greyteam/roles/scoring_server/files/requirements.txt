@@ -10,3 +10,4 @@ sdnotify
 tabulate
 paramiko
 pywinrm
+smbprotocol
