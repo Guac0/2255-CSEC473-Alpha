@@ -24,6 +24,7 @@
     - "pwgen"
     - "mysql-client" #ubuntu
     - "mariadb-client-compat" #debian
+    - "network-manager"
   ignore_errors: yes
 
 - name: Install Remmina and Web Browsers for GUI hosts
