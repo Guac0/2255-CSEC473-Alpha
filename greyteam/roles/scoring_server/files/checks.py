@@ -5,6 +5,7 @@ from server import (
 )
 import paramiko
 from winrm.protocol import Protocol
+import smbclient
 
 MAX_ERROR_LEN = 200
 DOMAIN = ""
@@ -124,10 +125,10 @@ class Mysql (Check):
                     ["mysql", "-h", self.host_ip,
                     "-u", f"{user[0]}"
                     "-p", f"{user[1]}",
-                    "Ponies", "-e", "\"SELECT ponies\""],
+                    criterion.loc],
                     capture_output=True,
                     text=True
-                ) # Expected: 30
+                )
                 
                 # Check succeeded
                 if res.returncode == 0 and criterion.content in res.stdout:
@@ -175,6 +176,32 @@ class Dns (Check):
                 # Incorrect output
                 elif host[1] not in res.stdout:
                     err.append(f"Could not find expected content for check {criterion.id}")
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
+        
+        return (0, err[0])
+
+class Smb (Check):
+    def __init__(self, check: Service) -> None:
+        super().__init__(check)
+
+    def check (self):        
+        err = []
+        for criterion in self.criteria:
+            try:
+                smbclient.register_session(server="Appleloosa")
+
+                if (smbclient.path.exists(criterion.loc)):
+                    with smbclient.open_file(criterion.loc, mode="r") as fd:
+                        res = fd.read()
+
+                        if criterion.content in res:
+                            return (criterion.team, f"Found expected content for check {criterion.id}")
+                        else:
+                            err.append(f"Could not find expected content for check {criterion.id}")
+                else:
+                    err.insert(0, f"Scoring file does not exist")
+                    
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
         
