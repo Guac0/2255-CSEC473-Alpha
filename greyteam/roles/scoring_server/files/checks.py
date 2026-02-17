@@ -143,24 +143,42 @@ class Mysql (Check):
         
         return (0, err[0])
 
-class Ssh (Check):
-    # outdated
-    users:list[tuple[str,str]]
+class Dns (Check):
+    hosts:list[tuple[str,str]]
 
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+        hosts:list[Host] = Host.query.all()
 
-        for user in users:
-            self.users.append((user.username, user.password))
+        for host in hosts:
+            self.hosts.append((host.hostname, host.ip))
 
     def check (self):
-        user = random.choice(self.users)
-        sshProcess = subprocess.Popen(
-            ['ssh', f'{user[0]}@{self.host_ip}'],
-            input=user[1]
-        )
+        host = random.choice(self.hosts)
+        
+        err = []
+        for criterion in self.criteria:
+            try:
+                res = subprocess.run(
+                    ["nslookup", f"{host[0]}.mlp.local", self.host_ip],
+                    capture_output=True,
+                    text=True
+                )
+                
+                # Check succeeded
+                if res.returncode == 0 and host[1] in res.stdout:
+                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                # Command failed
+                elif res.returncode != 0:
+                    err.insert(0, res.stderr)
+                # Incorrect output
+                elif host[1] not in res.stdout:
+                    err.append(f"Could not find expected content for check {criterion.id}")
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
+        
+        return (0, err[0])
 
 class Mssql (Check):
     users:list[tuple[str,str]]  
