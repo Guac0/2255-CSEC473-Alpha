@@ -1,0 +1,24 @@
+---
+- name: Check if installer exists
+  ansible.windows.win_stat:
+    path: "{{ working_dir }}\\mssql\\mssqlcmdlnutils.msi"
+  register: installer_check
+  ignore_errors: true
+
+# win_copy automatically creates the destination directory if it doesn't exist
+- name: Copy over install file
+  ansible.windows.win_copy:
+    src: files/mssqlcmdlnutils.msi
+    dest: "{{ working_dir }}\\mssql\\mssqlcmdlnutils.msi"
+  when: not installer_check.stat.exists
+
+# the product_id is associated with this MSI, win_package will first check if product_id already exists 
+# is so, it will assume installed and skip this task.
+- name: install sqlcmd if need
+  ansible.windows.win_package:
+    path: "{{ working_dir }}\\mssql\\mssqlcmdlnutils.msi"
+    arguments:
+    - /passive
+    - IACCEPTMSSQLCMDLNUTILSLICENSETERMS=YES
+    state: present
+    product_id: '{6F11B2D6-193B-4216-A8E6-D7092834F8FB}'

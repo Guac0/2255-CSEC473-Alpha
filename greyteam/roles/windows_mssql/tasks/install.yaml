@@ -13,6 +13,7 @@
     path: "{{ working_dir }}\\mssql"
   register: installer_check
   when: not app_check.stat.exists
+  ignore_errors: true
 
 - name: Create Directory
   ansible.windows.win_file:
@@ -34,8 +35,54 @@
     dest: "{{ working_dir }}\\mssql\\config.ini"
   when: not app_check.stat.exists
 
+# Needed to fix a crypto access denied error when using Network Service as the svc account
+- name: Configure Cryptography ProtectionPolicy
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Cryptography\Protect\Providers\df9d8cd0-1501-11d1-8c7a-00c04fc297eb
+    name: ProtectionPolicy
+    data: 1
+    type: dword
+    state: present
+  when: not app_check.stat.exists
+
 - name: Install MSSQL
   ansible.windows.win_command: '.\installer.exe /ConfigurationFile=.\config.ini /IACCEPTSQLSERVERLICENSETERMS /Q'
   args:
     chdir: "{{ working_dir }}\\mssql"
   when: not app_check.stat.exists
+  become: yes
+  become_method: runas
+  become_user: "{{ domain }}\\{{ whiteteam_user }}" # needed for crypto
+
+- name: Register ESCAPEPOD MSSQLSvc with SPN
+  ansible.windows.win_powershell:
+    script: |
+      setspn -S MSSQLSvc/escapepod.team20.cosmic.war:1433 ESCAPEPOD
+      setspn -S MSSQLSvc/192.168.20.1:1433 ESCAPEPOD
+  when: not app_check.stat.exists
+  
+- name: Enable TCP/IP for SQL Server
+  ansible.windows.win_powershell:
+    script: |
+      $inst = "{{ mssql_instancename }}"
+      $regPath = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server"
+      $instancePath = (Get-ChildItem $regPath | Where-Object { $_.PSChildName -like "*.$inst" }).Name
+
+      $tcpPath = "Registry::$instancePath\MSSQLServer\SuperSocketNetLib\Tcp"
+
+      # Enable TCP globally
+      Set-ItemProperty -Path $tcpPath -Name "Enabled" -Value 1
+
+      # Force Listen All to True (1)
+      Set-ItemProperty -Path $tcpPath -Name "ListenOnAllIPs" -Value 1
+
+      # Enable IPAll
+      Set-ItemProperty -Path "$tcpPath\IPAll" -Name "TcpPort" -Value "1433"
+      Set-ItemProperty -Path "$tcpPath\IPAll" -Name "TcpDynamicPorts" -Value ""
+
+      # Loop through IP1, IP2, etc. and set Enabled to 1
+      Get-ChildItem $tcpPath | Where-Object { $_.PSChildName -like "IP*" } | ForEach-Object {
+          Set-ItemProperty -Path $_.PSPath -Name "Enabled" -Value 1
+      }
+  when: not app_check.stat.exists
+  notify: Restart SQL Service
