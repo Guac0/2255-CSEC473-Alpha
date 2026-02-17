@@ -14,6 +14,19 @@ Password = {{ team_password }}
 Mask = 10.0.*.*
 {% endfor %}
 
+[Server]
+Name = ponyville
+Host = 10.0.10.3
+Port = 6667
+SSLConnect = no
+SSLVerify = yes
+MyPassword = {{ team_password }}
+PeerPassword = {{ team_password }}
+
+[Auth]
+Type = PAM
+Mask = 10.0.*.*
+
 [Options]
 SyslogFacility = local5
 PAM = yes
