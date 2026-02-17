@@ -104,8 +104,8 @@ def insert_initial_data(logger):
                 crit_content=""
             elif ("vsftpd" in service_name_simple):
                 generic_name="ftp"
-                crit_location=""
-                crit_content=""
+                crit_location="score.txt"
+                crit_content="FTP_SERVICE_OK"
             elif ("iis" in service_name_simple):
                 generic_name="http"
                 crit_location="80"

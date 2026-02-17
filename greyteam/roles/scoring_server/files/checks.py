@@ -6,6 +6,7 @@ from server import (
 import paramiko
 from winrm.protocol import Protocol
 import smbclient
+from ftplib import FTP
 
 MAX_ERROR_LEN = 200
 DOMAIN = ""
@@ -201,7 +202,39 @@ class Smb (Check):
                             err.append(f"Could not find expected content for check {criterion.id}")
                 else:
                     err.insert(0, f"Scoring file does not exist")
-                    
+
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
+        
+        return (0, err[0])
+
+class Ftp (Check):
+    users:list[tuple[str,str]]  
+
+    def __init__(self, check: Service) -> None:
+        super().__init__(check)
+
+        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+
+        for user in users:
+            self.users.append((user.username, user.password))
+
+    def check(self):
+        user = random.choice(self.users)
+
+        err = []
+        for criterion in self.criteria:
+            try:
+                res = []
+                with FTP(self.host_ip) as ftp:
+                    ftp.login(user[0], user[1])
+                    ftp.retrlines(criterion.loc, res.append)
+
+                if criterion.content in "\n".join(res).strip():
+                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                else:
+                    err.append(f"Could not find expected content for check {criterion.id}")
+
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
         
