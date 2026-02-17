@@ -70,21 +70,24 @@ class Http (Check):
     def check (self):
         err = []
         for criterion in self.criteria:
-            res = subprocess.run(
-                ["curl", f"{self.host_ip}:{criterion.loc}"],
-                capture_output=True,
-                text=True
-            )
-            
-            # Check succeeded
-            if res.returncode == 0 and criterion.content in res.stdout:
-                return (criterion.team, f"Found expected content for check {criterion.id}")
-            # Command failed
-            elif res.returncode != 0:
-                err.insert(0, res.stderr)
-            # Incorrect output
-            elif criterion.content not in res.stdout:
-                err.append(f"Could not find expected content for check {criterion.id}")
+            try:
+                res = subprocess.run(
+                    ["curl", f"{self.host_ip}:{criterion.loc}"],
+                    capture_output=True,
+                    text=True
+                )
+                
+                # Check succeeded
+                if res.returncode == 0 and criterion.content in res.stdout:
+                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                # Command failed
+                elif res.returncode != 0:
+                    err.insert(0, res.stderr)
+                # Incorrect output
+                elif criterion.content not in res.stdout:
+                    err.append(f"Could not find expected content for check {criterion.id}")
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
@@ -104,28 +107,32 @@ class Mysql (Check):
         
         err = []
         for criterion in self.criteria:
-            res = subprocess.run(
-                ["mysql", "-h", self.host_ip,
-                "-u", f"{user[0]}"
-                "-p", f"{user[1]}",
-                "Ponies", "-e", "\"SELECT ponies\""],
-                capture_output=True,
-                text=True
-            ) # Expected: 30
-            
-            # Check succeeded
-            if res.returncode == 0 and criterion.content in res.stdout:
-                return (criterion.team, f"Found expected content for check {criterion.id}")
-            # Command failed
-            elif res.returncode != 0:
-                err.insert(0, res.stderr)
-            # Incorrect output
-            elif criterion.content not in res.stdout:
-                err.append(f"Could not find expected content for check {criterion.id}")
+            try:
+                res = subprocess.run(
+                    ["mysql", "-h", self.host_ip,
+                    "-u", f"{user[0]}"
+                    "-p", f"{user[1]}",
+                    "Ponies", "-e", "\"SELECT ponies\""],
+                    capture_output=True,
+                    text=True
+                ) # Expected: 30
+                
+                # Check succeeded
+                if res.returncode == 0 and criterion.content in res.stdout:
+                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                # Command failed
+                elif res.returncode != 0:
+                    err.insert(0, res.stderr)
+                # Incorrect output
+                elif criterion.content not in res.stdout:
+                    err.append(f"Could not find expected content for check {criterion.id}")
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
 class Ssh (Check):
+    # outdated
     users:list[tuple[str,str]]
 
     def __init__(self, check: Service) -> None:
