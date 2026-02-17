@@ -13,7 +13,7 @@ PORT = 12345
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((HOST, PORT))
 data = client.recv(1024)
-if data.decode() == "Python 3.13.7\n": print("YAY")
+if data.decode() == "LibreOffice 24.2.7.2 420(Build:2)\n": print("YIPPIE")
 client.close()
 
 #any_workstation_failed  = False
