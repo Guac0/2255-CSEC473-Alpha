@@ -1,5 +1,5 @@
 ---
-- name: Create Database
+- name: Generate Ticket
   ansible.builtin.shell: |
     kinit {{ domain_admins[0] }}@{{ domain | upper }} << 'EOF'
     {{ team_password }}
@@ -7,6 +7,11 @@
     /opt/mssql-tools18/bin/sqlcmd -S {{ mssql_host }},1433 -E -C -Q "CREATE DATABASE [{{ mssql_database_name }}]"
   delegate_to: localhost
   #no_log: true # Hide password from logs
+
+- name: Create Database
+  ansible.builtin.shell: |
+    /opt/mssql-tools18/bin/sqlcmd -S {{ mssql_host }},1433 -E -C -Q "CREATE DATABASE [{{ mssql_database_name }}]"
+  delegate_to: localhost
 
 - name: Add Database Data
   ansible.builtin.shell: |
