@@ -32,9 +32,10 @@
     src: "wallpaper_script.ps1"
     dest: "C:\\ProgramData\\Inscope\\"
 
-- name: Register Wallpaper Script to run at logon
-  ansible.windows.win_regedit:
-    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run
-    name: "wallpaperChange"
-    data: 'powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Inscope\wallpaper_script.ps1"'
-    type: string
+- name: Create wallpaper scheduled task (run at logon)
+  ansible.windows.win_shell: |
+    schtasks /create /tn "WallpaperInit" ^
+    /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1" ^
+    /sc onlogon ^
+    /rl highest ^
+    /f
