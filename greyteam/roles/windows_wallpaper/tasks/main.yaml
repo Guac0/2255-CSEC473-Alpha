@@ -33,9 +33,9 @@
     dest: "C:\\ProgramData\\Inscope\\"
 
 - name: Create wallpaper scheduled task (run at logon)
-  ansible.windows.win_shell: |
-    schtasks /create /tn "WallpaperInit" ^
-    /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1" ^
-    /sc onlogon ^
-    /rl highest ^
+  ansible.windows.win_shell: >
+    schtasks /create /tn "WallpaperInit"
+    /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1"
+    /sc onlogon
+    /rl highest
     /f
