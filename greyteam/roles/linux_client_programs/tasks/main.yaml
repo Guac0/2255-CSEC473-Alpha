@@ -121,3 +121,21 @@
   loop: "{{ linux_desktop_users | product(['Thunderbird.desktop','LibreOffice.desktop','FileZilla.desktop','HexChat.desktop']) | list }}"
   when: item.0 in ansible_facts.getent_passwd
   become: true
+
+# Create Desktop Symbolic Links 
+- name: Create Desktop Symbolic Links
+  ansible.builtin.file:
+    src: "{{ item.1.src }}"
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.src | basename }}"
+    state: link
+    owner: "{{ item.0 }}"
+    group: "{{ item.0 }}"
+    mode: '0755'
+  loop: "{{ q('nested', local_users + local_admins, shortcuts) }}"
+  vars:
+    shortcuts:
+      - src: "/usr/share/applications/org.remmina.Remmina.desktop"
+      - src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop"
+      - src: "/usr/share/applications/chromium-browser.desktop"
+  ignore_errors: yes
+  register: desktop_links
