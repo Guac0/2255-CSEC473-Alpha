@@ -5,4 +5,4 @@ linux_client_programs_packages:
   - thunderbird
   - libreoffice
   - filezilla
-  - hexchat 
+  - hexchat

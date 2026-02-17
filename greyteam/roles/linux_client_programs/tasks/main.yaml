@@ -63,9 +63,12 @@
     database: passwd
   become: true
 
-- name: Ensure desktop exsists for all users
+- name: Ensure /etc/skel/Desktop exists
   ansible.builtin.file:
-    path: /usr/skel/Desktop
+    path: /etc/skel/Desktop
+    state: directory
+    mode: "0755"
+  become: true
 
 # Make sure each target user has a Desktop folder so we can drop shortcuts there
 - name: Ensure desktop exisits for existing users
@@ -111,9 +114,10 @@
 # Create Desktop Symbolic Links for client programs
 - name: Create Desktop Symbolic Links (client programs)
   ansible.builtin.file:
+    remote_src: true
     src: "{{ item.1.src }}"
     dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest}}"
-    state: link
+    #state: link
     owner: "{{ item.0 }}"
     group: "{{ item.0 }}"
     mode: "0755"
