@@ -4,3 +4,12 @@
     dns_servers: "{{ mgmt_dns }}"
   # Support mgmt dns having zero entries (why?)
   when: mgmt_dns is defined and mgmt_dns | length > 0
+
+- name: Deploy Local DNS Overrides
+  ansible.builtin.lineinfile:
+    path: "C:\\Windows\\System32\\drivers\\etc\\hosts"
+    regexp: ".*\\s+{{ item.name | regex_escape }}$"
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+    create: yes
+  loop: "{{ dns_overrides }}"

@@ -46,3 +46,9 @@ domain_admins:
   - discord
   - luna
   - starswirl
+
+dns_overrides:
+  - { ip: '10.0.10.1',    name: 'mlp.local' }
+  - { ip: '10.0.10.1',    name: 'canterlot.mlp.local' }
+  #- { ip: '10.0.10.1',    name: 'dc.mlp.local' }
+  - { ip: '172.20.0.100', name: 'scoring.mlp.local' }

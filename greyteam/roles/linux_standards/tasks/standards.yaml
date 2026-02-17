@@ -50,6 +50,15 @@
     mode: '0644'
   register: dns_dropin
 
+- name: Deploy Local DNS Overrides
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: ".*\\s+{{ item.name | regex_escape }}$"
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+    create: yes
+  loop: "{{ dns_overrides }}"
+
 - name: Restart systemd-resolved
   ansible.builtin.systemd:
     name: systemd-resolved
