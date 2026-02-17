@@ -2,7 +2,7 @@
 # See templates/config.ini.j2 for a full explanation of each of these parameters
 mssql_sqlsvcaccount: "NT AUTHORITY\\NETWORK SERVICE"
 #mssql_sqlsvcaccount: "{{ domain }}\\{{ domain_admins[0] }}" # runs into double hop problem!
-#mssql_sqlsvcpassword: "{{ team_password }}"
+mssql_sqlsvcpassword: "{{ team_password }}" # unused
 mssql_sqlsysadminaccounts: "{{ domain }}\\Domain Admins" # Administrators #"domain\admin"
 mssql_database_name: "db"
 #mssql_agtsvcaccount: "{{ domain }}\\{{ domain_users[0] }}"
