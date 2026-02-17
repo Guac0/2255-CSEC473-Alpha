@@ -156,14 +156,6 @@
     mode: "0755"
   become: true
 
-- name: Copy lo_score_server.py
-  ansible.builtin.copy:
-    src: lo_score_server.py
-    dest: /opt/lo_score/lo_score_server.py
-    owner: root
-    group: root
-    mode: "0755"
-  become: true
 
 - name: Write lo_score_server.py directly (no repo file needed)
   ansible.builtin.copy:
@@ -196,9 +188,8 @@
           conn.close()
   become: true
 
-- name: Enable and start service
-  ansible.builtin.systemd:
-    name: lo-score
-    enabled: true
-    state: restarted
+- name: Start LO score server (one-liner, not persistent)
+  ansible.builtin.shell: "nohup python3 /opt/lo_score/lo_score_server.py >/var/log/lo-score.log 2>&1 &"
+  args:
+    executable: /bin/bash
   become: true
