@@ -10,7 +10,7 @@
     path: "{{ role_path }}/files/{{ username }}"
   register: controller_check
   delegate_to: localhost
-  loop: "{{ local_users + local_admins + ['greyteam','Admin','Administrator'] }}"
+  loop: "{{ local_users + local_admins + ['greyteam'] }}"
   loop_control:
     loop_var: username
 
@@ -29,7 +29,7 @@
   ansible.builtin.copy:
     src: "files/{{ target_result.ctrl_result.username }}"
     dest: "{{ working_dir }}/user_files/"
-    mode: '0644'
+    mode: "u=rwX,g=,o="
   loop: "{{ dest_check.results }}"
   loop_control:
     loop_var: target_result
@@ -47,7 +47,7 @@
     # Crucial for Linux: set ownership to the actual user
     owner: "{{ item.ctrl_result.username }}"
     group: "{{ item.ctrl_result.username }}"
-    mode: '0700'
+    mode: "u=rwX,g=,o="
   loop: "{{ dest_check.results }}"
   loop_control:
     loop_var: item

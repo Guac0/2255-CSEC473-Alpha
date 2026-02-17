@@ -9,14 +9,14 @@
   ansible.builtin.copy:
     src: files/generic
     dest: "{{ working_dir }}/user_files/"
-    mode: '0644'
+    mode: "u=rwX,g=,o="
 
 # Check if the user's home directory exists on the Linux target
 - name: Check if user's home exists
   ansible.builtin.stat:
     path: "/home/{{ username }}"
   register: user_profile_check
-  loop: "{{ local_users + local_admins + ['greyteam','Admin','Administrator'] }}"
+  loop: "{{ local_users + local_admins + ['greyteam'] }}"
   loop_control:
     loop_var: username
 
@@ -30,7 +30,8 @@
     # Ensure the user actually owns the files copied into their home
     owner: "{{ user_res.username }}"
     group: "{{ user_res.username }}"
-    mode: '0700'
+    #mode: '0700'
+    mode: "u=rwX,g=,o="
   loop: "{{ user_profile_check.results }}"
   loop_control:
     loop_var: user_res
