@@ -17,6 +17,18 @@
     mode: '0777'
   when: ansible_facts.os_family != "Windows"
 
+- name: Update checks.py With Variable Content
+  ansible.builtin.replace:
+    path: "{{ scoring_deploy_dir }}/checks.py"
+    regexp: "^{{ item.key }}(?=\\s*=)\\s*=\\s*.*"
+    replace: "{{ item.key }} = {{ item.value }}"
+  loop:
+    - { key: 'DOMAIN', value: "\"{{ domain }}\"" }
+    - { key: 'DOMAIN_ADMINS', value: "{{ domain_admins | to_json }}" }
+    - { key: 'DOMAIN_USERS', value: "{{ domain_users | to_json }}" }
+    - { key: 'LOCAL_ADMINS', value: "{{ local_admins | to_json }}" }
+    - { key: 'LOCAL_USERS', value: "{{ local_users | to_json }}" }
+
 - name: Render config.json from template
   template:
     src: "config.json.j2"
@@ -35,3 +47,10 @@
     state: present
   vars:
     base_dir: "python -m venv --with-pip"
+
+- name: Recursive chmod 0777 on scoring_dir
+  ansible.builtin.file:
+    path: "{{ scoring_deploy_dir }}"
+    state: directory
+    recurse: yes
+    mode: '0777'

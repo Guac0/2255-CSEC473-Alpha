@@ -123,11 +123,11 @@ def insert_initial_data(logger):
                 crit_location="80"
                 crit_content=""
             elif (("workstation" in service_name_simple) and ("windows" in os_name.lower().strip())):
-                generic_name="workstation windows"
+                generic_name="workstation_windows"
                 crit_location=""
                 crit_content=""
             elif (("workstation" in service_name_simple) and ("windows" not in os_name.lower().strip())):
-                generic_name="workstation linux"
+                generic_name="workstation_linux"
                 crit_location=""
                 crit_content=""
 

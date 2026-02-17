@@ -3,8 +3,20 @@ import random
 from server import (
     Service, ScoringUser, ScoringCriteria, Host
 )
+import paramiko
+from winrm.protocol import Protocol
 
 MAX_ERROR_LEN = 200
+DOMAIN = ""
+DOMAIN_ADMINS = []
+DOMAIN_USERS = []
+LOCAL_ADMINS = []
+LOCAL_USERS = []
+ALL_DOMAIN = DOMAIN_ADMINS + DOMAIN_USERS
+ALL_LOCAL = LOCAL_ADMINS + LOCAL_USERS
+ALL_ADMINS = DOMAIN_ADMINS + LOCAL_ADMINS
+ALL_USERS = DOMAIN_USERS + LOCAL_USERS
+ALL_ALL = DOMAIN_ADMINS + DOMAIN_USERS + LOCAL_ADMINS + LOCAL_USERS
 
 class Criterion:
     team:int
@@ -159,7 +171,7 @@ class Mssql (Check):
         users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
 
         for user in users:
-            if user in ["celestia","discord","luna","starswirl"]: # only domain admins
+            if user in DOMAIN_ADMINS:
                 self.users.append((user.username, user.password))
 
     def check (self):
@@ -170,13 +182,12 @@ class Mssql (Check):
             try:
                 username = user[0]
                 password = user[1]
-                domain = "MLP.LOCAL"
-                target_host = f"{criterion.content.split(":")[0]},{criterion.content.split(":")[1]}"
+                target_host = f"{self.host_ip},1433"
                 db_name = "db"
 
                 # Pipe the password to kinit using the input parameter
                 kinit_proc = subprocess.run(
-                    ['kinit', f"{username}@{domain}"],
+                    ['kinit', f"{username}@{DOMAIN}"],
                     input=password.encode(),
                     capture_output=True,
                     check=True
@@ -211,7 +222,7 @@ class Mssql (Check):
         
         return (0, err[0])
     
-class Mssql (Check):
+class Workstation_linux (Check):
     users:list[tuple[str,str]]  
 
     def __init__(self, check: Service) -> None:
@@ -220,7 +231,7 @@ class Mssql (Check):
         users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
 
         for user in users:
-            if user in ["celestia","discord","luna","starswirl"]: # only domain admins
+            if user in ALL_LOCAL:
                 self.users.append((user.username, user.password))
 
     def check (self):
@@ -231,41 +242,114 @@ class Mssql (Check):
             try:
                 username = user[0]
                 password = user[1]
-                domain = "MLP.LOCAL"
-                target_host = f"{criterion.content.split(":")[0]},{criterion.content.split(":")[1]}"
-                db_name = "db"
+                filepath = criterion.location
+                expected_hash = criterion.content
+                
+                # Initialize SSH Client
+                client = paramiko.SSHClient()
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                client.connect(self.host_ip, username=username, password=password)
 
-                # Pipe the password to kinit using the input parameter
-                kinit_proc = subprocess.run(
-                    ['kinit', f"{username}@{domain}"],
-                    input=password.encode(),
-                    capture_output=True,
-                    check=True
-                )
+                # 1. Check if executable (the -L flag in the shell ensures we follow symlinks)
+                # We use 'test -x' which returns 0 if executable, 1 otherwise
+                exec_check_cmd = f"test -x {filepath}"
+                stdin, stdout, stderr = client.exec_command(exec_check_cmd)
+                is_executable = stdout.channel.recv_exit_status() == 0
 
-                # Execute sqlcmd using the Kerberos ticket (-E)
-                # -s"," sets comma as separator, -W removes trailing spaces, -h-1 removes headers
-                res = subprocess.run(
-                    [
-                        'sqlcmd', '-E', '-C', 
-                        '-S', target_host, 
-                        '-d', db_name, 
-                        '-Q', criterion.location, 
-                        '-s', ',', '-W', '-h-1'
-                    ],
-                    capture_output=True,
-                    text=True
-                )
+                if not is_executable:
+                    client.close()
+                    err.append(f"File {filepath} is not executable or does not exist for check {criterion.id}")
+                    continue
 
-                # Check succeeded
-                if res.returncode == 0 and criterion.content in res.stdout:
+                # 2. Check the File Hash
+                # -L follows symlinks for the hash calculation
+                hash_cmd = f"sha256sum {filepath} | cut -d' ' -f1"
+                stdin, stdout, stderr = client.exec_command(hash_cmd)
+                
+                actual_hash = stdout.read().decode().strip()
+                client.close()
+
+                if actual_hash == expected_hash:
                     return (criterion.team, f"Found expected content for check {criterion.id}")
-                # Command failed
-                elif res.returncode != 0:
-                    err.insert(0, res.stderr)
-                # Incorrect output
-                elif criterion.content not in res.stdout:
-                    err.append(f"Could not find expected content for check {criterion.id}")
+                else:
+                    err.append(f"File {filepath} does not match expected hash for check {criterion.id}")
+
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
+        
+        return (0, err[0])
+
+class Workstation_windows (Check):
+    users:list[tuple[str,str]]  
+
+    def __init__(self, check: Service) -> None:
+        super().__init__(check)
+
+        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+
+        for user in users:
+            if user in ALL_LOCAL:
+                self.users.append((user.username, user.password))
+
+    def check (self):
+        user = random.choice(self.users)
+
+        err = []
+        for criterion in self.criteria:
+            try:
+                username = user[0]
+                password = user[1]
+                filepath = criterion.location
+                expected_hash = criterion.content
+                
+                endpoint = f'http://{self.host_ip}:5985/wsman'
+                p = Protocol(
+                    endpoint=endpoint,
+                    transport='ntlm',
+                    username=username,
+                    password=password,
+                    server_cert_validation='ignore'
+                )
+
+                # PowerShell Script:
+                # 1. Get-Item -Path follows symlinks/junctions by default.
+                # 2. Check if the file has 'Execute' permissions for the current user.
+                # 3. Calculate SHA256 hash.
+                ps_script = f"""
+                $path = "{filepath}"
+                if (Test-Path $path) {{
+                    $item = Get-Item -Path $path
+                    $perm = (Get-Acl $item.FullName).Access | Where-Object {{ 
+                        $_.IdentityReference -eq "{username}" -or $_.IdentityReference -eq "Everyone" 
+                    }} | Where-Object {{ $_.FileSystemRights -match "ExecuteFile|FullControl" }}
+                    
+                    $hash = (Get-FileHash $item.FullName -Algorithm SHA256).Hash
+                    
+                    if ($perm -and ($hash -eq "{expected_hash}")) {{
+                        Write-Output "Found expected content"
+                    }} else {{
+                        Write-Output "File {filepath} does not match expected hash or is not executable"
+                    }}
+                }} else {{
+                    Write-Output "File {filepath} does not exist"
+                }}
+                """
+
+                shell_id = p.open_shell()
+                command_id = p.run_command(shell_id, 'powershell', ['-Command', ps_script])
+                std_out, std_err, status_code = p.get_command_output(shell_id, command_id)
+                p.cleanup_command(shell_id, command_id)
+                p.close_shell(shell_id)
+
+                output = std_out.decode().strip()
+                firstword = output.split(" ")[0].strip()
+                if ((firstword != "File") and (firstword != "Found")):
+                    raise ValueError(output)
+                
+                if firstword == "Found":
+                    return (criterion.team, f"{output} for check {criterion.id}")
+                else:
+                    err.append(f"{output} for check {criterion.id}")
 
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")

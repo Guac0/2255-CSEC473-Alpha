@@ -11,7 +11,7 @@ ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringT
 )
 from data import create_db_tables
 from sqlalchemy import func
-import rotate_ips
+import rotate_ips # this is deployed as a template so dont worry if its not found before deploy
 
 import checks
 import multiprocessing as mp
@@ -38,8 +38,10 @@ def check(service:Service) -> tuple[int, str]:
             check_obj = checks.Mysql(service)
         case 'mssql':
             check_obj = checks.Mssql(service)
-        case 'workstation':
-            check_obj = checks.Mssql(service)
+        case 'workstation_linux':
+            check_obj = checks.Workstation_linux(service)
+        case 'workstation_windows':
+            check_obj = checks.Workstation_windows(service)
         case _: # Default: no class match
             return (0, f'Check type "{service.scorecheck_name}" not implemented.')
 
