@@ -52,7 +52,7 @@
   when: not app_check.stat.exists
   become: yes
   become_method: runas
-  become_user: "{{ domain }}\\{{ whiteteam_user }}" # needed for crypto
+  become_user: "{{ domain }}\\{{ greyteam_user }}" # needed for crypto
 
 - name: Register ESCAPEPOD MSSQLSvc with SPN
   ansible.windows.win_powershell:
