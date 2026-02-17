@@ -6,7 +6,7 @@ This Ansible role installs and configures the NGIRCD IRC server on a Linux Host.
 
 1. Installs the NGIRCD package using apt.
 2. Starts and enables the NGIRCD service automatically.
-3. Deploys a custom configuration with IRC admin user cadence using our team password.
+3. Deploys a custom configuration with IRC admin user cadance using our team password.
 
 ## Usage
 

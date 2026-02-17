@@ -4,7 +4,7 @@
 greyteam_user: greyteam
 greyteam_password: ponyuploc0!
 
-redteam_user: redteam
+redteam_user: queenchrysalis
 redteam_password: SugarCubes4Doom!
 
 ansible_user: "{{ greyteam_user }}"
@@ -33,7 +33,7 @@ local_admins:
   - bigmac
   - mayormare
   - shiningarmor
-  - cadence
+  - cadance
 domain_users:
   - spike
   - starlight
