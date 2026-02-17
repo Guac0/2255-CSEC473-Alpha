@@ -165,35 +165,40 @@
     mode: "0755"
   become: true
 
-- name: Create systemd service file
+- name: Write lo_score_server.py directly (no repo file needed)
   ansible.builtin.copy:
-    dest: /etc/systemd/system/lo-score.service
+    dest: /opt/lo_score/lo_score_server.py
     owner: root
     group: root
-    mode: "0644"
+    mode: "0755"
     content: |
-      [Unit]
-      Description=LibreOffice Scoring Server
-      After=network.target
+      import socket
+      import subprocess
 
-      [Service]
-      ExecStart=/usr/bin/python3 /opt/lo_score/lo_score_server.py
-      Restart=always
-      User=root
-      WorkingDirectory=/opt/lo_score
+      server = socket.socket()
+      server.bind(("0.0.0.0", 12345))
+      server.listen(1)
 
-      [Install]
-      WantedBy=multi-user.target
-  become: true
+      while True:
+          conn, addr = server.accept()
+          result = subprocess.run(
+              ["libreoffice", "--headless", "--version"],
+              capture_output=True,
+              text=True
+          )
+          output = result.stdout
+          if output == "":
+              output = result.stderr
+          if output == "":
+              output = "ERROR: no output"
 
-- name: Reload systemd
-  ansible.builtin.systemd:
-    daemon_reload: true
+          conn.send(output.encode())
+          conn.close()
   become: true
 
 - name: Enable and start service
   ansible.builtin.systemd:
     name: lo-score
     enabled: true
-    state: started
+    state: restarted
   become: true
