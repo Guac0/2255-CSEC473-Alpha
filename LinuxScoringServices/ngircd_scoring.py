@@ -77,7 +77,7 @@ def main():
         "violations": len(violations),
         "details": violations
     }
-    with open("/tmp/score_ngircd.json", "w") as f:
+    with open("/home/greyteam/score_ngircd.json", "w") as f:
         json.dump(result, f)
 
     if violations:
