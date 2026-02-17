@@ -10,10 +10,16 @@ CMD   = "timeout 10s libreoffice --headless --version"
 HOST = '10.0.30.4'
 PORT = 12345
 
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((HOST, PORT))
-data = client.recv(1024)
-if data.decode() == "LibreOffice 24.2.7.2 420(Build:2)\n": print("YIPPIE")
+data = client.recv(1024).decode(errors="ignore")
+
+if "LibreOffice" in data:
+    print("YAY")
+else:
+    print("NO:", data)
+
 client.close()
 
 #any_workstation_failed  = False
