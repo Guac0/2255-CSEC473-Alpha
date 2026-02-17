@@ -133,7 +133,7 @@
     group: "{{ item.0 }}"
     mode: "0755"
     force: true
-  loop: "{{ q('nested', linux_desktop_users, shortcuts) }}"
+  loop: "{{ q('nested', local_users + local_admins, shortcuts) }}"
   when: item.0 in ansible_facts.getent_passwd
   vars:
     shortcuts:
