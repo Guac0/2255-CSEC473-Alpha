@@ -44,43 +44,43 @@ instance_ips_jumpblue = {
 }
 instance_ips_jumpgrey = {
   "jumpgrey1" = {
-    "external_ip" = "100.65.7.139"
+    "external_ip" = "100.65.7.211"
     "internal_ip" = "172.20.0.71"
   }
   "jumpgrey10" = {
-    "external_ip" = "100.65.3.7"
+    "external_ip" = "100.65.5.16"
     "internal_ip" = "172.20.0.70"
   }
   "jumpgrey2" = {
-    "external_ip" = "100.65.8.30"
+    "external_ip" = "100.65.6.32"
     "internal_ip" = "172.20.0.72"
   }
   "jumpgrey3" = {
-    "external_ip" = "100.65.3.41"
+    "external_ip" = "100.65.4.157"
     "internal_ip" = "172.20.0.73"
   }
   "jumpgrey4" = {
-    "external_ip" = "100.65.5.37"
+    "external_ip" = "100.65.5.106"
     "internal_ip" = "172.20.0.74"
   }
   "jumpgrey5" = {
-    "external_ip" = "100.65.5.177"
+    "external_ip" = "100.65.3.75"
     "internal_ip" = "172.20.0.75"
   }
   "jumpgrey6" = {
-    "external_ip" = "100.65.6.170"
+    "external_ip" = "100.65.7.18"
     "internal_ip" = "172.20.0.76"
   }
   "jumpgrey7" = {
-    "external_ip" = "100.65.4.178"
+    "external_ip" = "100.65.7.221"
     "internal_ip" = "172.20.0.77"
   }
   "jumpgrey8" = {
-    "external_ip" = "100.65.6.246"
+    "external_ip" = "100.65.5.209"
     "internal_ip" = "172.20.0.78"
   }
   "jumpgrey9" = {
-    "external_ip" = "100.65.7.62"
+    "external_ip" = "100.65.6.119"
     "internal_ip" = "172.20.0.79"
   }
 }
@@ -115,32 +115,32 @@ ok: [jumpblue10] => {
     "msg": "RustDesk ID: 519436120 -- Password: FriendshipIsMagic0!"
 }
 ok: [jumpgrey1] => {
-    "msg": "RustDesk ID: 512832227 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 515560629 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey2] => {
-    "msg": "RustDesk ID: 503933158 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 518635574 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey3] => {
-    "msg": "RustDesk ID: 516608747 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 505129719 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey4] => {
-    "msg": "RustDesk ID: 506029381 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 519002604 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey5] => {
-    "msg": "RustDesk ID: 515653709 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 513125055 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey6] => {
-    "msg": "RustDesk ID: 512868879 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 510578557 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey7] => {
-    "msg": "RustDesk ID: 516549554 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 1338717426 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey8] => {
-    "msg": "RustDesk ID: 519057380 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 514335282 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey9] => {
-    "msg": "RustDesk ID: 507937367 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 515088631 -- Password: ponyuploc0!"
 }
 ok: [jumpgrey10] => {
-    "msg": "RustDesk ID: 513332687 -- Password: ponyuploc0!"
+    "msg": "RustDesk ID: 516129048 -- Password: ponyuploc0!"
 }

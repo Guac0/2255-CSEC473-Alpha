@@ -26,28 +26,6 @@
       ansible.windows.win_ping:
 
 #################################
-########### Management ##########
-#################################
-
-- name: Deploy OpenVPN Server
-  hosts: vpn
-  roles:
-    - openvpn_server
-  tags: 
-    - mgmt
-    - openvpn
-    - openvpn_server
-
-- name: Deploy Scoring Server
-  hosts: scoring
-  roles:
-    - scoring_server
-  tags: 
-    - mgmt
-    - scoring
-    - scoring_server
-
-#################################
 ########### Team Hosts ##########
 #################################
 
@@ -330,6 +308,28 @@
     - inscope
     - utilities
     - utilities_linux
+
+#################################
+########### Management ##########
+#################################
+
+- name: Deploy OpenVPN Server
+  hosts: vpn
+  roles:
+    - openvpn_server
+  tags: 
+    - mgmt
+    - openvpn
+    - openvpn_server
+
+- name: Deploy Scoring Server
+  hosts: scoring
+  roles:
+    - scoring_server
+  tags: 
+    - mgmt
+    - scoring
+    - scoring_server
 
 ####### Finish ########
 
