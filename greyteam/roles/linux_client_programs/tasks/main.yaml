@@ -149,8 +149,7 @@
   when: item in ansible_facts.getent_passwd
 
 - name: Mark Desktop launchers as trusted in Lubuntu
-  ansible.builtin.shell: |
-    # Loop through all .desktop files on the user's desktop
+  ansible.builtin.shell: | # Loop through all .desktop files on the user's desktop
     for launcher in /home/{{ item }}/Desktop/*.desktop; do
       [ -e "$launcher" ] || continue
       # Set the metadata attribute directly
