@@ -112,17 +112,14 @@
       - "chromium_chromium.desktop"
 
 # Create Desktop Symbolic Links for client programs
-- name: Create Desktop Symbolic Links (client programs)
-  ansible.builtin.file:
-  #ansible.builtin.copy:
-    #remote_src: true
+- name: Deploy Trusted System Desktop Shortcuts
+  ansible.builtin.copy:
     src: "{{ item.1.src }}"
-    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest}}"
-    state: link
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest }}"
+    remote_src: true
     owner: "{{ item.0 }}"
     group: "{{ item.0 }}"
     mode: "0755"
-    force: true
   loop: "{{ q('nested', linux_desktop_users, desktop_shortcuts) }}"
   when: item.0 in ansible_facts.getent_passwd
   vars:
@@ -130,66 +127,102 @@
       - { src: "/usr/share/applications/thunderbird.desktop", dest: "Thunderbird.desktop" }
       - { src: "/usr/share/applications/libreoffice-startcenter.desktop", dest: "LibreOffice.desktop" }
       - { src: "/usr/share/applications/filezilla.desktop", dest: "FileZilla.desktop" }
-      - { src: "/usr/share/applications/hexchat.desktop", dest: "HexChat.desktop" }
-  become: true
 
-- name: Note missing desktop shortcut sources
-  ansible.builtin.debug:
-    msg: "A .desktop source file was missing on this host. That shortcut did not get installed."
-  when: false
+- name: Create Custom HexChat Desktop Shortcut
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/Desktop/HexChat.desktop"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0755"
+    content: |
+      [Desktop Entry]
+      Name=HexChat
+      GenericName=IRC Client
+      Comment=Chat with other people using Internet Relay Chat
+      Exec=hexchat
+      Icon=hexchat
+      Terminal=false
+      Type=Application
+      Categories=Network;GTK;IRCClient;
+      StartupNotify=true
+  loop: "{{ linux_desktop_users }}"
+  when: item in ansible_facts.getent_passwd
+
+- name: Mark Desktop launchers as trusted in Lubuntu
+  ansible.builtin.shell: |
+    # Loop through all .desktop files on the user's desktop
+    for launcher in /home/{{ item }}/Desktop/*.desktop; do
+      [ -e "$launcher" ] || continue
+      # Set the metadata attribute directly
+      gio set -t string "$launcher" metadata::trusted true
+    done
+  loop: "{{ linux_desktop_users }}"
+  when: item in ansible_facts.getent_passwd
+  become: true
+  become_user: "{{ item }}"
+  # We use become_user because gio metadata is often user-specific 
+  # and stored in the user's ~/.local/share/gvfs-metadata/
+  register: trust_result
+  failed_when: false
+
+#- name: Note missing desktop shortcut sources
+#  ansible.builtin.debug:
+#    msg: "A .desktop source file was missing on this host. That shortcut did not get installed."
+#  when: false
 
 # 4) Scoring service checks (LibreOffice)
 
-- name: Ensure python3 is installed
-  ansible.builtin.apt:
-    name: python3
-    state: present
-    update_cache: yes
-  become: true
-
-- name: Create app directory
-  ansible.builtin.file:
-    path: /opt/lo_score
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  become: true
-
-
-- name: Write lo_score_server.py directly (no repo file needed)
-  ansible.builtin.copy:
-    dest: /opt/lo_score/lo_score_server.py
-    owner: root
-    group: root
-    mode: "0755"
-    content: |
-      import socket
-      import subprocess
-
-      server = socket.socket()
-      server.bind(("0.0.0.0", 12345))
-      server.listen(1)
-
-      while True:
-          conn, addr = server.accept()
-          result = subprocess.run(
-              ["libreoffice", "--headless", "--version"],
-              capture_output=True,
-              text=True
-          )
-          output = result.stdout
-          if output == "":
-              output = result.stderr
-          if output == "":
-              output = "ERROR: no output"
-
-          conn.send(output.encode())
-          conn.close()
-  become: true
-
-- name: Start LO score server (one-liner, not persistent)
-  ansible.builtin.shell: "nohup python3 /opt/lo_score/lo_score_server.py >/var/log/lo-score.log 2>&1 &"
-  args:
-    executable: /bin/bash
-  become: true
+#- name: Ensure python3 is installed
+#  ansible.builtin.apt:
+#    name: python3
+#    state: present
+#    update_cache: yes
+#  become: true
+#
+#- name: Create app directory
+#  ansible.builtin.file:
+#    path: /opt/lo_score
+#    state: directory
+#    owner: root
+#    group: root
+#    mode: "0755"
+#  become: true
+#
+#
+#- name: Write lo_score_server.py directly (no repo file needed)
+#  ansible.builtin.copy:
+#    dest: /opt/lo_score/lo_score_server.py
+#    owner: root
+#    group: root
+#    mode: "0755"
+#    content: |
+#      import socket
+#      import subprocess
+#
+#      server = socket.socket()
+#      server.bind(("0.0.0.0", 12345))
+#      server.listen(1)
+#
+#      while True:
+#          conn, addr = server.accept()
+#          result = subprocess.run(
+#              ["libreoffice", "--headless", "--version"],
+#              capture_output=True,
+#              text=True
+#          )
+#          output = result.stdout
+#          if output == "":
+#              output = result.stderr
+#          if output == "":
+#              output = "ERROR: no output"
+#
+#          conn.send(output.encode())
+#          conn.close()
+#  become: true
+#
+#- name: Start LO score server (one-liner, not persistent)
+#  ansible.builtin.shell: "nohup python3 /opt/lo_score/lo_score_server.py >/var/log/lo-score.log 2>&1 &"
+#  args:
+#    executable: /bin/bash
+#  become: true
+#
