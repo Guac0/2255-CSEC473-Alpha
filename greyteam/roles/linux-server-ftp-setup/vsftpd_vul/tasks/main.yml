@@ -184,7 +184,7 @@
 #    mode: '0644'
 
 - name: Drop content files into the share
-  opy:
+  copy:
     dest: "/home/{{ item.0 }}/{{ item.1.name }}"
     content: "{{ item.1.content }}"
     owner: "{{ item.0 }}"
