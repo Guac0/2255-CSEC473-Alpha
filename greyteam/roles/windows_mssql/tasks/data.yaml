@@ -4,9 +4,10 @@
     #name: "MSSQL${{ mssql_instancename }}"
     name: "{{ mssql_instancename }}"
     state: restarted
-    
+
 - name: Generate Ticket
   ansible.builtin.shell: |
+    kdestroy
     kinit {{ domain_admins[0] }}@{{ domain | upper }} << 'EOF'
     {{ team_password }}
     EOF
