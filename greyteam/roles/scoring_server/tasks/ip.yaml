@@ -7,7 +7,7 @@
 - name: Convert netmask to CIDR (Internal helper)
   set_fact:
     # Converts e.g. 255.255.255.0 to 24 for nmcli compatibility
-    primary_cidr: "{{ primary_ip_mask | ipaddr('host/prefix') }}"
+    primary_cidr: "{{ primary_ip_mask | ansible.utils.ipaddr('host/prefix') }}"
 
 - name: Apply Primary and Scoring IPs to Interface
   community.general.nmcli:
