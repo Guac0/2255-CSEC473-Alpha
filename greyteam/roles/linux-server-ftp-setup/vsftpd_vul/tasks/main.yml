@@ -78,7 +78,7 @@
       dirmessage_enable=YES
       use_localtime=YES
       xferlog_enable=YES
-      connect_from_port_21=YES
+      connect_from_port_20=YES
       secure_chroot_dir=/var/run/vsftpd/empty
       pam_service_name=vsftpd
       rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -91,7 +91,17 @@
   file:
     path: /var/run/vsftpd/empty
     state: directory
-    mode: '0755'
+    owner: root
+    group: root
+    mode: '0555'
+
+- name: Create PAM config for vsftpd
+  copy:
+    dest: /etc/pam.d/vsftpd
+    content: |
+      auth required pam_unix.so
+      account required pam_unix.so
+      session required pam_unix.so
 
 - name: Create systemd service for vsftpd
   copy:
