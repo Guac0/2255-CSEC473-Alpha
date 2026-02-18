@@ -92,8 +92,8 @@ def insert_initial_data(logger):
                 crit_content="['Honesty,applejack,Earth Pony,Element of Honesty,Ponyville Kindness,fluttershy,Pegasus,Voice of Kindness,Ponyville Laughter,pinkiepie,Earth Pony,Minister of Merriment,Ponyville Loyalty,rainbowdash,Pegasus,Loyalty incarnate,Ponyville Generosity,rarity,Unicorn,Lady of Generosity,Ponyville Magic,twilight,Alicorn,Princess of Friendship,Ponyville (6 rows affected)']"
             elif ("apache" in service_name_simple):
                 generic_name="http"
-                crit_location="80"
-                crit_content=""
+                crit_location="80/doku.php?id=wiki:wikipage"
+                crit_content="Equestria faces an unprecedented threat. A coordinated assault on our magical infrastructure has disrupted harmony across multiple regions. Early investigations confirm the involvement of Queen Chrysalis, Cozy Glow, and Lord Tirek, now operating together under the name Legion of Doom."
             elif ("mariadb" in service_name_simple):
                 generic_name="mariadb"
                 crit_location="Ponies -e 'SELECT ponies'"
@@ -121,7 +121,7 @@ def insert_initial_data(logger):
             elif ("nginx" in service_name_simple):
                 generic_name="http"
                 crit_location="80"
-                crit_content="Test page for Pony NGINX!"
+                crit_content="<strong>Pony Wings</strong> is an exhilarating rollerscooting adventure that captures the spirit of perseverance and the joy of flight. In this journey, you guide Scootaloo - a young filly with big dreams - as she uses the topography of the land to achieve heights her tiny wings couldn't reach alone."
             elif (("wkst" in service_name_simple) and ("windows" in os_name.lower().strip())):
                 generic_name="workstation_windows"
                 if "hexchat" in service_name_simple:
