@@ -139,57 +139,57 @@
   when: false
 
 # 4) Scoring service checks (LibreOffice)
-
-- name: Ensure python3 is installed
-  ansible.builtin.apt:
-    name: python3
-    state: present
-    update_cache: yes
-  become: true
-
-- name: Create app directory
-  ansible.builtin.file:
-    path: /opt/lo_score
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  become: true
-
-
-- name: Write lo_score_server.py directly (no repo file needed)
-  ansible.builtin.copy:
-    dest: /opt/lo_score/lo_score_server.py
-    owner: root
-    group: root
-    mode: "0755"
-    content: |
-      import socket
-      import subprocess
-
-      server = socket.socket()
-      server.bind(("0.0.0.0", 12345))
-      server.listen(1)
-
-      while True:
-          conn, addr = server.accept()
-          result = subprocess.run(
-              ["libreoffice", "--headless", "--version"],
-              capture_output=True,
-              text=True
-          )
-          output = result.stdout
-          if output == "":
-              output = result.stderr
-          if output == "":
-              output = "ERROR: no output"
-
-          conn.send(output.encode())
-          conn.close()
-  become: true
-
-- name: Start LO score server (one-liner, not persistent)
-  ansible.builtin.shell: "nohup python3 /opt/lo_score/lo_score_server.py >/var/log/lo-score.log 2>&1 &"
-  args:
-    executable: /bin/bash
-  become: true
+#not working no moe
+#- name: Ensure python3 is installed
+#  ansible.builtin.apt:
+#    name: python3
+#    state: present
+#    update_cache: yes
+#  become: true
+#
+#- name: Create app directory
+#  ansible.builtin.file:
+#    path: /opt/lo_score
+#    state: directory
+#    owner: root
+#    group: root
+#    mode: "0755"
+#  become: true
+#
+#
+#- name: Write lo_score_server.py directly (no repo file needed)
+#  ansible.builtin.copy:
+#    dest: /opt/lo_score/lo_score_server.py
+#    owner: root
+#    group: root
+#    mode: "0755"
+#    content: |
+#      import socket
+#      import subprocess
+#
+#      server = socket.socket()
+#      server.bind(("0.0.0.0", 12345))
+#      server.listen(1)
+#
+#      while True:
+#          conn, addr = server.accept()
+#          result = subprocess.run(
+#              ["libreoffice", "--headless", "--version"],
+#              capture_output=True,
+#              text=True
+#          )
+#          output = result.stdout
+#          if output == "":
+#              output = result.stderr
+#          if output == "":
+#              output = "ERROR: no output"
+#
+#          conn.send(output.encode())
+#          conn.close()
+#  become: true
+#
+#- name: Start LO score server (one-liner, not persistent)
+#  ansible.builtin.shell: "nohup python3 /opt/lo_score/lo_score_server.py >/var/log/lo-score.log 2>&1 &"
+#  args:
+#    executable: /bin/bash
+#  become: true
