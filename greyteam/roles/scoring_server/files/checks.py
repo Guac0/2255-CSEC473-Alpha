@@ -151,11 +151,6 @@ class Dns (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        hosts:list[Host] = Host.query.all()
-
-        for host in hosts:
-            self.hosts.append((host.hostname, host.ip))
-
     def check (self):
         host = random.choice(self.hosts)
         
@@ -163,19 +158,19 @@ class Dns (Check):
         for criterion in self.criteria:
             try:
                 res = subprocess.run(
-                    ["nslookup", f"{host[0]}.mlp.local", self.host_ip],
+                    ["nslookup", criterion.loc, self.host_ip],
                     capture_output=True,
                     text=True
                 )
                 
                 # Check succeeded
-                if res.returncode == 0 and host[1] in res.stdout:
+                if res.returncode == 0 and criterion.content in res.stdout:
                     return (criterion.team, f"Found expected content for check {criterion.id}")
                 # Command failed
                 elif res.returncode != 0:
                     err.insert(0, res.stderr)
                 # Incorrect output
-                elif host[1] not in res.stdout:
+                elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content for check {criterion.id}")
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
