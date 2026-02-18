@@ -27,6 +27,11 @@
     src: "{{ wallpaper_src }}"
     dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
 
+- name: Delete existing script file
+  ansible.windows.win_file:
+    path: "C:\\ProgramData\\Inscope\\wallpaper_script.ps1"
+    state: absent
+
 - name: Copy wallpaper script to host
   ansible.windows.win_copy:
     src: "wallpaper_script.ps1"
@@ -39,17 +44,24 @@
     data: 0
     type: dword
     state: present
-    
+
+- name: Register Wallpaper Script to run at logon
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run
+    name: "wallpaperChange"
+    data: 'powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Inscope\wallpaper_script.ps1"'
+    type: string
+
 - name: Remove existing wallpaper scheduled task if it exists
   community.windows.win_scheduled_task:
     name: WallpaperInit
     state: absent
     
-- name: Create wallpaper scheduled task (run at logon with delay)
-  ansible.windows.win_shell: >
-    schtasks /create /tn WallpaperInit
-    /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1"
-    /sc onlogon
-    /delay 0000:15
-    /rl highest
-    /f
+#- name: Create wallpaper scheduled task (run at logon with delay)
+#  ansible.windows.win_shell: >
+#    schtasks /create /tn WallpaperInit
+#    /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1"
+#    /sc onlogon
+#    /delay 0000:5
+#    /rl highest
+#    /f
