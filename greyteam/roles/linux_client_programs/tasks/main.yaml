@@ -151,9 +151,9 @@
       Type=Application
       Categories=Network;GTK;IRCClient;
       StartupNotify=true
+    newline_sequence: "\n"
   loop: "{{ linux_desktop_users }}"
   when: item in ansible_facts.getent_passwd
-  newline_sequence: "\n"
 
 - name: Mark Desktop launchers as trusted
   ansible.builtin.shell: |
