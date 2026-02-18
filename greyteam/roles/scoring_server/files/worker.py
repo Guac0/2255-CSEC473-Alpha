@@ -23,6 +23,7 @@ from data import create_db_tables
 import copy
 
 logger = setup_logging("server_worker")
+MAX_MESSAGE_DISCORD = 130
 
 # === WEBHOOK ===
 
@@ -167,7 +168,7 @@ def discord_webhook(task,url=WEBHOOK_URL):
         'User-Agent': 'python-urllib/3' # Required for urllib, automatic with requests
     }
     data = payload.encode("utf-8") if isinstance(payload, str) else json.dumps(payload).encode("utf-8")
-    logger.info(f"{data}")
+    #logger.info(f"{data}")
     req = urllib.request.Request(
         url,
         data=data,
@@ -263,10 +264,11 @@ class ScoreboardManager:
                                 row['team'] = f"🟥{row['team']}" # Red
                             elif "offline" in team:
                                 row['team'] = f"🟨{row['team']}" # yellow
-                        table = tabulate(data_discord, headers="keys", tablefmt="grid")
+                            row['message'] = row['message'][:MAX_MESSAGE_DISCORD] + "..." if len(row['message']) > MAX_MESSAGE_DISCORD else row['message']
+                        table = tabulate(data_discord, headers="keys", tablefmt="simple")#tablefmt="grid")
                         task = WebhookQueue(
                             title=f"Scoring Round {current_round}",
-                            content=table
+                            content=f"```\n{table}\n```"
                         )
                         db.session.add(task)
                         db.session.commit()

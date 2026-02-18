@@ -22,7 +22,7 @@ secret_key: "changeme"
 stale_time: 300
 default_webhook_sleep_time: 0.25
 max_webhook_msg_per_minute: 50
-webhook_url: "https://discord.com/api/webhooks/1468302694681804885/8jnjVOEXipPiY_xksMch5yI-E7l-f1KOcFWhB_8vjw5evQb4X6zEfZ15AlqiO32_yOOX"
+webhook_url: "https://discord.com/api/webhooks/1468302694681804885/8jnjVOEXipPiY_xksMch5yI-E7l-f1KOcFWhB_8vjw5evQb4X6zEfZ15AlqiO32_yOOX?thread_id=1467968648089174178"
 create_test_data: true
 agent_auth_tokens:
   testtoken:
