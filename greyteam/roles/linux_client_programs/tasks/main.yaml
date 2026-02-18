@@ -153,22 +153,23 @@
       StartupNotify=true
   loop: "{{ linux_desktop_users }}"
   when: item in ansible_facts.getent_passwd
+  newline_sequence: "\n"
 
-- name: Mark Desktop launchers as trusted in Lubuntu
-  ansible.builtin.shell: | # Loop through all .desktop files on the user's desktop
+- name: Mark Desktop launchers as trusted
+  ansible.builtin.shell: |
+    export $(dbus-launch)  # Start a temporary bus session
     for launcher in /home/{{ item }}/Desktop/*.desktop; do
       [ -e "$launcher" ] || continue
-      # Set the metadata attribute directly
+      # Set the attribute
       gio set -t string "$launcher" metadata::trusted true
+      # Force the executable bit again to be sure
+      chmod +x "$launcher"
     done
+    kill $DBUS_SESSION_BUS_PID # Clean up
   loop: "{{ linux_desktop_users }}"
   when: item in ansible_facts.getent_passwd
-  become: true
+  become: yes
   become_user: "{{ item }}"
-  # We use become_user because gio metadata is often user-specific 
-  # and stored in the user's ~/.local/share/gvfs-metadata/
-  register: trust_result
-  failed_when: false
 
 #- name: Note missing desktop shortcut sources
 #  ansible.builtin.debug:
