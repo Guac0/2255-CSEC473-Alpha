@@ -6,7 +6,7 @@
   lineinfile:
     path: /etc/apt/sources.list
     regexp: '^# deb-src'
-    line: 'deb-src http://archive.ubuntu.com/ubuntu jammy main'
+    line: 'deb-src https://archive.ubuntu.com/ubuntu jammy main'
 
 - name: Update apt cache
   apt:
@@ -78,7 +78,7 @@
       dirmessage_enable=YES
       use_localtime=YES
       xferlog_enable=YES
-      connect_from_port_20=YES
+      connect_from_port_21=YES
       secure_chroot_dir=/var/run/vsftpd/empty
       pam_service_name=vsftpd
       rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -109,7 +109,19 @@
       WantedBy=multi-user.target
 
 - name: Reload systemd
-  command: systemctl daemon-reexec
+  command: systemctl daemon-reload
+
+- name: Enable vsftpd service
+  systemd:
+    name: vsftpd
+    enabled: yes
+
+- name: Allow FTP through firewall
+  ufw:
+    rule: allow
+    port: 21
+    proto: tcp
+  ignore_errors: yes
 
 # -------- Feature Set 1 --------
 - name: Feature 1 – Enable anonymous FTP
