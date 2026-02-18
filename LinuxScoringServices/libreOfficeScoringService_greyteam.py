@@ -1,27 +1,27 @@
-import subprocess
-import socket
-
-#HOSTS = ["10.0.30.4", "10.0.30.5", "10.0.30.6"] # cloudsdale", "vanhoover", "whinnyapolis"
-USER  = "twilight"
-CMD   = "timeout 10s libreoffice --headless --version"
-
-
-
-HOST = '10.0.30.4'
-PORT = 12345
-
-
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((HOST, PORT))
-data = client.recv(1024).decode(errors="ignore")
-
-if "LibreOffice" in data:
-    print("YAY")
-else:
-    print("NO:", data)
-
-client.close()
-
+#import subprocess
+#import socket
+#
+##HOSTS = ["10.0.30.4", "10.0.30.5", "10.0.30.6"] # cloudsdale", "vanhoover", "whinnyapolis"
+#CMD   = "timeout 10s libreoffice --headless --version"
+#
+#
+#
+#HOST = '10.0.30.4'
+#PORT = 12345
+#USER  = "bigmac"
+#
+#
+#client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#client.connect((HOST, PORT))
+#data = client.recv(1024).decode(errors="ignore")
+#
+#if "LibreOffice" in data:
+#    print("YAY")
+#else:
+#    print("NO:", data)
+#
+#client.close()
+#
 #any_workstation_failed  = False
 #
 #for host in HOSTS:
