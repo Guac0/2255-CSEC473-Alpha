@@ -245,6 +245,21 @@ class ScoreboardManager:
         footer = f"\nUpdated: {time.strftime('%H:%M:%S')} | Active Clients: {len(self.clients)}\n"
         return clear_screen + header + table + footer
 
+    def format_as_cards(data):
+        lines = []
+        for row in data:
+            # Determine status emoji
+            team = row['team'].lower()
+            emoji = "🟦" if "blue" in team else "🟥" if "red" in team else "🟨"
+            
+            # Build a single line or small block per host
+            # Format: [Status] Hostname (IP) - Service: Message
+            line = f"{emoji} **{row['hostname']}** ({row['ip']})\n"
+            line += f"┕ *{row['service']}*: `{row['message'][:50]}`"
+            lines.append(line)
+        
+        return "\n\n".join(lines)
+
     def broadcast_loop(self):
         logger.info("Central Manager loop started.")
         while True:
@@ -256,6 +271,7 @@ class ScoreboardManager:
                     
                     try:
                         data_discord = copy.deepcopy(data)
+                        """
                         for row in data_discord:
                             team = row['team'].lower()
                             if "blue" in team:
@@ -266,9 +282,11 @@ class ScoreboardManager:
                                 row['team'] = f"🟨{row['team']}" # yellow
                             row['message'] = row['message'][:MAX_MESSAGE_DISCORD] + "..." if len(row['message']) > MAX_MESSAGE_DISCORD else row['message']
                         table = tabulate(data_discord, headers="keys", tablefmt="simple")#tablefmt="grid")
+                        """
                         task = WebhookQueue(
                             title=f"Scoring Round {current_round}",
-                            content=f"```\n{table}\n```"
+                            content=self.format_as_cards(data_discord)
+                            #content=f"```\n{table}\n```"
                         )
                         db.session.add(task)
                         db.session.commit()
