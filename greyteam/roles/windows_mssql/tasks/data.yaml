@@ -15,13 +15,16 @@
   #no_log: true # Hide password from logs
 
 - name: Create Database
-  ansible.builtin.shell: | # /opt/mssql-tools18/bin/sqlcmd -S 10.0.10.2,1433 -E -C -Q "CREATE DATABASE [db]"
-    /opt/mssql-tools18/bin/sqlcmd -S {{ mssql_host }},1433 -E -C -Q "CREATE DATABASE [{{ mssql_database_name }}]"
+  ansible.builtin.shell: | 
+    /opt/mssql-tools18/bin/sqlcmd -S {{ inventory_hostname_short }}.{{ domain }},1433 -E -C -Q "CREATE DATABASE [{{ mssql_database_name }}]"
   delegate_to: localhost
+  # NOTE: something broke and now connecting by IP wont work despite SPN being set same as before. FQDN works though!
+  # /opt/mssql-tools18/bin/sqlcmd -S {{ mssql_host }},1433 -E -C -Q "CREATE DATABASE [{{ mssql_database_name }}]"
+  # /opt/mssql-tools18/bin/sqlcmd -S 10.0.10.2,1433 -E -C -Q "CREATE DATABASE [db]"
 
 - name: Add Database Data
   ansible.builtin.shell: |
-    /opt/mssql-tools18/bin/sqlcmd -S {{ mssql_host }},1433 -E -C -d "{{ mssql_database_name }}" -Q "
+    /opt/mssql-tools18/bin/sqlcmd -S {{ inventory_hostname_short }}.{{ domain }},1433 -E -C -d "{{ mssql_database_name }}" -Q "
     /* 1. Cleanup for Fresh Lore State */
     IF OBJECT_ID('[dbo].[Elements]', 'U') IS NOT NULL DROP TABLE [dbo].[Elements];
     IF OBJECT_ID('[dbo].[Characters]', 'U') IS NOT NULL DROP TABLE [dbo].[Characters];

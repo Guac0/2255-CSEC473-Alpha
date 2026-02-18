@@ -55,7 +55,7 @@
   become_user: "{{ domain }}\\{{ greyteam_user }}" # needed for crypto
 
 - name: Register MSSQLSvc host with SPN
-  ansible.windows.win_powershell:
+  ansible.windows.win_powershell: # NOTE: something broke and now connecting by IP wont work despite SPN being set same as before. FQDN works though!
     script: |
       setspn -D MSSQLSvc/{{ inventory_hostname_short }}.{{ domain }}:1433 {{ inventory_hostname_short | upper }}
       setspn -D MSSQLSvc/{{ mssql_host }}:1433 {{ inventory_hostname_short | upper }}
