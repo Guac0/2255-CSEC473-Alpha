@@ -11,9 +11,6 @@
 - name: Copy files
   ansible.builtin.include_tasks: copy_files.yaml
 
-- name: Setup MSSQL prerequs
-  ansible.builtin.include_tasks: mssql.yaml
-
 - name: Generate SSL Cert
   ansible.builtin.include_tasks: ssl.yaml
 
@@ -22,6 +19,9 @@
 
 - name: Deploy User
   ansible.builtin.include_tasks: user.yaml
+
+- name: Setup MSSQL prerequs
+  ansible.builtin.include_tasks: mssql.yaml
 
 - name: Deploy Services
   ansible.builtin.include_tasks: service_install.yaml
