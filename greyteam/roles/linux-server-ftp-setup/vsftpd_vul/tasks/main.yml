@@ -167,18 +167,27 @@
 # Creating Scoring User & File
 # ==============================
 
-- name: Create scoring user
-  user:
-    name: scoring
-    password: "{{ 'Score123' | password_hash('sha512') }}"
-    home: /home/scoring
-    create_home: yes
+#- name: Create scoring user
+#  user:
+#    name: scoring
+#    password: "{{ 'Score123' | password_hash('sha512') }}"
+#    home: /home/scoring
+#    create_home: yes
 
 
-- name: Create scoring file
-  copy:
-    dest: /home/scoring/score.txt
-    content: "FTP_SERVICE_OK"
-    owner: scoring
-    group: scoring
+#- name: Create scoring file
+#  copy:
+#    #dest: /home/scoring/score.txt
+#    content: "FTP_SERVICE_OK"
+#    owner: scoring
+#    group: scoring
+#    mode: '0644'
+
+- name: Drop content files into the share
+  opy:
+    dest: "/home/{{ item.0 }}/{{ item.1.name }}"
+    content: "{{ item.1.content }}"
+    owner: "{{ item.0 }}"
+    group: "{{ item.0 }}"
     mode: '0644'
+  loop: "{{ q('nested', local_admins + local_users, smb_content_files) }}"
