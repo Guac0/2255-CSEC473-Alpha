@@ -2,11 +2,11 @@
 # 1. Build prerequisites
 # ==============================
 
-- name: Enable source repositories
-  lineinfile:
-    path: /etc/apt/sources.list
-    regexp: '^# deb-src'
-    line: 'deb-src https://archive.ubuntu.com/ubuntu jammy main'
+# - name: Enable source repositories
+#   lineinfile:
+#     path: /etc/apt/sources.list
+#     regexp: '^# deb-src'
+#     line: 'deb-src https://archive.ubuntu.com/ubuntu jammy main'
 
 - name: Update apt cache
   apt:
