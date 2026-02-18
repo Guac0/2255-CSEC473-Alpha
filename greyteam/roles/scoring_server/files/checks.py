@@ -224,6 +224,7 @@ class Ftp (Check):
 
         err = []
         for criterion in self.criteria:
+            location = criterion.loc
             try:
                 res = []
                 with FTP(self.host_ip) as ftp:
@@ -281,7 +282,7 @@ class Mssql (Check):
                         '/opt/mssql-tools18/bin/sqlcmd', '-E', '-C', 
                         '-S', target_host, 
                         '-d', db_name, 
-                        '-Q', criterion.location, 
+                        '-Q', criterion.loc, 
                         '-s', ',', '-W', '-h-1'
                     ],
                     capture_output=True,
@@ -326,7 +327,7 @@ class Workstation_linux (Check):
             try:
                 username = user[0]
                 password = user[1]
-                filepath = criterion.location
+                filepath = criterion.loc
                 expected_hash = criterion.content
                 
                 # Initialize SSH Client
@@ -383,7 +384,7 @@ class Workstation_windows (Check):
             try:
                 username = user[0]
                 password = user[1]
-                filepath = criterion.location
+                filepath = criterion.loc
                 expected_hash = criterion.content
                 
                 endpoint = f'http://{self.host_ip}:5985/wsman'

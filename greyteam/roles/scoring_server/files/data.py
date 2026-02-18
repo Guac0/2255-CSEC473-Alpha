@@ -104,8 +104,8 @@ def insert_initial_data(logger):
                 crit_content=""
             elif ("vsftpd" in service_name_simple):
                 generic_name="ftp"
-                crit_location="score.txt"
-                crit_content="FTP_SERVICE_OK"
+                crit_location="~/Legion_Activity_Log.txt"
+                crit_content="Suspicious activity detected in Crystal Empire."
             elif ("iis" in service_name_simple):
                 generic_name="http"
                 crit_location="80"
