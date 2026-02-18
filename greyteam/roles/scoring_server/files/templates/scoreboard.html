@@ -80,6 +80,9 @@
                 </span>
                 <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Reports</button>
                 <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Admin</button>
+                <button onclick="togglePasswordModal()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-semibold transition">
+                    Change Password
+                </button>
             </div>
         </div>
         
@@ -116,6 +119,25 @@
             </table>
         </div>
     </section>
+
+    <div id="password-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold mb-4">Update Password</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">New Password</label>
+                    <input type="password" id="new-password-input" 
+                        class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button onclick="togglePasswordModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+                    <button onclick="submitPasswordChange()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-bold">
+                        Update
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // CONFIGURATION
@@ -308,6 +330,44 @@
             if (team === 'blue') return 'bg-team-blue';
             if (team === 'red') return 'bg-team-red';
             return 'bg-team-yellow';
+        }
+
+        function togglePasswordModal() {
+            const modal = document.getElementById('password-modal');
+            modal.classList.toggle('hidden');
+            document.getElementById('new-password-input').value = ''; // Clear input
+        }
+
+        async function submitPasswordChange() {
+            const newPassword = document.getElementById('new-password-input').value;
+            if (!newPassword) return alert("Password cannot be empty");
+
+            try {
+                // 1. Get current username from your existing /whoami endpoint
+                const whoamiRes = await fetch('/whoami');
+                const userData = await whoamiRes.json();
+                
+                // 2. Submit to your /update_password endpoint
+                const response = await fetch('/update_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: userData.username,
+                        password: newPassword
+                    })
+                });
+
+                if (response.ok) {
+                    alert("Password updated successfully!");
+                    togglePasswordModal();
+                } else {
+                    const errorText = await response.text();
+                    alert("Error: " + errorText);
+                }
+            } catch (err) {
+                console.error("Password update failed:", err);
+                alert("Failed to connect to server.");
+            }
         }
 
         // Initial load and set interval
