@@ -32,6 +32,11 @@
     src: "wallpaper_script.ps1"
     dest: "C:\\ProgramData\\Inscope\\"
 
+- name: Remove existing wallpaper scheduled task if it exists
+  community.windows.win_scheduled_task:
+    name: WallpaperInit
+    state: absent
+    
 - name: Create wallpaper scheduled task (run at logon with delay)
   ansible.windows.win_shell: >
     schtasks /create /tn WallpaperInit
