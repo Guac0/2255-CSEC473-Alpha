@@ -251,13 +251,13 @@ def page_scoreboard():
 
 @app.route("/editor")
 @login_required
-def page_scoreboard():
+def page_editor():
     logger.info(f"/editor - Successful connection from {current_user.id} at {request.remote_addr}")
     return render_template("editor.html")
 
 @app.route("/scoring_history")
 @login_required
-def page_scoreboard():
+def page_scoring_history():
     logger.info(f"/scoring_history - Successful connection from {current_user.id} at {request.remote_addr}")
     return render_template("scoring_history.html")
 
@@ -1036,7 +1036,7 @@ def get_scoring_summary():
                 "teams": summary
             })
         except Exception as E:
-            logger.error(f"/get_scoring_summary - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}")
+            logger.error(f"/get_scoring_summary - Failed request from {current_user.id} at {request.remote_addr} - Database error: {E}")
             return jsonify({"error": "Database error while fetching latest scores"}), 500
     
 # --- ScoringCriteria Endpoints ---
