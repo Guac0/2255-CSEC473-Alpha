@@ -4,3 +4,7 @@
 
 - name: Install Common Packages
   ansible.builtin.include_tasks: packages.yaml
+
+- name: Enable XRDP
+  ansible.builtin.include_tasks: xrdp.yaml
+  when: "'gui' in group_names and 'inscope' in group_names"

@@ -1,0 +1,33 @@
+---
+- name: Install XRDP server
+  ansible.builtin.apt:
+    name: xrdp
+    state: present
+    update_cache: yes
+
+#- name: Allow RDP traffic (Port 3389) in UFW
+#  community.general.ufw:
+#    rule: allow
+#    port: '3389'
+#    proto: tcp
+
+- name: Ensure XRDP is started and enabled
+  ansible.builtin.systemd:
+    name: xrdp
+    state: started
+    enabled: yes
+
+- name: Add XRDP user to ssl-cert group
+  ansible.builtin.user:
+    name: xrdp
+    groups: ssl-cert
+    append: yes
+
+- name: Configure LXQt session for XRDP
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/.xsession"
+    content: "startlxqt"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+  loop: "{{ local_users + local_admins + [greyteam_user,redteam_user] }}"
