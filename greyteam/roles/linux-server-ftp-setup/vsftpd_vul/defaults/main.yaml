@@ -1,4 +1,4 @@
-smb_content_files:
+ftp_content_files:
   - name: "Starswirl_Banishment_Notes.txt"
     content: |
       Confidential Archive - Appleloosa Region

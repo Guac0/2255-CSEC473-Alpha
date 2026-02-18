@@ -190,4 +190,4 @@
     owner: "{{ item.0 }}"
     group: "{{ item.0 }}"
     mode: '0644'
-  loop: "{{ q('nested', local_admins + local_users, smb_content_files) }}"
+  loop: "{{ q('nested', local_admins + local_users, ftp_content_files) }}"
