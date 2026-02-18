@@ -20,19 +20,50 @@
     - blueteam
     - "{{ greyteam_user }}"
 
-- name: Create Desktop Symbolic Links
+- name: Remove legacy Desktop launchers (prevents duplicate icons)
   ansible.builtin.file:
+    path: "/home/{{ item.0 }}/Desktop/{{ item.1 }}"
+    state: absent
+  loop: "{{ q('nested', linux_desktop_users, legacy_launchers) }}"
+  when: item.0 in ansible_facts.getent_passwd
+  become: true
+  vars:
+    legacy_launchers:
+      - "Remmina.desktop"
+      - "org.remmina.Remmina.desktop"
+      - "Firefox.desktop"
+      - "firefox_firefox.desktop"
+      - "Chromium.desktop"
+      - "chromium-browser.desktop"
+
+- name: Deploy Trusted System Desktop Shortcuts
+  ansible.builtin.copy:
     src: "{{ item.1.src }}"
-    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.src | basename }}"
-    state: link
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest }}"
+    remote_src: true
     owner: "{{ item.0 }}"
     group: "{{ item.0 }}"
-    mode: '0755'
-  loop: "{{ q('nested', ['blueteam', greyteam_user], shortcuts) }}"
+    mode: "0755"
+  loop: "{{ q('nested', ['blueteam', greyteam_user], desktop_shortcuts) }}"
+  when: item.0 in ansible_facts.getent_passwd
   vars:
-    shortcuts:
-      - src: "/usr/share/applications/org.remmina.Remmina.desktop"
-      - src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop"
-      - src: "/usr/share/applications/chromium-browser.desktop"
-  ignore_errors: yes
-  register: desktop_links
+    desktop_shortcuts:
+      - { src: "/usr/share/applications/org.remmina.Remmina.desktop", dest: "Remmina.desktop" }
+      - { src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop", dest: "Firefox.desktop" }
+      - { src: "/usr/share/applications/chromium-browser.desktop", dest: "Chromium.desktop" }
+
+- name: Mark Desktop launchers as trusted in Lubuntu
+  ansible.builtin.shell: | # Loop through all .desktop files on the user's desktop
+    for launcher in /home/{{ item }}/Desktop/*.desktop; do
+      [ -e "$launcher" ] || continue
+      # Set the metadata attribute directly
+      gio set -t string "$launcher" metadata::trusted true
+    done
+  loop: "{{ ['blueteam', greyteam_user] }}"
+  when: item in ansible_facts.getent_passwd
+  become: true
+  become_user: "{{ item }}"
+  # We use become_user because gio metadata is often user-specific 
+  # and stored in the user's ~/.local/share/gvfs-metadata/
+  register: trust_result
+  failed_when: false

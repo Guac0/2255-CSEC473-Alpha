@@ -3,6 +3,12 @@
 
 # 1) Package installation
 
+- name: Add LibreOffice PPA
+  ansible.builtin.apt_repository:
+    repo: 'ppa:libreoffice/ppa'
+    state: present
+    update_cache: yes
+
 # Refresh apt package
 - name: Update apt cache
   ansible.builtin.apt:
@@ -100,16 +106,16 @@
       - "filezilla.desktop"
       - "HexChat.desktop"
       - "hexchat.desktop"
-      - "Remmina.desktop"
-      - "org.remmina.Remmina.desktop"
-      - "remmina.desktop"
-      - "Firefox.desktop"
-      - "firefox.desktop"
-      - "firefox_firefox.desktop"
-      - "Chromium.desktop"
-      - "chromium.desktop"
-      - "chromium-browser.desktop"
-      - "chromium_chromium.desktop"
+      #- "Remmina.desktop"
+      #- "org.remmina.Remmina.desktop"
+      #- "remmina.desktop"
+      #- "Firefox.desktop"
+      #- "firefox.desktop"
+      #- "firefox_firefox.desktop"
+      #- "Chromium.desktop"
+      #- "chromium.desktop"
+      #- "chromium-browser.desktop"
+      #- "chromium_chromium.desktop"
 
 # Create Desktop Symbolic Links for client programs
 - name: Deploy Trusted System Desktop Shortcuts
