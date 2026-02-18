@@ -292,16 +292,6 @@
     - linux
     - inscope
 
-- name: Deploy Linux Client Programs
-  hosts: linux:&wksts 
-  roles:
-    - linux_client_programs
-  tags:
-    - linux
-    - inscope
-    - utilities
-    - utilities_linux
-
 - name: Deploy Vulnerable vsftpd (CTF)
   hosts: vsftpd
   become: true
@@ -331,6 +321,15 @@
     - linux 
     - inscope
 
+- name: Deploy Linux Client Programs
+  hosts: linux:&wksts 
+  roles:
+    - linux_client_programs
+  tags:
+    - linux
+    - inscope
+    - utilities
+    - utilities_linux
 
 ####### Finish ########
 
