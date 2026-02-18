@@ -25,7 +25,6 @@
     path: "/home/{{ item.0 }}/Desktop/{{ item.1 }}"
     state: absent
   loop: "{{ q('nested', linux_desktop_users, legacy_launchers) }}"
-  when: item.0 in ansible_facts.getent_passwd
   become: true
   vars:
     legacy_launchers:
@@ -45,7 +44,6 @@
     group: "{{ item.0 }}"
     mode: "0755"
   loop: "{{ q('nested', ['blueteam', greyteam_user], desktop_shortcuts) }}"
-  when: item.0 in ansible_facts.getent_passwd
   vars:
     desktop_shortcuts:
       - { src: "/usr/share/applications/org.remmina.Remmina.desktop", dest: "Remmina.desktop" }
@@ -64,6 +62,5 @@
     done
     kill $DBUS_SESSION_BUS_PID # Clean up
   loop: "{{ ['blueteam', greyteam_user] }}"
-  when: item in ansible_facts.getent_passwd
   become: yes
   become_user: "{{ item }}"
