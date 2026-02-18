@@ -109,7 +109,7 @@ def insert_initial_data(logger):
             elif ("iis" in service_name_simple):
                 generic_name="http"
                 crit_location="80"
-                crit_content=""
+                crit_content="<dd><b>Fluttershy</b>: Everypony, <i>stop!</i> I appreciate you sharing your thoughts, but I need everypony to respect mine. Other ponies may be experts in <i>their</i> fields, but animals are <i>my</i> field of expertise. And if I say this is what I want, then this is what needs to happen!</dd></dl>"
             elif ("smb" in service_name_simple):
                 generic_name="smb"
                 crit_location="\\\\appleloosa\\Appleloosa_Archives\\Starswirl_Banishment_Notes.txt"

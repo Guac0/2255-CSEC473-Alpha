@@ -37,74 +37,77 @@ def webhook_main():
     logger.info("/webhook_main - starting main loop")
     
     while True:
-        sleep_time = 0
-        with app.app_context():
-            # Find the oldest unprocessed task
-            task = WebhookQueue.query.order_by(WebhookQueue.created_at.asc()).first()
-            
-            if not task:
-                logger.info("/webhook_main - no webhooks in queue, sleeping.")
-                time.sleep(2) # Wait a bit before checking for new tasks again
-                continue
+        try:
+            sleep_time = 0
+            with app.app_context():
+                # Find the oldest unprocessed task
+                task = WebhookQueue.query.order_by(WebhookQueue.created_at.asc()).first()
+                
+                if not task:
+                    logger.info("/webhook_main - no webhooks in queue, sleeping.")
+                    time.sleep(2) # Wait a bit before checking for new tasks again
+                    continue
 
-            # Send the webhook
-            resp, body = discord_webhook(task)
+                # Send the webhook
+                resp, body = discord_webhook(task)
 
-            try:
-                if resp.code == 429:
-                    # Rate limited by Discord
-                    bodyDict = json.loads(body)
-                    sleep_time = float(bodyDict["retry_after"])
+                try:
+                    if resp.code == 429:
+                        # Rate limited by Discord
+                        bodyDict = json.loads(body)
+                        sleep_time = float(bodyDict["retry_after"])
 
-                    logger.warning(f"/webhook_main - message {task.id}: Retry_After detected, re-queued message {task.id} and sleeping for {sleep_time}.")
-                else:
+                        logger.warning(f"/webhook_main - message {task.id}: Retry_After detected, re-queued message {task.id} and sleeping for {sleep_time}.")
+                    else:
+                        db.session.delete(task)
+                        db.session.commit()
+
+                        # Maybe rate-limit headers present
+                        remaining = resp.getheader("X-RateLimit-Remaining")
+                        reset_after = resp.getheader("X-RateLimit-Reset-After")
+
+                        if remaining is not None and reset_after is not None:
+                            try:
+                                remaining_int = int(remaining)
+                                reset_after_float = float(reset_after)
+
+                                if remaining_int == 0:
+                                    sleep_time = reset_after_float
+                                    logger.info(f"/webhook_main - message {task.id}: 0 responses remaining, sleeping for {sleep_time}.")
+                            except ValueError:
+                                sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
+                                logger.warning(f"/webhook_main - message {task.id}: failed to parse headers, sleeping {sleep_time}.")
+                        else:
+                            sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
+                            logger.warning(f"/webhook_main - message {task.id}: Missing rate limit headers, sleeping {sleep_time}.")
+
+                except Exception as e:
+                    db.session.rollback()
+                    sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
                     db.session.delete(task)
                     db.session.commit()
+                    logger.error(f"/webhook_main - caught unknown error from discord_webhook, deleting message {task.id} from webhook queue - {e}.")
 
-                    # Maybe rate-limit headers present
-                    remaining = resp.getheader("X-RateLimit-Remaining")
-                    reset_after = resp.getheader("X-RateLimit-Reset-After")
+            last_60_seconds.append(time.time())
 
-                    if remaining is not None and reset_after is not None:
-                        try:
-                            remaining_int = int(remaining)
-                            reset_after_float = float(reset_after)
+            for incTime in last_60_seconds:
+                if (time.time() - incTime) > 60:
+                    last_60_seconds.remove(incTime)
+            
+            if len(last_60_seconds) >= MAX_WEBHOOK_MSG_PER_MINUTE - 1:
+                new_sleep_time = 60 - (time.time() - last_60_seconds[0]) # how long until first message is out of the 60 second window
+                if new_sleep_time < sleep_time: # dont go below existing ratelimit if any
+                    new_sleep_time = sleep_time
+                new_sleep_time = math.ceil(new_sleep_time * 100) / 100 # round to 2 decimals
+                if new_sleep_time > (60 / MAX_WEBHOOK_MSG_PER_MINUTE): # reduce noise in normal operation
+                    logger.info(f"/webhook_main - client side ratelimiting enabled: sleeping for {new_sleep_time} seconds. Old sleep_time: {sleep_time}. len(last_60_seconds): {len(last_60_seconds)}. MAX_WEBHOOK_MSG_PER_MINUTE: {MAX_WEBHOOK_MSG_PER_MINUTE}.") 
+                sleep_time = new_sleep_time # If we are client side ratelimited, set extra time to compensate for discord channel ratelimiting (wait until oldest message drops off)
 
-                            if remaining_int == 0:
-                                sleep_time = reset_after_float
-                                logger.info(f"/webhook_main - message {task.id}: 0 responses remaining, sleeping for {sleep_time}.")
-                        except ValueError:
-                            sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                            logger.warning(f"/webhook_main - message {task.id}: failed to parse headers, sleeping {sleep_time}.")
-                    else:
-                        sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                        logger.warning(f"/webhook_main - message {task.id}: Missing rate limit headers, sleeping {sleep_time}.")
-
-            except Exception as e:
-                db.session.rollback()
-                sleep_time = DEFAULT_WEBHOOK_SLEEP_TIME
-                db.session.delete(task)
-                db.session.commit()
-                logger.error(f"/webhook_main - caught unknown error from discord_webhook, deleting message {task.id} from webhook queue - {e}.")
-
-        last_60_seconds.append(time.time())
-
-        for incTime in last_60_seconds:
-            if (time.time() - incTime) > 60:
-                last_60_seconds.remove(incTime)
-        
-        if len(last_60_seconds) >= MAX_WEBHOOK_MSG_PER_MINUTE - 1:
-            new_sleep_time = 60 - (time.time() - last_60_seconds[0]) # how long until first message is out of the 60 second window
-            if new_sleep_time < sleep_time: # dont go below existing ratelimit if any
-                new_sleep_time = sleep_time
-            new_sleep_time = math.ceil(new_sleep_time * 100) / 100 # round to 2 decimals
-            if new_sleep_time > (60 / MAX_WEBHOOK_MSG_PER_MINUTE): # reduce noise in normal operation
-                logger.info(f"/webhook_main - client side ratelimiting enabled: sleeping for {new_sleep_time} seconds. Old sleep_time: {sleep_time}. len(last_60_seconds): {len(last_60_seconds)}. MAX_WEBHOOK_MSG_PER_MINUTE: {MAX_WEBHOOK_MSG_PER_MINUTE}.") 
-            sleep_time = new_sleep_time # If we are client side ratelimited, set extra time to compensate for discord channel ratelimiting (wait until oldest message drops off)
-
-        # Rate limit enforcement
-        #time.sleep(max(sleep_time,0.2))
-        time.sleep(sleep_time)
+            # Rate limit enforcement
+            #time.sleep(max(sleep_time,0.2))
+            time.sleep(sleep_time)
+        except Exception as E:
+            logger.info(f"/webhook_main - generic error: {E}")
 
 def discord_webhook(task,url=WEBHOOK_URL):
     #compare rules level to set colors of the alert
@@ -114,25 +117,25 @@ def discord_webhook(task,url=WEBHOOK_URL):
     color = "5e5e5e" # unknown
     
     try:
-        if ("web user" in task.Title.lower().strip()):
+        if ("web user" in task.title.lower().strip()):
             color = "641f1a"
-        elif ("scoring user" in task.Title.lower().strip()):
+        elif ("scoring user" in task.title.lower().strip()):
             color = "91251e"
-        elif (task.Title.lower().split(' ')[0]  == "token"):
+        elif (task.title.lower().split(' ')[0]  == "token"):
             color = "8C573A"
-        elif (task.Title.lower().split(' ')[0]  == "host"):
+        elif (task.title.lower().split(' ')[0]  == "host"):
             color = "a37526"
-        elif ("scoring criteria" in task.Title.lower().strip()):
+        elif ("scoring criteria" in task.title.lower().strip()):
             color = "404C24"
-        elif (task.Title.lower().split(' ')[0] == "scoring"):
+        elif (task.title.lower().split(' ')[0] == "scoring"):
             color = "6d39cf"
-        elif (task.Title.lower().split(' ')[0] == "ir"):
+        elif (task.title.lower().split(' ')[0] == "ir"):
             color = "4e08aa"
-        elif (task.Title.lower().split(' ')[0] == "inject"):
+        elif (task.title.lower().split(' ')[0] == "inject"):
             color = "036995"
-        elif (task.Title.lower().split(' ')[0] == "uptime"):
+        elif (task.title.lower().split(' ')[0] == "uptime"):
             color = "380a8e"
-        elif (task.Title.lower().split(' ')[0]  == "file"):
+        elif (task.title.lower().split(' ')[0]  == "file"):
             color = "b11226"
 
     except Exception as E:
@@ -143,7 +146,7 @@ def discord_webhook(task,url=WEBHOOK_URL):
     payload = json.dumps({
     "embeds": [
         {
-        "title": f"{task.Title}",
+        "title": f"{task.title}",
         "color": int(color,16),
         "description": f"{task.Content}"#,
         #"url": f"{PUBLIC_URL}/incidents?incident_id={incident_id}",
