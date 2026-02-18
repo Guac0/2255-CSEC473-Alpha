@@ -6,15 +6,35 @@ import sys
 import urllib.error
 import urllib.request
 
-# Default URL to check (can be overridden with --url)
+
 url = "http://10.0.10.3/doku.php?id=wiki:wikipage"
 
 
-def check_url(target_url, timeout=5.0):
+def check_url(target_url, timeout=5.0, expected_text=None):
     req = urllib.request.Request(target_url, headers={"User-Agent": "apacheScoreCheck/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             status = getattr(resp, "status", None)
+            body = resp.read()
+            # try to decode using charset header if provided, otherwise utf-8
+            charset = None
+            try:
+                content_type = resp.headers.get_content_charset()
+                if content_type:
+                    charset = content_type
+            except Exception:
+                charset = None
+            try:
+                text = body.decode(charset or "utf-8", errors="replace")
+            except Exception:
+                text = body.decode("utf-8", errors="replace")
+
+            if expected_text:
+                if expected_text in text:
+                    return True, f"UP (status={status}) MATCHED_TEXT", 0
+                else:
+                    return False, "MISSING_TEXT", 3
+
             if status is None:
                 return True, "UP (no status available)", 0
             if 200 <= status < 400:
@@ -33,7 +53,7 @@ def check_url(target_url, timeout=5.0):
 def main():
    
 
-    up, message, code = check_url(url, timeout=5)
+    up, message, code = check_url(url, timeout=5.0, expected_text=None)
     if up:
         print(f"OK: {message}")
         sys.exit(0)
