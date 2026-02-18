@@ -1,0 +1,13 @@
+---
+- name: Copy over file
+  ansible.windows.win_copy: 
+    src: files/SetResolution.exe
+    dest: "C:\\SetResolution.exe"
+
+- name: Grant Execute permissions to all users for executable
+  ansible.windows.win_acl:
+    path: 'C:\\SetResolution.exe'
+    user: 'Users'
+    rights: ReadAndExecute
+    type: allow
+    state: present
