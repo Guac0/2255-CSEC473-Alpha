@@ -148,7 +148,7 @@ def discord_webhook(task,url=WEBHOOK_URL):
         {
         "title": f"{task.title}",
         "color": int(color,16),
-        "description": f"{task.Content}"#,
+        "description": f"{task.content}"#,
         #"url": f"{PUBLIC_URL}/incidents?incident_id={incident_id}",
         #"fields": [
         #    {
