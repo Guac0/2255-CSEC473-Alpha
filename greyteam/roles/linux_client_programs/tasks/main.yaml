@@ -140,7 +140,9 @@
     owner: "{{ item }}"
     group: "{{ item }}"
     mode: "0755"
-    content: |
+    content: "{{ hexchat_content | regex_replace('\\r\\n', '\\n') }}"
+  vars:
+    hexchat_content: |
       [Desktop Entry]
       Name=HexChat
       GenericName=IRC Client
@@ -151,7 +153,6 @@
       Type=Application
       Categories=Network;GTK;IRCClient;
       StartupNotify=true
-    newline_sequence: "\n"
   loop: "{{ linux_desktop_users }}"
   when: item in ansible_facts.getent_passwd
 
