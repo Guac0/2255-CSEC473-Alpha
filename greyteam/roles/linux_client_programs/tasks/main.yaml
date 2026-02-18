@@ -225,7 +225,4 @@
 #  args:
 #    executable: /bin/bash
 #  become: true
-<<<<<<< HEAD
 #
-=======
->>>>>>> 5536d8baf3e3cc013b4672f7ee5904e63d8a9a3e
