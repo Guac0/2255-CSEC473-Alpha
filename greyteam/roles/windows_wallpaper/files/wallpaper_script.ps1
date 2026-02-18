@@ -4,7 +4,7 @@ while (-not (Get-Process explorer -ErrorAction SilentlyContinue)) {
 }
 
 # Small additional delay to let profile finish loading
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 2
 
 # Tell windows to enable rdp wallpaper
 #$rdpPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
@@ -36,4 +36,4 @@ public class Wallpaper {
 [Wallpaper]::SystemParametersInfo(20, 0, $wallpaper, 3)
 
 # Delete the scheduled task 
-schtasks /delete /tn "WallpaperInit" /f
+#schtasks /delete /tn "WallpaperInit" /f

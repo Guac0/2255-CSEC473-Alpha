@@ -39,7 +39,7 @@
     data: 0
     type: dword
     state: present
-    
+
 - name: Remove existing wallpaper scheduled task if it exists
   community.windows.win_scheduled_task:
     name: WallpaperInit
@@ -50,6 +50,6 @@
     schtasks /create /tn WallpaperInit
     /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1"
     /sc onlogon
-    /delay 0000:15
+    /delay 0000:5
     /rl highest
     /f
