@@ -57,6 +57,8 @@
 - name: Register MSSQLSvc host with SPN
   ansible.windows.win_powershell:
     script: |
+      setspn -D MSSQLSvc/{{ inventory_hostname_short }}.{{ domain }}:1433 {{ inventory_hostname_short | upper }}
+      setspn -D MSSQLSvc/{{ mssql_host }}:1433 {{ inventory_hostname_short | upper }}
       setspn -S MSSQLSvc/{{ inventory_hostname_short }}.{{ domain }}:1433 {{ inventory_hostname_short | upper }}
       setspn -S MSSQLSvc/{{ mssql_host }}:1433 {{ inventory_hostname_short | upper }}
     #setspn -S MSSQLSvc/manehatten.mlp.local:1433 MANEHATTEN
