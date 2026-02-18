@@ -4,7 +4,14 @@ while (-not (Get-Process explorer -ErrorAction SilentlyContinue)) {
 }
 
 # Small additional delay to let profile finish loading
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 10
+
+# 2. CRITICAL: Clear the wallpaper cache before setting the new one
+# This prevents Windows from reverting to the 'cached' teal screen.
+$themePath = "$env:APPDATA\Microsoft\Windows\Themes"
+if (Test-Path "$themePath\TranscodedWallpaper") {
+    Remove-Item "$themePath\TranscodedWallpaper" -Force -ErrorAction SilentlyContinue
+}
 
 # Tell windows to enable rdp wallpaper
 #$rdpPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
@@ -34,6 +41,7 @@ public class Wallpaper {
 "@
 
 [Wallpaper]::SystemParametersInfo(20, 0, $wallpaper, 3)
-
+Start-Sleep -Seconds 1
+[Wallpaper]::SystemParametersInfo(20, 0, $wallpaper, 3)
 # Delete the scheduled task 
 #schtasks /delete /tn "WallpaperInit" /f
