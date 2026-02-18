@@ -146,9 +146,9 @@ def discord_webhook(task,url=WEBHOOK_URL):
     payload = json.dumps({
     "embeds": [
         {
-        "title": f"{task.title}",
+        "title": f"{task.title}"[:250] if task.title.strip() else "No Title",
         "color": int(color,16),
-        "description": f"{task.content}"#,
+        "description": f"{task.content}"[:4000] if task.content.strip() else "No Content"#,
         #"url": f"{PUBLIC_URL}/incidents?incident_id={incident_id}",
         #"fields": [
         #    {
@@ -167,6 +167,7 @@ def discord_webhook(task,url=WEBHOOK_URL):
         'User-Agent': 'python-urllib/3' # Required for urllib, automatic with requests
     }
     data = payload.encode("utf-8") if isinstance(payload, str) else json.dumps(payload).encode("utf-8")
+    logger.info(f"{data}")
     req = urllib.request.Request(
         url,
         data=data,

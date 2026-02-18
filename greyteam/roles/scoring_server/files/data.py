@@ -125,13 +125,13 @@ def insert_initial_data(logger):
             elif (("wkst" in service_name_simple) and ("windows" in os_name.lower().strip())):
                 generic_name="workstation_windows"
                 if "hexchat" in service_name_simple:
-                    crit_location="C:\Program Files\HexChat\hexchat.exe"
+                    crit_location="C:\\Program Files\\HexChat\\hexchat.exe"
                     crit_content="8B02D5E8376FE9BA4169692E273DAB3DE8F39907CC8F3ECE6F7611AC07202E07"
                 if "filzilla" in service_name_simple:
-                    crit_location="C:\Program Files\FileZilla FTP Client\filezilla.exe"
+                    crit_location="C:\\Program Files\\FileZilla FTP Client\\filezilla.exe"
                     crit_content="34CC44587089222E09A105494A175191B99061CECCB265389CF58B58F35A0DA3"
                 if "libreoffice" in service_name_simple:
-                    crit_location="C:\Program Files\LibreOffice\program\soffice.exe"
+                    crit_location="C:\\Program Files\\LibreOffice\\program\\soffice.exe"
                     crit_content="234C8DF6C1F79B9705CEE233C6C6A5282E3F2B50873637859BFBCDD31AAEC1C4"
             elif (("wkst" in service_name_simple) and ("windows" not in os_name.lower().strip())):
                 generic_name="workstation_linux"
