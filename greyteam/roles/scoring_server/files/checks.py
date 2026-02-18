@@ -260,7 +260,8 @@ class Mssql (Check):
             try:
                 username = user[0]
                 password = user[1]
-                target_host = f"{self.host_ip},1433"
+                #target_host = f"{self.host_ip},1433"
+                target_host = f"manehatten.mlp.local,1433" # TODO hardcoded!
                 db_name = "db"
 
                 # Pipe the password to kinit using the input parameter
@@ -275,6 +276,8 @@ class Mssql (Check):
                 # -s"," sets comma as separator, -W removes trailing spaces, -h-1 removes headers
                 res = subprocess.run(
                     [
+                        # /opt/mssql-tools18/bin/sqlcmd -E -C -S manehatten.mlp.local,1433 -d "db" -Q "SELECT E.Virtue AS [The Element], C.Name AS [Bearer], C.Species AS [Species], C.LoreTitle AS [Known As], L.PlaceName AS [Resides In] FROM [dbo].[Elements] E JOIN [dbo].[Characters] C ON E.BearerID = C.CharID JOIN [dbo].[Locations] L ON C.HomeLocationID = L.LocationID ORDER BY C.Name;" -s , -W -h-1
+                        # /opt/mssql-tools18/bin/sqlcmd -E -C -S manehatten.mlp.local,1433 -d "db" -Q "WITH ElementSummary AS ( SELECT C.Name + '(' + E.Virtue + ')' AS BearerInfo FROM [dbo].[Elements] E JOIN [dbo].[Characters] C ON E.BearerID = C.CharID JOIN [dbo].[Locations] L ON C.HomeLocationID = L.LocationID ) SELECT STRING_AGG(BearerInfo, ', ') WITHIN GROUP (ORDER BY BearerInfo ASC) AS FlatResult FROM ElementSummary;" -s , -W -h-1
                         '/opt/mssql-tools18/bin/sqlcmd', '-E', '-C', 
                         '-S', target_host, 
                         '-d', db_name, 
@@ -285,14 +288,17 @@ class Mssql (Check):
                     text=True
                 )
 
+                lines = [line.strip() for line in res.splitlines() if line.strip()]
+                final_string = lines[0]
+
                 # Check succeeded
-                if res.returncode == 0 and criterion.content in res.stdout:
+                if res.returncode == 0 and criterion.content in final_string:
                     return (criterion.team, f"Found expected content for check {criterion.id}")
                 # Command failed
                 elif res.returncode != 0:
                     err.insert(0, res.stderr)
                 # Incorrect output
-                elif criterion.content not in res.stdout:
+                elif criterion.content not in final_string:
                     err.append(f"Could not find expected content for check {criterion.id}")
 
             except Exception as E:
