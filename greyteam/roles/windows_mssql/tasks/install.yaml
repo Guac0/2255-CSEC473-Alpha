@@ -59,6 +59,12 @@
     script: |
       setspn -S MSSQLSvc/{{ inventory_hostname_short }}.{{ domain }}:1433 {{ inventory_hostname_short | upper }}
       setspn -S MSSQLSvc/{{ mssql_host }}:1433 {{ inventory_hostname_short | upper }}
+    #setspn -S MSSQLSvc/manehatten.mlp.local:1433 MANEHATTEN
+    #setspn -S MSSQLSvc/10.0.10.2:1433 MANEHATTEN
+    # -D to delete (ansible wont indicate)
+  become: yes
+  become_method: runas
+  become_user: "{{ domain }}\\{{ greyteam_user }}"
   #when: not app_check.stat.exists
   
 - name: Enable TCP/IP for SQL Server
