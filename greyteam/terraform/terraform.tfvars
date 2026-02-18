@@ -43,7 +43,7 @@ deb13 = {
 ubun24 = {
   "linux_wkst1" = { hostname = "cloudsdale", ip = "10.0.30.4", network = "internal"}
   "linux_wkst2" = { hostname = "vanhoover", ip = "10.0.30.5", network = "internal"}
-  "linux_wkst2" = { hostname = "whinnyapolis", ip = "10.0.30.6", network = "internal"}
+  "linux_wkst3" = { hostname = "whinnyapolis", ip = "10.0.30.6", network = "internal"}
 }
 win10 = {
   "windows_wkst1" = { hostname = "baltamare", ip = "10.0.30.1", network = "internal"}
