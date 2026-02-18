@@ -91,4 +91,9 @@
           Set-ItemProperty -Path $_.PSPath -Name "Enabled" -Value 1
       }
   when: not app_check.stat.exists
-  notify: Restart SQL Service
+
+- name: Restart SQL Service
+  ansible.windows.win_service:
+    #name: "MSSQL${{ mssql_instancename }}"
+    name: "{{ mssql_instancename }}"
+    state: restarted

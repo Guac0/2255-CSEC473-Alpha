@@ -1,4 +1,10 @@
 ---
+- name: Restart SQL Service
+  ansible.windows.win_service:
+    #name: "MSSQL${{ mssql_instancename }}"
+    name: "{{ mssql_instancename }}"
+    state: restarted
+    
 - name: Generate Ticket
   ansible.builtin.shell: |
     kinit {{ domain_admins[0] }}@{{ domain | upper }} << 'EOF'
@@ -80,3 +86,9 @@
     ('Loyalty', (SELECT CharID FROM Characters WHERE Name='rainbowdash')),
     ('Kindness', (SELECT CharID FROM Characters WHERE Name='fluttershy'));"
   delegate_to: localhost
+
+- name: Restart SQL Service
+  ansible.windows.win_service:
+    #name: "MSSQL${{ mssql_instancename }}"
+    name: "{{ mssql_instancename }}"
+    state: restarted
