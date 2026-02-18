@@ -1,0 +1,20 @@
+smb_content_files:
+  - name: "Starswirl_Banishment_Notes.txt"
+    content: |
+      Confidential Archive - Appleloosa Region
+      These documents are required to reconstruct the ancient banishment spell.
+      Unauthorized access may aid the Legion of Doom.
+
+  - name: "Legion_Activity_Log.txt"
+    content: |
+      Incident Log:
+      - Suspicious activity detected in Crystal Empire.
+      - Possible changeling infiltration attempt.
+      - Network corruption observed in Canterlot.
+
+  - name: "Harmony_Artifact_Index.txt"
+    content: |
+      Artifact Status:
+      - Crystal Heart: Secure
+      - Elements of Harmony: Distributed
+      - Canterlot Archives: Monitoring

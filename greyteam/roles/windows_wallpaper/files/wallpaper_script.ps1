@@ -7,11 +7,11 @@ while (-not (Get-Process explorer -ErrorAction SilentlyContinue)) {
 Start-Sleep -Seconds 5
 
 # Tell windows to enable rdp wallpaper
-$rdpPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-if (-not (Test-Path $rdpPath)) {
-    New-Item $rdpPath -Force | Out-Null
-}
-Set-ItemProperty -Path $rdpPath -Name "fNoRemoteDesktopWallpaper" -Value 0
+#$rdpPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+#if (-not (Test-Path $rdpPath)) {
+#    New-Item $rdpPath -Force | Out-Null
+#}
+#Set-ItemProperty -Path $rdpPath -Name "fNoRemoteDesktopWallpaper" -Value 0
 
 $wallpaper = "C:\ProgramData\Inscope\Branding\wallpaper.jpg"
 
