@@ -19,16 +19,16 @@
     group: root
   become: yes
 
-# Create user to login to GUI & receive print files
-- name: Create printer admin
+# Add all admin users to lpadmin group
+- name: Add admins to lpadmin
   ansible.builtin.user:
-    name: "{{ printer_admin }}"
-    shell: "/bin/bash"
-    password: "{{ printer_admin_passwd | password_hash('sha512') }}"
-    group: lpadmin
+    name: "{{ item }}"
+    groups: lpadmin
+    append: yes
   become: yes
+  loop: "{{ local_admins }}"
 
-# Create directory to output print files to
+# We select 1 pony to output print files to
 - name: Create printer output directory
   ansible.builtin.file:
     path: "/home/{{ printer_admin }}/print"
@@ -70,3 +70,4 @@
   ansible.builtin.command:
     cmd: "cupsctl --share-printers"
   become: yes
+
