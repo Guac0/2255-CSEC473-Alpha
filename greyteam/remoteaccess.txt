@@ -85,34 +85,34 @@ instance_ips_jumpgrey = {
   }
 }
 ok: [jumpblue1] => {
-    "msg": "RustDesk ID: 507549506 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 507549506 -- Password: Friendship0!"
 }
 ok: [jumpblue2] => {
-    "msg": "RustDesk ID: 514264008 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 514264008 -- Password: Friendship0!"
 }
 ok: [jumpblue3] => {
-    "msg": "RustDesk ID: 515186532 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 515186532 -- Password: Friendship0!"
 }
 ok: [jumpblue4] => {
-    "msg": "RustDesk ID: 513810519 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 513810519 -- Password: Friendship0!"
 }
 ok: [jumpblue5] => {
-    "msg": "RustDesk ID: 515043480 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 515043480 -- Password: Friendship0!"
 }
 ok: [jumpblue6] => {
-    "msg": "RustDesk ID: 1990674293 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 1990674293 -- Password: Friendship0!"
 }
 ok: [jumpblue7] => {
-    "msg": "RustDesk ID: 512381411 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 512381411 -- Password: Friendship0!"
 }
 ok: [jumpblue8] => {
-    "msg": "RustDesk ID: 506287610 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 506287610 -- Password: Friendship0!"
 }
 ok: [jumpblue9] => {
-    "msg": "RustDesk ID: 503963007 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 503963007 -- Password: Friendship0!"
 }
 ok: [jumpblue10] => {
-    "msg": "RustDesk ID: 519436120 -- Password: FriendshipIsMagic0!"
+    "msg": "RustDesk ID: 519436120 -- Password: Friendship0!"
 }
 ok: [jumpgrey1] => {
     "msg": "RustDesk ID: 515560629 -- Password: ponyuploc0!"
