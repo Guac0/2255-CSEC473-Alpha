@@ -205,3 +205,38 @@
     host: "%"
     state: present
   loop: "{{ local_admins }}"
+
+- name: Create database user for localhost
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ db_user }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "localhost"
+    state: present
+
+- name: Create database users for local_users (localhost)
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "localhost"
+    state: present
+  loop: "{{ local_users }}"
+
+- name: Create database users for local_admins (localhost)
+  mysql_user:
+    login_user: root
+    login_password: "{{ team_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ item }}"
+    password: "{{ team_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "localhost"
+    state: present
+  loop: "{{ local_admins }}"
