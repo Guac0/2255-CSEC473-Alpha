@@ -116,6 +116,15 @@
     - windows
     - inscope
 
+- name: Windows Deploy DNS
+  hosts: dns
+  roles:
+    - windows_dns
+  tags:
+    - windows
+    - inscope
+    - dns
+
 - name: Windows Boxes join AD
   hosts: windows:&inscope:!dc #:!cementc
   roles:
@@ -134,15 +143,6 @@
     - windows
     - inscope
     - mssql
-
-- name: Windows Deploy DNS
-  hosts: dns
-  roles:
-    - windows_dns
-  tags:
-    - windows
-    - inscope
-    - dns
 
 - name: Windows Deploy SMB 
   hosts: smb
