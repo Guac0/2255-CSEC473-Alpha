@@ -8,6 +8,14 @@
     name: rsync
     state: present
 
+- name: Ensure local exfil directory exists
+  ansible.builtin.file:
+    path: "./exfil/homedirs"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  become: no
+
 - name: Pull home directories to controller
   ansible.posix.synchronize:
     mode: pull
