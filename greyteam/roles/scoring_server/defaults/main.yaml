@@ -32,8 +32,10 @@ webgui_users:
     password: "ponyuploc0!"
     role: "admin"
   redteam:
-    password: "SugarCubes4Doom!"
+    #password: "Frenemies0!"
+    password: "getout"
     role: "redteam"
   blueteam:
-    password: "Friendship0!"
+    #password: "Friendship0!"
+    password: "getout"
     role: "blueteam"
