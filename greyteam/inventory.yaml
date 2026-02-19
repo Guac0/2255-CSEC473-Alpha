@@ -86,6 +86,11 @@ all:
       hosts:
         whinnyapolis:
           ansible_host: "10.0.30.6"
+    
+    controller:
+      hosts:
+        deploy:
+          ansible_host: "172.20.0.80"
 
 # Groups
     # Workstation Hosts
@@ -190,9 +195,7 @@ all:
     mgmt:
       children:
         scoring_all:
-      hosts:
-        deploy:
-          ansible_host: "172.20.0.80"
+        controller:
 
 # OS-based groups
     # Hosts that are Windows
@@ -220,7 +223,7 @@ all:
         void:
         jumpboxes:
         scoring_all:
-        deploy:
+        controller:
     unix:
       children:
         linux:
