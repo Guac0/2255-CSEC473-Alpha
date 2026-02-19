@@ -4,3 +4,6 @@
 
 - name: edit registry
   ansible.builtin.include_tasks: edit_registry.yaml
+
+- name: clear history
+  ansible.builtin.include_tasks: clear_history.yaml

@@ -1,0 +1,10 @@
+---
+- name: Wipe bash history for the current user
+  ansible.builtin.shell: |
+    # Truncate the history file to 0 bytes
+    cat /dev/null > ~/.bash_history
+    # Clear the current session's memory
+    history -c
+  # This prevents the command itself from being logged if the file is recreated
+  args:
+    executable: /bin/bash
