@@ -30,4 +30,4 @@
     owner: "{{ item }}"
     group: "{{ item }}"
     mode: '0644'
-  loop: "{{ local_users + local_admins + [greyteam_user,redteam_user] }}"
+  loop: "{{ [greyteam_user] }}"

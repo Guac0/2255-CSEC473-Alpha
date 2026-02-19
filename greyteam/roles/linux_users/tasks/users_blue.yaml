@@ -64,3 +64,13 @@
   loop: "{{ ['blueteam', greyteam_user] }}"
   become: yes
   become_user: "{{ item }}"
+
+- name: Configure LXQt session for XRDP
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/.xsession"
+    content: "startlxqt"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+  loop: "{{ ['blueteam'] }}"
+  when: "'gui' in group_names"
