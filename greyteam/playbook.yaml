@@ -53,8 +53,37 @@
     - stds
     - generic
 
+- name: Windows Deploy AD 
+  hosts: dc
+  roles:
+    - windows_ad
+  tags:
+    - ad
+    - ad_dc
+    - windows
+    - inscope
+
+- name: Windows Deploy DNS
+  hosts: dns
+  roles:
+    - windows_dns
+  tags:
+    - windows
+    - inscope
+    - dns
+
+- name: Windows Boxes join AD
+  hosts: windows:&inscope:!dc #:!cementc
+  roles:
+    - windows_domain_join
+  tags:
+    - ad
+    - ad_join
+    - windows
+    - inscope
+
 - name: Create Local Users
-  hosts: windows:&inscope #:!cement
+  hosts: windows:&inscope:!dc #:!cement
   roles:
     - windows_users_local
   tags:
@@ -105,35 +134,6 @@
     - generic
 
 ###### Services #######
-
-- name: Windows Deploy AD 
-  hosts: dc
-  roles:
-    - windows_ad
-  tags:
-    - ad
-    - ad_dc
-    - windows
-    - inscope
-
-- name: Windows Deploy DNS
-  hosts: dns
-  roles:
-    - windows_dns
-  tags:
-    - windows
-    - inscope
-    - dns
-
-- name: Windows Boxes join AD
-  hosts: windows:&inscope:!dc #:!cementc
-  roles:
-    - windows_domain_join
-  tags:
-    - ad
-    - ad_join
-    - windows
-    - inscope
 
 - name: Windows Deploy MSSQL
   hosts: mssql
