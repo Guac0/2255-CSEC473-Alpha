@@ -176,7 +176,7 @@ def insert_initial_data(logger):
 
             # Create 10 Users per host and link them to the criteria
             for u_name in scoring_usernames:
-                user = ScoringUser(username=u_name, password="FriendshipIsMagic0!", host=new_host)
+                user = ScoringUser(username=u_name, password="Friendship0!", host=new_host)
                 db.session.add(user)
                 db.session.flush() # Get User ID
 

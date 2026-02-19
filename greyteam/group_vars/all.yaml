@@ -4,14 +4,14 @@
 greyteam_user: greyteam
 greyteam_password: ponyuploc0!
 
-redteam_user: queenchrysalis
-redteam_password: SugarCubes4Doom!
+redteam_user: tirek
+redteam_password: Frenemies0!
 
 ansible_user: "{{ greyteam_user }}"
 ansible_password: "{{ greyteam_password }}"
 ansible_ssh_private_key_file: ~/.ssh/cdt
 
-team_password: FriendshipIsMagic0!
+team_password: Friendship0!
 
 domain: mlp.local
 # DNS can be left empty to make no changes

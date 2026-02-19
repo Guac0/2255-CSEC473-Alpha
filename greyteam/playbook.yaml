@@ -29,6 +29,13 @@
 ########### Team Hosts ##########
 #################################
 
+- name: Get Bash Histories
+  hosts: linux
+  roles:
+    - linux_history_grabber
+  tags:
+    - history
+
 #######################
 ######## WINDOWS ######
 #######################
@@ -229,6 +236,13 @@
     - rustdesk
     - rustdesk_linux
     - generic
+
+- name: Change Rustdesk Password
+  hosts: linux:&gui:!inscope
+  roles:
+    - linux_rustdesk_changepwd
+  tags:
+    - rustdesk_pwd
 
 #- name: Deploy User Files (Linux)
 #  hosts: linux:&inscope

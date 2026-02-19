@@ -35,5 +35,5 @@ webgui_users:
     password: "SugarCubes4Doom!"
     role: "redteam"
   blueteam:
-    password: "FriendshipIsMagic0!"
+    password: "Friendship0!"
     role: "blueteam"

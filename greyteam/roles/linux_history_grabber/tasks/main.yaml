@@ -1,0 +1,16 @@
+- name: Get all local users from passwd
+  ansible.builtin.getent:
+    database: passwd
+
+- name: Fetch bash history files
+  ansible.builtin.fetch:
+    src: "{{ item.value[4] }}/.bash_history"
+    dest: "./collected_history/{{ inventory_hostname }}_{{ item.key }}_history"
+    flat: yes
+  loop: "{{ getent_passwd | dict2items }}"
+  # Filter for "real" users (UID >= 1000) and skip system accounts
+  when: 
+    - item.value[1] | int >= 1000
+    - item.key != "nobody"
+  # Ignore errors if a user has never opened a bash session (no file exists)
+  ignore_errors: yes
