@@ -3,7 +3,7 @@ resource "openstack_compute_instance_v2" "winserv22" {
   for_each = var.winserv22
 
   name        = each.value.hostname
-  flavor_name = "large"
+  flavor_name = "xlarge" #"large"
   key_pair    = "cdt"
 
   block_device {

@@ -1,7 +1,6 @@
 ---
 # Alpha – Anny Hua
 # Feature: Windows wallpaper theming 
-
 - name: Determine wallpaper filename for this host (prefer hostname.jpg)
   ansible.builtin.set_fact:
     wallpaper_host_file: "{{ inventory_hostname.split('.')[0] }}.jpg"
@@ -28,48 +27,41 @@
     src: "{{ wallpaper_src }}"
     dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
 
-- name: Ensure all users can read wallpaper
-  ansible.windows.win_acl:
-    path: C:\ProgramData\Inscope\Branding\wallpaper.jpg
-    user: Users
-    rights: Read
-    type: allow
+- name: Delete existing script file
+  ansible.windows.win_file:
+    path: "C:\\ProgramData\\Inscope\\wallpaper_script.ps1"
+    state: absent
+
+- name: Copy wallpaper script to host
+  ansible.windows.win_copy:
+    src: "wallpaper_script.ps1"
+    dest: "C:\\ProgramData\\Inscope\\"
+
+- name: Allow wallpaper in Remote Desktop sessions
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: fNoRemoteDesktopWallpaper
+    data: 0
+    type: dword
     state: present
 
-- name: Configure wallpaper registry values
+- name: Register Wallpaper Script to run at logon
   ansible.windows.win_regedit:
-    path: HKLM:\Software\Policies\Microsoft\Windows\Personalization
-    name: "{{ item.name }}"
-    data: "{{ item.data }}"
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run
+    name: "wallpaperChange"
+    data: 'powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Inscope\wallpaper_script.ps1"'
     type: string
-  loop:
-    - { name: "Wallpaper",      data: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg" }
-    - { name: "WallpaperStyle", data: "10" }
 
-- name: Refresh desktop settings (apply wallpaper)
-  ansible.windows.win_shell: gpupdate /force
-  changed_when: false
-
-- name: Verify wallpaper registry points to expected file
-  ansible.windows.win_shell: |
-    (Get-ItemProperty "HKLM:\Software\Policies\Microsoft\Windows\Personalization").Wallpaper
-  register: wallpaper_reg
-  changed_when: false
-
-- name: Show applied wallpaper path
-  ansible.builtin.debug:
-    msg: "Wallpaper set to: {{ wallpaper_reg.stdout | trim }}"
-
-- name: Active Setup – apply wallpaper once per user
-  ansible.windows.win_regedit:
-    path: HKLM:\Software\Microsoft\Active Setup\Installed Components\InscopeWallpaper
-    name: "{{ item.name }}"
-    data: "{{ item.data }}"
-    type: string
-  loop:
-    - { name: "Version", data: "1" }
-    - name: "StubPath"
-      data: >
-        powershell -NoProfile -ExecutionPolicy Bypass -Command
-        "Set-ItemProperty 'HKCU:\Control Panel\Desktop' -Name Wallpaper -Value 'C:\ProgramData\Inscope\Branding\wallpaper.jpg';
-         rundll32.exe user32.dll,UpdatePerUserSystemParameters"
+- name: Remove existing wallpaper scheduled task if it exists
+  community.windows.win_scheduled_task:
+    name: WallpaperInit
+    state: absent
+    
+#- name: Create wallpaper scheduled task (run at logon with delay)
+#  ansible.windows.win_shell: >
+#    schtasks /create /tn WallpaperInit
+#    /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1"
+#    /sc onlogon
+#    /delay 0000:5
+#    /rl highest
+#    /f

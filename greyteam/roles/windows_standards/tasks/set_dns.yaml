@@ -4,3 +4,10 @@
     dns_servers: "{{ mgmt_dns }}"
   # Support mgmt dns having zero entries (why?)
   when: mgmt_dns is defined and mgmt_dns | length > 0
+  
+- name: Deploy Local DNS Overrides (Windows Way)
+  ansible.windows.win_hosts:
+    state: present
+    canonical_name: "{{ item.name }}"
+    ip_address: "{{ item.ip }}"
+  loop: "{{ dns_overrides }}"

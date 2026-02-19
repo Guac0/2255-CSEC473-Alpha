@@ -1,5 +1,5 @@
 ---
-# Alpha – Anny Hua
+# Created by Anny Hua (active setup method) and modified by Han Chen (runonce method)
 # Feature: Custom cursor theme (ship cursor files)
 
 - name: Create cursor directory
@@ -12,26 +12,14 @@
     src: "cursors/"
     dest: "C:\\ProgramData\\Inscope\\Cursors\\"
 
-- name: Set cursor registry paths to custom cursors
-  ansible.windows.win_regedit:
-    path: HKLM:\Software\Microsoft\Active Setup\Installed Components\InscopeCursors
-    name: "{{ item.name }}"
-    data: "{{ item.data }}"
-    type: string
-  loop:
-    - name: Version
-      data: "1"
-    - name: StubPath
-      data: |
-        powershell -NoProfile -ExecutionPolicy Bypass -Command "
-        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name Arrow -Value 'C:\ProgramData\Inscope\Cursors\Arrow.cur';
-        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name IBeam -Value 'C:\ProgramData\Inscope\Cursors\IBeam.ani';
-        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name Hand  -Value 'C:\ProgramData\Inscope\Cursors\Hand.ani';
-        Set-ItemProperty 'HKCU:\Control Panel\Cursors' -Name SchemeSource -Value 2;
-        rundll32.exe user32.dll,UpdatePerUserSystemParameters
-        "
+- name: Copy cursor changing script to host
+  ansible.windows.win_copy:
+    src: "cursor_script.ps1"
+    dest: "C:\\ProgramData\\Inscope\\"
 
-- name: Notify user a logoff/login may be needed to fully apply cursor changes
-  ansible.windows.win_shell: |
-    Write-Output "Custom cursor files deployed. Logoff/login may be required to refresh."
-  changed_when: false
+- name: Register Cursor Script to run at logon
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run
+    name: "cursorChange"
+    data: 'powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Inscope\cursor_script.ps1"'
+    type: string

@@ -1,0 +1,146 @@
+instance_fixed_ip_deploy_external = "172.20.0.80"
+instance_fixed_ip_deploy_internal = "100.65.3.219"
+instance_ips_jumpblue = {
+  "jumpblue1" = {
+    "external_ip" = "100.65.6.247"
+    "internal_ip" = "172.20.0.41"
+  }
+  "jumpblue10" = {
+    "external_ip" = "100.65.2.107"
+    "internal_ip" = "172.20.0.40"
+  }
+  "jumpblue2" = {
+    "external_ip" = "100.65.6.186"
+    "internal_ip" = "172.20.0.42"
+  }
+  "jumpblue3" = {
+    "external_ip" = "100.65.7.94"
+    "internal_ip" = "172.20.0.43"
+  }
+  "jumpblue4" = {
+    "external_ip" = "100.65.6.185"
+    "internal_ip" = "172.20.0.44"
+  }
+  "jumpblue5" = {
+    "external_ip" = "100.65.7.205"
+    "internal_ip" = "172.20.0.45"
+  }
+  "jumpblue6" = {
+    "external_ip" = "100.65.3.191"
+    "internal_ip" = "172.20.0.46"
+  }
+  "jumpblue7" = {
+    "external_ip" = "100.65.6.2"
+    "internal_ip" = "172.20.0.47"
+  }
+  "jumpblue8" = {
+    "external_ip" = "100.65.3.215"
+    "internal_ip" = "172.20.0.48"
+  }
+  "jumpblue9" = {
+    "external_ip" = "100.65.8.6"
+    "internal_ip" = "172.20.0.49"
+  }
+}
+instance_ips_jumpgrey = {
+  "jumpgrey1" = {
+    "external_ip" = "100.65.7.211"
+    "internal_ip" = "172.20.0.71"
+  }
+  "jumpgrey10" = {
+    "external_ip" = "100.65.5.16"
+    "internal_ip" = "172.20.0.70"
+  }
+  "jumpgrey2" = {
+    "external_ip" = "100.65.6.32"
+    "internal_ip" = "172.20.0.72"
+  }
+  "jumpgrey3" = {
+    "external_ip" = "100.65.4.157"
+    "internal_ip" = "172.20.0.73"
+  }
+  "jumpgrey4" = {
+    "external_ip" = "100.65.5.106"
+    "internal_ip" = "172.20.0.74"
+  }
+  "jumpgrey5" = {
+    "external_ip" = "100.65.3.75"
+    "internal_ip" = "172.20.0.75"
+  }
+  "jumpgrey6" = {
+    "external_ip" = "100.65.7.18"
+    "internal_ip" = "172.20.0.76"
+  }
+  "jumpgrey7" = {
+    "external_ip" = "100.65.7.221"
+    "internal_ip" = "172.20.0.77"
+  }
+  "jumpgrey8" = {
+    "external_ip" = "100.65.5.209"
+    "internal_ip" = "172.20.0.78"
+  }
+  "jumpgrey9" = {
+    "external_ip" = "100.65.6.119"
+    "internal_ip" = "172.20.0.79"
+  }
+}
+ok: [jumpblue1] => {
+    "msg": "RustDesk ID: 507549506 -- Password: Friendship0!"
+}
+ok: [jumpblue2] => {
+    "msg": "RustDesk ID: 514264008 -- Password: Friendship0!"
+}
+ok: [jumpblue3] => {
+    "msg": "RustDesk ID: 515186532 -- Password: Friendship0!"
+}
+ok: [jumpblue4] => {
+    "msg": "RustDesk ID: 513810519 -- Password: Friendship0!"
+}
+ok: [jumpblue5] => {
+    "msg": "RustDesk ID: 515043480 -- Password: Friendship0!"
+}
+ok: [jumpblue6] => {
+    "msg": "RustDesk ID: 1990674293 -- Password: Friendship0!"
+}
+ok: [jumpblue7] => {
+    "msg": "RustDesk ID: 512381411 -- Password: Friendship0!"
+}
+ok: [jumpblue8] => {
+    "msg": "RustDesk ID: 506287610 -- Password: Friendship0!"
+}
+ok: [jumpblue9] => {
+    "msg": "RustDesk ID: 503963007 -- Password: Friendship0!"
+}
+ok: [jumpblue10] => {
+    "msg": "RustDesk ID: 519436120 -- Password: Friendship0!"
+}
+ok: [jumpgrey1] => {
+    "msg": "RustDesk ID: 515560629 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey2] => {
+    "msg": "RustDesk ID: 518635574 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey3] => {
+    "msg": "RustDesk ID: 505129719 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey4] => {
+    "msg": "RustDesk ID: 519002604 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey5] => {
+    "msg": "RustDesk ID: 513125055 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey6] => {
+    "msg": "RustDesk ID: 510578557 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey7] => {
+    "msg": "RustDesk ID: 1338717426 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey8] => {
+    "msg": "RustDesk ID: 514335282 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey9] => {
+    "msg": "RustDesk ID: 515088631 -- Password: ponyuploc0!"
+}
+ok: [jumpgrey10] => {
+    "msg": "RustDesk ID: 516129048 -- Password: ponyuploc0!"
+}

@@ -1,0 +1,23 @@
+---
+- name: Get current primary interface and IP
+  set_fact:
+    scoring_interface: "{{ ansible_default_ipv4.interface }}"
+    primary_ip_mask: "{{ ansible_default_ipv4.address }}/{{ ansible_default_ipv4.netmask }}"
+
+- name: Convert netmask to CIDR (Internal helper)
+  set_fact:
+    # Converts e.g. 255.255.255.0 to 24 for nmcli compatibility
+    primary_cidr: "{{ primary_ip_mask | ansible.utils.ipaddr('host/prefix') }}"
+
+- name: Apply Primary and Scoring IPs to Interface
+  community.general.nmcli:
+    conn_name: "{{ scoring_interface }}"
+    ifname: "{{ scoring_interface }}"
+    type: ethernet
+    ip4: "{{ [primary_cidr] + scoring_ips }}"
+    state: present
+  register: nmcli_result
+
+- name: Reload connections to apply changes
+  ansible.builtin.shell: "nmcli device reapply {{ scoring_interface }}"
+  when: nmcli_result.changed

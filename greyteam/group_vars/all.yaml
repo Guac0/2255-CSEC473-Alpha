@@ -3,15 +3,19 @@
 
 greyteam_user: greyteam
 greyteam_password: ponyuploc0!
+#greyteam_user: tirek
+#greyteam_password: Frenemies0!
+#greyteam_user: bigmac
+#greyteam_password: Friendship0!
 
-redteam_user: redteam
-redteam_password: SugarCubes4Doom!
+redteam_user: tirek
+redteam_password: Frenemies0!
 
 ansible_user: "{{ greyteam_user }}"
 ansible_password: "{{ greyteam_password }}"
 ansible_ssh_private_key_file: ~/.ssh/cdt
 
-team_password: FriendshipIsMagic0!
+team_password: Friendship0!
 
 domain: mlp.local
 # DNS can be left empty to make no changes
@@ -33,7 +37,7 @@ local_admins:
   - bigmac
   - mayormare
   - shiningarmor
-  - cadence
+  - cadance
 domain_users:
   - spike
   - starlight
@@ -46,3 +50,9 @@ domain_admins:
   - discord
   - luna
   - starswirl
+
+dns_overrides:
+  - { ip: '10.0.10.1',    name: 'mlp.local' }
+  - { ip: '10.0.10.1',    name: 'canterlot.mlp.local' }
+  #- { ip: '10.0.10.1',    name: 'dc.mlp.local' }
+  - { ip: '172.20.0.100', name: 'scoring.mlp.local' }

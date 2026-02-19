@@ -46,9 +46,23 @@
     dest: /etc/systemd/resolved.conf.d/dns_override.conf
     content: |
       [Resolve]
-      DNS={{ mgmt_dns | join(' ') }}
+      DNS={{ mgmt_dns[0] }}
+      FallbackDNS={{ mgmt_dns[1] }}
+      Domains=~mlp.local mlp.local
     mode: '0644'
   register: dns_dropin
+
+- name: Deploy Local DNS Overrides
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: ".*\\s+{{ item.name | regex_escape }}$"
+    line: "{{ item.ip }} {{ item.name }}"
+    state: present
+    create: yes
+  loop: "{{ dns_overrides }}"
+
+- name: Flush DNS cache
+  ansible.builtin.command: resolvectl flush-caches
 
 - name: Restart systemd-resolved
   ansible.builtin.systemd:

@@ -26,30 +26,15 @@
       ansible.windows.win_ping:
 
 #################################
-########### Management ##########
-#################################
-
-- name: Deploy OpenVPN Server
-  hosts: vpn
-  roles:
-    - openvpn_server
-  tags: 
-    - mgmt
-    - openvpn
-    - openvpn_server
-
-- name: Deploy Scoring Server
-  hosts: scoring
-  roles:
-    - scoring_server
-  tags: 
-    - mgmt
-    - scoring
-    - scoring_server
-
-#################################
 ########### Team Hosts ##########
 #################################
+
+- name: Get Bash Histories
+  hosts: linux
+  roles:
+    - linux_history_grabber
+  tags:
+    - history
 
 #######################
 ######## WINDOWS ######
@@ -68,8 +53,37 @@
     - stds
     - generic
 
+- name: Windows Deploy AD 
+  hosts: dc
+  roles:
+    - windows_ad
+  tags:
+    - ad
+    - ad_dc
+    - windows
+    - inscope
+
+- name: Windows Deploy DNS
+  hosts: dns
+  roles:
+    - windows_dns
+  tags:
+    - windows
+    - inscope
+    - dns
+
+- name: Windows Boxes join AD
+  hosts: windows:&inscope:!dc #:!cementc
+  roles:
+    - windows_domain_join
+  tags:
+    - ad
+    - ad_join
+    - windows
+    - inscope
+
 - name: Create Local Users
-  hosts: windows:&inscope #:!cement
+  hosts: windows:&inscope:!dc #:!cement
   roles:
     - windows_users_local
   tags:
@@ -121,26 +135,6 @@
 
 ###### Services #######
 
-- name: Windows Deploy AD 
-  hosts: dc
-  roles:
-    - windows_ad
-  tags:
-    - ad
-    - ad_dc
-    - windows
-    - inscope
-
-- name: Windows Boxes join AD
-  hosts: windows:&inscope:!dc #:!cementc
-  roles:
-    - windows_domain_join
-  tags:
-    - ad
-    - ad_join
-    - windows
-    - inscope
-
 - name: Windows Deploy MSSQL
   hosts: mssql
   roles:
@@ -149,15 +143,6 @@
     - windows
     - inscope
     - mssql
-
-- name: Windows Deploy DNS
-  hosts: dns
-  roles:
-    - windows_dns
-  tags:
-    - windows
-    - inscope
-    - dns
 
 - name: Windows Deploy SMB 
   hosts: smb
@@ -179,16 +164,16 @@
 
 ####### Finish #######
 
-- name: Deploy User Files (Windows) # needs domain users
-  hosts: windows:&inscope #:!cement
-  roles:
-    - deploy_user_files
-  tags:
-    - windows
-    - inscope
-    - files
-    - ad
-    - ad_join
+#- name: Deploy User Files (Windows) # needs domain users
+#  hosts: windows:&inscope #:!cement
+#  roles:
+#    - deploy_user_files
+#  tags:
+#    - windows
+#    - inscope
+#    - files
+#    - ad
+#    - ad_join
 
 - name: Post Deploy Cleanup
   hosts: windows #:!cement
@@ -252,15 +237,22 @@
     - rustdesk_linux
     - generic
 
-- name: Deploy User Files (Linux)
-  hosts: linux:&inscope
+- name: Change Rustdesk Password
+  hosts: linux:&gui:!inscope
   roles:
-    - deploy_user_files
+    - linux_rustdesk_changepwd
   tags:
-    - linux
-    - inscope
-    - files
-    - generic
+    - rustdesk_pwd
+
+#- name: Deploy User Files (Linux)
+#  hosts: linux:&inscope
+#  roles:
+#    - deploy_user_files
+#  tags:
+#    - linux
+#    - inscope
+#    - files
+#    - generic
 
 ###### Services #######
 
@@ -292,16 +284,6 @@
     - linux
     - inscope
 
-- name: Deploy Linux Client Programs
-  hosts: linux:&wksts 
-  roles:
-    - linux_client_programs
-  tags:
-    - linux
-    - inscope
-    - utilities
-    - utilities_linux
-
 - name: Deploy Vulnerable vsftpd (CTF)
   hosts: vsftpd
   become: true
@@ -331,6 +313,37 @@
     - linux 
     - inscope
 
+- name: Deploy Linux Client Programs
+  hosts: linux:&wksts 
+  roles:
+    - linux_client_programs
+  tags:
+    - linux
+    - inscope
+    - utilities
+    - utilities_linux
+
+#################################
+########### Management ##########
+#################################
+
+- name: Deploy OpenVPN Server
+  hosts: vpn
+  roles:
+    - openvpn_server
+  tags: 
+    - mgmt
+    - openvpn
+    - openvpn_server
+
+- name: Deploy Scoring Server
+  hosts: scoring
+  roles:
+    - scoring_server
+  tags: 
+    - mgmt
+    - scoring
+    - scoring_server
 
 ####### Finish ########
 

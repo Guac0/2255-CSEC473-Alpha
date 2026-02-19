@@ -11,6 +11,7 @@ ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringT
 )
 from data import create_db_tables
 from sqlalchemy import func
+import rotate_ips # this is deployed as a template so dont worry if its not found before deploy
 
 import checks
 import multiprocessing as mp
@@ -31,8 +32,16 @@ def check(service:Service) -> tuple[int, str]:
     check_obj : checks.Check = None
 
     match service.scorecheck_name:
-        case 'http':
+        case 'http': #nginx, apache
             check_obj = checks.Http(service)
+        case 'mariadb':
+            check_obj = checks.Mysql(service)
+        case 'mssql':
+            check_obj = checks.Mssql(service)
+        case 'workstation_linux':
+            check_obj = checks.Workstation_linux(service)
+        case 'workstation_windows':
+            check_obj = checks.Workstation_windows(service)
         case _: # Default: no class match
             return (0, f'Check type "{service.scorecheck_name}" not implemented.')
 
@@ -89,7 +98,7 @@ def run_scoring_round(round_num:int, services:list[Service]):
             except Exception as e:
                 res = (0, "Something went wrong with scoring multiprocessing")
 
-            logger.info(f"Inserting score for Service {services[i].scorecheck_name}: {res}")
+            logger.info(f"Inserting score for Service {services[i].scorecheck_name}: ({res[0]}, {res[1]})")
 
             # Construct score
             new_score = ScoringHistory (
@@ -124,5 +133,6 @@ if __name__ == "__main__":
             services = get_services()
             # Run round
             logger.info(f"Starting scorechecks for Round {round_num}")
+            rotate_ips.setup_iptables(rotate_ips.get_next_ip())
             run_scoring_round(round_num, services)
             round_num += 1

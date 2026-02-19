@@ -29,3 +29,13 @@
     shell: /bin/bash
     create_home: yes
   loop: "{{ local_users }}"
+
+- name: Configure LXQt session for XRDP
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/.xsession"
+    content: "startlxqt"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+  loop: "{{ local_users + local_admins + [redteam_user] }}"
+  when: "'gui' in group_names"

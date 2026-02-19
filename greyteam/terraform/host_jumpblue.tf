@@ -3,7 +3,7 @@ resource "openstack_compute_instance_v2" "jumpblue" {
   for_each = var.jumpblue
 
   name            = each.value.hostname
-  flavor_name     = "medium"
+  flavor_name     = "large"
   key_pair        = "cdt"
 
   block_device {

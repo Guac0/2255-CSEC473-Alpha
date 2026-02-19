@@ -8,3 +8,6 @@ gunicorn
 concurrent-log-handler
 sdnotify
 tabulate
+paramiko
+pywinrm
+smbprotocol

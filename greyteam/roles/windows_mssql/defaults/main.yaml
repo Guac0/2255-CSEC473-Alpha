@@ -1,10 +1,14 @@
 ---
 # See templates/config.ini.j2 for a full explanation of each of these parameters
-mssql_sqlsvcaccount: "{{ domain }}\\{{ domain_admins[0] }}"
+mssql_sqlsvcaccount: "NT AUTHORITY\\NETWORK SERVICE"
+#mssql_sqlsvcaccount: "{{ domain }}\\{{ domain_admins[0] }}" # runs into double hop problem!
 mssql_sqlsvcpassword: "{{ team_password }}"
-mssql_sqlsysadminaccounts: "Administrators" #"domain\admin"
+mssql_sqlsysadminaccounts: "{{ domain }}\\Domain Admins" # Administrators #"domain\admin"
 mssql_database_name: "db"
-mssql_agtsvcaccount: "NT AUTHORITY\NETWORK SERVICE" #NT Service\SQLSERVERAGENT"
+#mssql_agtsvcaccount: "{{ domain }}\\{{ domain_users[0] }}"
+#mssql_agtsvcpassword: "{{ team_password }}"
+mssql_agtsvcaccount: "NT AUTHORITY\\NETWORK SERVICE" #NT Service\SQLSERVERAGENT" # not used
 mssql_instancename: "MSSQLSERVER"
+mssql_firewall: false
 
-mssql_host: "{{ ansible_default_ipv4.address }}"
+mssql_host: "{{ ansible_host }}"

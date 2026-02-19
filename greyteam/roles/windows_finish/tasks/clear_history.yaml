@@ -1,0 +1,12 @@
+---
+- name: Wipe PowerShell history for the current user
+  ansible.windows.win_powershell:
+    script: |
+      # 1. Clear the current session's history buffer
+      Clear-History
+
+      # 2. Locate and wipe the PSReadline persistent history file
+      $HistoryFile = (Get-PSReadLineOption).HistorySavePath
+      if (Test-Path $HistoryFile) {
+          Clear-Content -Path $HistoryFile
+      }

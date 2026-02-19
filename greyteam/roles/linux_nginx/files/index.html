@@ -1,1 +1,192 @@
-Test page for Pony NGINX!
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/Game">
+<head>  
+    <title>PONY WINGS</title>
+    <LINK href="css/game.css" rel="stylesheet" type="text/css">
+    <base target="_blank" />
+    <link rel="icon" type="image/ico" href="art/favicon/scootwing.ico?">
+
+    <meta itemprop="name" content="Pony Wings">
+    <meta itemprop="description" content="Help Scootaloo fly through the hills of Equestria!">
+    <meta itemprop="image" content="http://ponywings.nutcasenightmare.com">
+    
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="white-translucent" />
+    <link rel="apple-touch-icon-precomposed" href="art/icon/IconScootBack.png" />
+    <link rel="apple-touch-startup-image" href="art/Loading.png" />  
+
+    <style>
+        /* Centering Logic */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Horizontal center */
+            justify-content: flex-start;
+            margin: 0;
+            padding: 10px;
+            background-color: #ffdef2; /* Light pony pink */
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        /* Prevent the game from floating to the top-left */
+        #game_container {
+            position: relative !important; 
+            display: block;
+            width: 480px; 
+            height: 300px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        /* Description Styling */
+        .game-description {
+            width: 480px; /* Match game width exactly */
+            padding: 10px;
+            background: white;
+            border-radius: 15px;
+            border: 3px solid #E84298;
+            box-sizing: border-box;
+            color: #444;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .game-description h2 {
+            color: #E84298;
+            margin-top: 0;
+            font-size: 1.4em;
+            border-bottom: 2px solid #ffdef2;
+            padding-bottom: 5px;
+        }
+
+        .equestria-context {
+            font-weight: bold;
+            color: #8A2BE2;
+        }
+
+        #background {
+            position: fixed; /* Keep background behind everything */
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+        }
+    </style>
+
+    <script>
+        function BlockMove(event) {
+            if(!gameIsLoaded || !menu.isGameOver){
+                event.preventDefault();
+            }
+        }
+        var gameIsLoaded = false;
+        var gameIsMobile = false;
+        var notHomeScreened = gameIsMobile && !window.navigator.standalone;
+    </script>
+</head>
+   
+<body
+    onkeydown="if(gameIsLoaded){ kCont.keyDownHandler(event); }" 
+    onkeyup="if(gameIsLoaded){ kCont.keyUpHandler(event); }"
+    onblur="if(gameIsLoaded){ kCont.down=false; menu.pause(); }"
+    onmousedown="if(gameIsLoaded){ if(event.pageX<360||event.pageY>45){ kCont.down = true; } }"
+    onmouseup="if(gameIsLoaded){ kCont.down = false; }"
+    ontouchstart="if(gameIsLoaded){ if(event.touches[0].pageX<360||event.touches[0].pageY>45){ kCont.down = true; } } BlockMove(event);"
+    ontouchend="if(gameIsLoaded){ kCont.down = false; }" 
+    ontouchcancel="if(gameIsLoaded){ kCont.down = false; }"> 
+
+    <div id="background">
+        <div id='loading'></div>
+    </div>
+
+    <div id="game_container" style='display:none;'>
+        <canvas id="game" width="480" height="300"></canvas>
+        <canvas id="hud" width="480" height="300"></canvas>
+        
+        <div id='instructions' style='position:relative;opacity:1'>
+            <div class='title' style="position:absolute;top:20px;left:20px;"></div>
+            <div style='position:absolute;top:100px;left:200px;width:270px;height:100px;color:#E84298;'>
+                Scootaloo has always dreamed of flying, but her wings are too tiny.
+                <br><br>
+                Rollerscoot across hills to fly, catch speed-boosting parasprites, and outrace the sunset!
+                <br><br>
+                Press Screen or S to Scoot
+            </div>
+        </div>
+
+        <div id="hud_screen">
+            <div style="position:absolute;top:0;right:0;margin:10px;width:150px">
+                <div class="hud_button" id="breset" onclick='if(pony.startMoving){PWG.pauseGame();PWG.init();PWG.startTheGame();}'></div>
+                <div class="hud_button" id="bmusic" onclick='menu.toggleAudio();'></div>
+                <div class="hud_button" id="bpause" onclick='menu.togglePause();'></div>
+            </div>
+            <span style="position:absolute;right:0;bottom:0;margin:10px" id="points">0</span>
+        </div>
+
+        <div id="screen">
+            <div id="shade"></div>
+            <div id="container">
+                <div class="center0">
+                    <div class="center1">
+                        <div class="center2">
+                            <div id='pause' class="screenMenu" onclick='menu.togglePause();'>
+                                <div class='title' style="background-position:0 -100px;"></div>
+                                <div class='stats' id='main' style='font-size:16px'>
+                                    Press the Play button<br>to resume flight
+                                </div>
+                            </div>
+                            <div id='gameover' class="screenMenu" style="top:40px;" >
+                                <div class="center2" style="width:400px;">
+                                    <div class='title' style="background-position:0 -50px;"></div>
+                                    <div class='stats' id='main'>
+                                        Scootaloo flew <span id='stats_points'>1337m</span> today!
+                                    </div>
+                                    <div class='stats' id='yougotta'>
+                                        <div class='gotta_button social'><div id='fb-root'></div><div class='fb-like' data-href='http://ponywings.nutcasenightmare.com' data-send='false' data-layout='box_count' data-width='50' data-show-faces='false'></div></div>
+                                        <div class='gotta_button social'><a href='https://twitter.com/share' class='twitter-share-button' data-url='http://ponywings.nutcasenightmare.com' data-text='Today I roller-scooted and flew across the hills of Equestria!' data-count='vertical'>Tweet</a></div>
+                                        <div class='gotta_button social'><g:plusone size='tall'></g:plusone></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="game-description">
+        <h2>About Pony Wings</h2>
+        <p>
+            <strong>Pony Wings</strong> is an exhilarating rollerscooting adventure that captures the spirit of perseverance and the joy of flight. In this journey, you guide Scootaloo - a young filly with big dreams - as she uses the topography of the land to achieve heights her tiny wings couldn't reach alone.
+        </p>
+    </section>
+
+    <script src="src/Config.js"></script>
+    <script src="src/HUD.js"></script>
+    <script src="src/Menu.js"></script>
+    <script src="src/Background.js"></script>
+    <script src="src/Pony.js"></script>
+    <script src="src/Terrain.js"></script>
+    <script src="src/TerrainProp.js"></script>
+    <script src="src/KeyCont.js"></script>
+    <script src="src/MusicLoop.js"></script>
+    <script src="src/PonyWingsGame.js"></script>
+    <script type="text/javascript">
+        var enterFrameRate = 1000/60;
+        var drawFrameRate = 1000/60;
+        canvas = document.getElementById('game');
+        ctx = canvas.getContext('2d');
+        hudCanvas = document.getElementById('hud');
+        hudCTX = hudCanvas.getContext('2d');
+        PWG.loadArtAssets();
+        PWG.init();
+    </script>
+
+    <script>(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//connect.facebook.net/en_US/all.js#xfbml=1"; fjs.parentNode.insertBefore(js, fjs); }(document, "script", "facebook-jssdk"));</script>
+    <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
+    <script type="text/javascript"> (function() { var po = document.createElement("script"); po.type = "text/javascript"; po.async = true; po.src = "https://apis.google.com/js/plusone.js"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(po, s); })(); </script>
+
+</body> 
+</html>

@@ -58,17 +58,17 @@ def insert_initial_data(logger):
             ("10.0.10.3", "ponyville", "Debian 13", "Apache2"),
             ("10.0.10.4", "seaddle", "Debian 13", "MariaDB"),
             ("10.0.10.5", "trotsylvania", "Debian 13", "cups"),
-            ("10.0.10.6", "crystal-empire", "CachyOS", "vsftpd"),
+            ("10.0.10.6", "crystal-empire", "Debian 13", "vsftpd"),
             ("10.0.20.1", "las-pegasus", "Windows Server 2022", "IIS"),
             ("10.0.20.2", "appleloosa", "Windows Server 2022", "SMB"),
             ("10.0.20.3", "everfree-forest", "Debian 13", "IRC"),
             ("10.0.20.4", "griffonstone", "Debian 13", "Nginx"),
-            ("10.0.30.1", "baltamare", "Windows 10", "Workstation"),
-            ("10.0.30.2", "neighara-falls", "Windows 10", "Workstation"),
-            ("10.0.30.3", "fillydelphia", "Windows CEMeNT", "Workstation"),
-            ("10.0.30.4", "cloudsdale", "Ubuntu 24.04", "Workstation"),
-            ("10.0.30.5", "vanhoover", "Ubuntu 24.04", "Workstation"),
-            ("10.0.30.6", "whinnyapolis", "VoidOS", "Workstation"),
+            ("10.0.30.1", "baltamare", "Windows 10", "Wkst Hexchat"),
+            ("10.0.30.2", "neighara-falls", "Windows 10", "Wkst FileZilla"),
+            ("10.0.30.3", "fillydelphia", "Windows 10", "Wkst LibreOffice"),
+            ("10.0.30.4", "cloudsdale", "Ubuntu 24.04", "Wkst Hexchat"),
+            ("10.0.30.5", "vanhoover", "Ubuntu 24.04", "Wkst FileZilla"),
+            ("10.0.30.6", "whinnyapolis", "Ubuntu 24.04", "Wkst LibreOffice"),
         ]
 
         scoring_usernames = [
@@ -88,32 +88,32 @@ def insert_initial_data(logger):
                 crit_content=""
             elif ("mssql" in service_name_simple):
                 generic_name="mssql"
-                crit_location=""
-                crit_content=""
+                crit_location="'SELECT E.Virtue AS [The Element], C.Name AS [Bearer], C.Species AS [Species], C.LoreTitle AS [Known As], L.PlaceName AS [Resides In] FROM [dbo].[Elements] E JOIN [dbo].[Characters] C ON E.BearerID = C.CharID JOIN [dbo].[Locations] L ON C.HomeLocationID = L.LocationID ORDER BY C.Name;'"
+                crit_content="['Honesty,applejack,Earth Pony,Element of Honesty,Ponyville Kindness,fluttershy,Pegasus,Voice of Kindness,Ponyville Laughter,pinkiepie,Earth Pony,Minister of Merriment,Ponyville Loyalty,rainbowdash,Pegasus,Loyalty incarnate,Ponyville Generosity,rarity,Unicorn,Lady of Generosity,Ponyville Magic,twilight,Alicorn,Princess of Friendship,Ponyville (6 rows affected)']"
             elif ("apache" in service_name_simple):
                 generic_name="http"
-                crit_location="80"
-                crit_content=""
+                crit_location="80/doku.php?id=wiki:wikipage"
+                crit_content="Equestria faces an unprecedented threat. A coordinated assault on our magical infrastructure has disrupted harmony across multiple regions. Early investigations confirm the involvement of Queen Chrysalis, Cozy Glow, and Lord Tirek, now operating together under the name Legion of Doom."
             elif ("mariadb" in service_name_simple):
                 generic_name="mariadb"
-                crit_location=""
-                crit_content=""
+                crit_location="Ponies -e 'SELECT ponies'"
+                crit_content="30"
             elif ("cups" in service_name_simple):
                 generic_name="cups"
                 crit_location=""
                 crit_content=""
             elif ("vsftpd" in service_name_simple):
                 generic_name="ftp"
-                crit_location=""
-                crit_content=""
+                crit_location="~/Legion_Activity_Log.txt"
+                crit_content="Suspicious activity detected in Crystal Empire."
             elif ("iis" in service_name_simple):
                 generic_name="http"
                 crit_location="80"
-                crit_content=""
+                crit_content="<dd><b>Fluttershy</b>: Everypony, <i>stop!</i> I appreciate you sharing your thoughts, but I need everypony to respect mine. Other ponies may be experts in <i>their</i> fields, but animals are <i>my</i> field of expertise. And if I say this is what I want, then this is what needs to happen!</dd></dl>"
             elif ("smb" in service_name_simple):
                 generic_name="smb"
-                crit_location=""
-                crit_content=""
+                crit_location="\\\\appleloosa\\Appleloosa_Archives\\Starswirl_Banishment_Notes.txt"
+                crit_content="Confidential Archive - Appleloosa Region\n These documents are required to reconstruct the ancient banishment spell.\nUnauthorized access may aid the Legion of Doom."
             elif ("irc" in service_name_simple):
                 generic_name="irc"
                 crit_location=""
@@ -121,16 +121,30 @@ def insert_initial_data(logger):
             elif ("nginx" in service_name_simple):
                 generic_name="http"
                 crit_location="80"
-                crit_content=""
-            elif (("workstation" in service_name_simple) and ("windows" in os_name.lower().strip())):
-                generic_name="workstation windows"
-                crit_location=""
-                crit_content=""
-            elif (("workstation" in service_name_simple) and ("windows" not in os_name.lower().strip())):
-                generic_name="workstation linux"
-                crit_location=""
-                crit_content=""
-
+                crit_content="<strong>Pony Wings</strong> is an exhilarating rollerscooting adventure that captures the spirit of perseverance and the joy of flight. In this journey, you guide Scootaloo - a young filly with big dreams - as she uses the topography of the land to achieve heights her tiny wings couldn't reach alone."
+            elif (("wkst" in service_name_simple) and ("windows" in os_name.lower().strip())):
+                generic_name="workstation_windows"
+                if "hexchat" in service_name_simple:
+                    crit_location="C:\\Program Files\\HexChat\\hexchat.exe"
+                    crit_content="8B02D5E8376FE9BA4169692E273DAB3DE8F39907CC8F3ECE6F7611AC07202E07"
+                if "filzilla" in service_name_simple:
+                    crit_location="C:\\Program Files\\FileZilla FTP Client\\filezilla.exe"
+                    crit_content="34CC44587089222E09A105494A175191B99061CECCB265389CF58B58F35A0DA3"
+                if "libreoffice" in service_name_simple:
+                    crit_location="C:\\Program Files\\LibreOffice\\program\\soffice.exe"
+                    crit_content="234C8DF6C1F79B9705CEE233C6C6A5282E3F2B50873637859BFBCDD31AAEC1C4"
+            elif (("wkst" in service_name_simple) and ("windows" not in os_name.lower().strip())):
+                generic_name="workstation_linux"
+                if "hexchat" in service_name_simple:
+                    crit_location="/usr/bin/hexchat"
+                    crit_content="5ac0373164fc490bf1cadb77ffcd8d65960a8d3f73437c909050ca1f52c96aa3"
+                if "filezilla" in service_name_simple:
+                    crit_location="/usr/bin/filezilla"
+                    crit_content="b465eeecdab629c965ffa821ee2343c74b26d24b5b63db43cc606768a70574fe"
+                if "libreoffice" in service_name_simple:
+                    crit_location="/usr/bin/libreoffice"
+                    crit_content="adf468b45764b2abce53a7d91bbf3056b33f2734c5d5f628c075753e73903c43"
+                
             # Create Host
             new_host = Host(
                 hostname=hostname,
@@ -162,7 +176,7 @@ def insert_initial_data(logger):
 
             # Create 10 Users per host and link them to the criteria
             for u_name in scoring_usernames:
-                user = ScoringUser(username=u_name, password="FriendshipIsMagic0!", host=new_host)
+                user = ScoringUser(username=u_name, password="Friendship0!", host=new_host)
                 db.session.add(user)
                 db.session.flush() # Get User ID
 

@@ -17,6 +17,9 @@
 - name: Install Git
   ansible.builtin.include_tasks: install_git.yaml
 
+- name: Install SetResolution
+  ansible.builtin.include_tasks: install_setresolution.yaml
+
 #- name: Download sysinternals
 #  ansible.builtin.include_tasks: install_sysinternals.yaml
 

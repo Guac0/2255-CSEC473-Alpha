@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoring Editor | Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .editor-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; overflow: hidden; }
+        .sidebar-item { cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+        .sidebar-item:hover { background-color: #334155; }
+        .sidebar-item.active { background-color: #334155; border-left-color: #3b82f6; }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-6xl mx-auto space-y-8">
+        <header class="flex justify-between items-center border-b border-slate-700 pb-4">
+            <h1 class="text-2xl font-bold tracking-tight">System Configuration Editor</h1>
+            <a href="/scoreboard" class="text-sm text-blue-400 hover:text-blue-300">Back to Dashboard</a>
+        </header>
+
+        <section class="editor-card shadow-xl">
+            <div class="bg-slate-800 px-6 py-3 border-b border-slate-700 flex justify-between items-center">
+                <h2 class="font-bold text-slate-300 uppercase tracking-wider text-sm">Host User Management</h2>
+                <span class="text-xs text-slate-500">Update service credentials per host</span>
+            </div>
+            <div class="flex h-64">
+                <div id="host-list" class="w-1/3 border-r border-slate-700 overflow-y-auto bg-slate-800/50">
+                    </div>
+                <div id="user-workspace" class="w-2/3 p-6 overflow-y-auto">
+                    <p class="text-slate-500 italic text-center mt-10">Select a host to manage users</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="editor-card shadow-xl">
+            <div class="bg-slate-800 px-6 py-3 border-b border-slate-700 flex justify-between items-center">
+                <h2 class="font-bold text-slate-300 uppercase tracking-wider text-sm">Scoring Criteria & Checkers</h2>
+                <button onclick="showNewCriteriaModal()" id="add-btn" class="hidden bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded font-bold">
+                    + Add Criteria
+                </button>
+            </div>
+            <div class="flex h-80">
+                <div id="service-list" class="w-1/3 border-r border-slate-700 overflow-y-auto bg-slate-800/50">
+                    </div>
+                <div id="criteria-workspace" class="w-2/3 p-6 overflow-y-auto">
+                    <p class="text-slate-500 italic text-center mt-10">Select a service to view requirements</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="criteria-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 w-full max-w-lg">
+            <h3 class="text-lg font-bold mb-4">Add New Scoring Requirement</h3>
+            <div class="space-y-4">
+                <input type="hidden" id="modal-service-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Location (e.g. /etc/shadow, /var/www/index.php)</label>
+                    <input type="text" id="new-location" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Required Content (Regex or String)</label>
+                    <textarea id="new-content" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm font-mono"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="toggleModal('criteria-modal')" class="text-slate-400 text-sm">Cancel</button>
+                    <button onclick="submitNewCriteria()" class="bg-blue-600 px-4 py-2 rounded text-sm font-bold">Save Criteria</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let selectedServiceId = null;
+
+        async function init() {
+            await loadHosts();
+            await loadServices();
+        }
+
+        // --- USER MANAGEMENT LOGIC ---
+        async function loadHosts() {
+            const res = await fetch('/get_hosts');
+            const hosts = await res.json();
+            const list = document.getElementById('host-list');
+            list.innerHTML = hosts.map(h => `
+                <div class="sidebar-item p-4 border-b border-slate-700" onclick="loadScoringUsers(${h.id}, this)">
+                    <div class="font-bold text-sm">${h.hostname}</div>
+                    <div class="text-xs text-slate-500">${h.ip}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadScoringUsers(hostId, el) {
+            document.querySelectorAll('#host-list .sidebar-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            
+            const res = await fetch(`/get_scoring_users?host_id=${hostId}`);
+            const users = await res.json();
+            const workspace = document.getElementById('user-workspace');
+            
+            workspace.innerHTML = users.map(u => `
+                <div class="bg-slate-900/50 border border-slate-700 rounded-lg p-4 mb-3 flex justify-between items-center">
+                    <div>
+                        <div class="text-xs font-bold text-blue-400 uppercase">User: ${u.username}</div>
+                        <div class="text-xs text-slate-500 italic">Credential Update Required?</div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <input type="password" id="pw-${u.id}" placeholder="New Password" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs">
+                        <button onclick="updatePassword(${u.id})" class="bg-slate-700 hover:bg-slate-600 text-[10px] px-2 py-1 rounded uppercase font-bold">Update</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updatePassword(userId) {
+            const pwd = document.getElementById(`pw-${userId}`).value;
+            const res = await fetch('/update_scoring_user_pwd', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: userId, password: pwd })
+            });
+            if (res.ok) alert("Password updated in database.");
+        }
+
+        // --- CRITERIA MANAGEMENT LOGIC ---
+        async function loadServices() {
+            const res = await fetch('/get_services');
+            const services = await res.json();
+            const list = document.getElementById('service-list');
+            list.innerHTML = services.map(s => `
+                <div class="sidebar-item p-4 border-b border-slate-700" onclick="loadCriteria(${s.id}, this)">
+                    <div class="font-bold text-sm">${s.display_name}</div>
+                    <div class="text-xs text-slate-500">${s.hostname}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadCriteria(serviceId, el) {
+            selectedServiceId = serviceId;
+            document.getElementById('add-btn').classList.remove('hidden');
+            document.querySelectorAll('#service-list .sidebar-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+
+            const res = await fetch(`/get_scoring_criteria?service_id=${serviceId}`);
+            const data = await res.json();
+            const workspace = document.getElementById('criteria-workspace');
+
+            workspace.innerHTML = data.map(c => `
+                <div class="bg-slate-900 border border-slate-700 rounded p-3 mb-2">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase mb-1">Location: ${c.location}</div>
+                    <div class="text-xs font-mono bg-black/30 p-2 rounded text-green-400 break-all">${c.content}</div>
+                </div>
+            `).join('');
+        }
+
+        function showNewCriteriaModal() {
+            document.getElementById('modal-service-id').value = selectedServiceId;
+            toggleModal('criteria-modal');
+        }
+
+        async function submitNewCriteria() {
+            const payload = {
+                service_id: document.getElementById('modal-service-id').value,
+                location: document.getElementById('new-location').value,
+                content: document.getElementById('new-content').value
+            };
+            
+            const res = await fetch('/add_criteria', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                toggleModal('criteria-modal');
+                loadCriteria(selectedServiceId, document.querySelector('.sidebar-item.active'));
+            }
+        }
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+        init();
+        </script>
+</body>
+</html>

@@ -3,6 +3,12 @@
 
 # 1) Package installation
 
+- name: Add LibreOffice PPA
+  ansible.builtin.apt_repository:
+    repo: 'ppa:libreoffice/ppa'
+    state: present
+    update_cache: yes
+
 # Refresh apt package
 - name: Update apt cache
   ansible.builtin.apt:
@@ -55,13 +61,6 @@
 
 # 3) Desktop shortcuts for installed applications
 
-# Create /etc/skel/Desktop so any future users created on the box inherit these shortcuts (might delete once all users are finalized)
-- name: Fix desktop skeleton path
-  ansible.builtin.file:
-    path: /etc/skel/Desktop
-    state: directory
-    mode: "0755"
-  become: true
 
 # Pulls /etc/passwd into ansible_facts.getent_passwd so we can verify usernames exist
 # also prevents errors when looping over non-existent users
@@ -70,12 +69,11 @@
     database: passwd
   become: true
 
-# Creates /usr/skel/Desktop (default on path on ubuntu)
-- name: Ensure desktop exsists for all users
+- name: Ensure /etc/skel/Desktop exists
   ansible.builtin.file:
-    path: /usr/skel/Desktop
+    path: /etc/skel/Desktop
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
 
 # Make sure each target user has a Desktop folder so we can drop shortcuts there
@@ -90,34 +88,148 @@
   when: item in ansible_facts.getent_passwd
   become: true
 
-# Create simple .desktop launchers that run each program by name
-- name: Create app launchers in /etc/skel/Desktop
-  ansible.builtin.copy:
-    dest: "/etc/skel/Desktop/{{ item.filename }}"
-    mode: "0755"
-    content: |
-      [Desktop Entry]
-      Type=Application
-      Name={{ item.name }}
-      Exec={{ item.exec }}
-      Terminal=false
-  loop:
-    - { name: "Thunderbird", filename: "Thunderbird.desktop", exec: "thunderbird" }
-    - { name: "LibreOffice", filename: "LibreOffice.desktop", exec: "libreoffice" }
-    - { name: "FileZilla", filename: "FileZilla.desktop", exec: "filezilla" }
-    - { name: "HexChat", filename: "HexChat.desktop", exec: "hexchat" }
+# 3a) Remove old launchers from the previous approach so we do not get duplicate icons
+- name: Remove legacy Desktop launchers (prevents duplicate icons)
+  ansible.builtin.file:
+    path: "/home/{{ item.0 }}/Desktop/{{ item.1 }}"
+    state: absent
+  loop: "{{ q('nested', linux_desktop_users, legacy_launchers) }}"
+  when: item.0 in ansible_facts.getent_passwd
   become: true
+  vars:
+    legacy_launchers:
+      - "Thunderbird.desktop"
+      - "thunderbird.desktop"
+      - "LibreOffice.desktop"
+      - "libreoffice-startcenter.desktop"
+      - "FileZilla.desktop"
+      - "filezilla.desktop"
+      - "HexChat.desktop"
+      - "hexchat.desktop"
+      #- "Remmina.desktop"
+      #- "org.remmina.Remmina.desktop"
+      #- "remmina.desktop"
+      #- "Firefox.desktop"
+      #- "firefox.desktop"
+      #- "firefox_firefox.desktop"
+      #- "Chromium.desktop"
+      #- "chromium.desktop"
+      #- "chromium-browser.desktop"
+      #- "chromium_chromium.desktop"
 
-# Copies the launcher templates from /etc/skel/Desktop into every existing user’s Desktop folder
-# Uses product() so we do each user times each launcher without writing 4 separate tasks
-- name: Copy launchers to each user Desktop
+# Create Desktop Symbolic Links for client programs
+- name: Deploy Trusted System Desktop Shortcuts
   ansible.builtin.copy:
+    src: "{{ item.1.src }}"
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest }}"
     remote_src: true
-    src: "/etc/skel/Desktop/{{ item.1 }}"
-    dest: "/home/{{ item.0 }}/Desktop/{{ item.1 }}"
     owner: "{{ item.0 }}"
     group: "{{ item.0 }}"
     mode: "0755"
-  loop: "{{ linux_desktop_users | product(['Thunderbird.desktop','LibreOffice.desktop','FileZilla.desktop','HexChat.desktop']) | list }}"
+  loop: "{{ q('nested', linux_desktop_users, desktop_shortcuts) }}"
   when: item.0 in ansible_facts.getent_passwd
-  become: true
+  vars:
+    desktop_shortcuts:
+      - { src: "/usr/share/applications/thunderbird.desktop", dest: "Thunderbird.desktop" }
+      - { src: "/usr/share/applications/libreoffice-startcenter.desktop", dest: "LibreOffice.desktop" }
+      - { src: "/usr/share/applications/filezilla.desktop", dest: "FileZilla.desktop" }
+
+- name: Create Custom HexChat Desktop Shortcut
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/Desktop/HexChat.desktop"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0755"
+    content: "{{ hexchat_content | regex_replace('\\r\\n', '\\n') }}"
+  vars:
+    hexchat_content: |
+      [Desktop Entry]
+      Name=HexChat
+      GenericName=IRC Client
+      Comment=Chat with other people using Internet Relay Chat
+      Exec=hexchat
+      Icon=hexchat
+      Terminal=false
+      Type=Application
+      Categories=Network;GTK;IRCClient;
+      StartupNotify=true
+  loop: "{{ linux_desktop_users }}"
+  when: item in ansible_facts.getent_passwd
+
+- name: Mark Desktop launchers as trusted
+  ansible.builtin.shell: |
+    export $(dbus-launch)  # Start a temporary bus session
+    for launcher in /home/{{ item }}/Desktop/*.desktop; do
+      [ -e "$launcher" ] || continue
+      # Set the attribute
+      gio set -t string "$launcher" metadata::trusted true
+      # Force the executable bit again to be sure
+      chmod +x "$launcher"
+    done
+    kill $DBUS_SESSION_BUS_PID # Clean up
+  loop: "{{ linux_desktop_users }}"
+  when: item in ansible_facts.getent_passwd
+  become: yes
+  become_user: "{{ item }}"
+
+#- name: Note missing desktop shortcut sources
+#  ansible.builtin.debug:
+#    msg: "A .desktop source file was missing on this host. That shortcut did not get installed."
+#  when: false
+
+# 4) Scoring service checks (LibreOffice)
+#not working no moe
+#- name: Ensure python3 is installed
+#  ansible.builtin.apt:
+#    name: python3
+#    state: present
+#    update_cache: yes
+#  become: true
+#
+#- name: Create app directory
+#  ansible.builtin.file:
+#    path: /opt/lo_score
+#    state: directory
+#    owner: root
+#    group: root
+#    mode: "0755"
+#  become: true
+#
+#
+#- name: Write lo_score_server.py directly (no repo file needed)
+#  ansible.builtin.copy:
+#    dest: /opt/lo_score/lo_score_server.py
+#    owner: root
+#    group: root
+#    mode: "0755"
+#    content: |
+#      import socket
+#      import subprocess
+#
+#      server = socket.socket()
+#      server.bind(("0.0.0.0", 12345))
+#      server.listen(1)
+#
+#      while True:
+#          conn, addr = server.accept()
+#          result = subprocess.run(
+#              ["libreoffice", "--headless", "--version"],
+#              capture_output=True,
+#              text=True
+#          )
+#          output = result.stdout
+#          if output == "":
+#              output = result.stderr
+#          if output == "":
+#              output = "ERROR: no output"
+#
+#          conn.send(output.encode())
+#          conn.close()
+#  become: true
+#
+#- name: Start LO score server (one-liner, not persistent)
+#  ansible.builtin.shell: "nohup python3 /opt/lo_score/lo_score_server.py >/var/log/lo-score.log 2>&1 &"
+#  args:
+#    executable: /bin/bash
+#  become: true
+#

@@ -249,6 +249,18 @@ def page_scoreboard():
     logger.info(f"/scoreboard - Successful connection from {current_user.id} at {request.remote_addr}")
     return render_template("scoreboard.html")
 
+@app.route("/editor")
+@login_required
+def page_editor():
+    logger.info(f"/editor - Successful connection from {current_user.id} at {request.remote_addr}")
+    return render_template("editor.html")
+
+@app.route("/scoring_history")
+@login_required
+def page_scoring_history():
+    logger.info(f"/scoring_history - Successful connection from {current_user.id} at {request.remote_addr}")
+    return render_template("scoring_history.html")
+
 @app.route("/management")
 @login_required
 @admin_required
@@ -1024,11 +1036,77 @@ def get_scoring_summary():
                 "teams": summary
             })
         except Exception as E:
-            logger.error(f"/get_scoring_summary - Failed request from {current_user.id} at {request.remote_addr} - Database error: {e}")
+            logger.error(f"/get_scoring_summary - Failed request from {current_user.id} at {request.remote_addr} - Database error: {E}")
             return jsonify({"error": "Database error while fetching latest scores"}), 500
     
 # --- ScoringCriteria Endpoints ---
 
+@app.route("/get_services", methods=["GET"])
+@login_required
+def get_services():
+    """
+    Returns all services and their associated hostname/host_ip.
+    """
+    try:
+        # Querying Service joined with Host to get IP and Hostname
+        results = db.session.query(
+            Service.id,
+            Service.scorecheck_name,
+            Service.scorecheck_display_name,
+            Host.hostname,
+            Host.ip
+        ).join(Host, Service.host_id == Host.id).all()
+
+        services_list = [
+            {
+                "id": r.id,
+                "name": r.scorecheck_name,
+                "display_name": r.scorecheck_display_name,
+                "hostname": r.hostname,
+                "host_ip": r.ip
+            } for r in results
+        ]
+
+        logger.info(f"/get_services - User {current_user.id} retrieved {len(services_list)} services.")
+        return jsonify(services_list)
+
+    except Exception as e:
+        logger.error(f"/get_services - Error: {e}")
+        return jsonify({"error": "Failed to retrieve services"}), 500
+
+@app.route("/get_scoring_criteria", methods=["GET"])
+@login_required
+def get_scoring_criteria():
+    """
+    Returns all scoring criteria for a specified service_id.
+    Usage: /get_scoring_criteria?service_id=1
+    """
+    service_id = request.args.get('service_id')
+    
+    if not service_id:
+        return jsonify({"error": "Missing service_id parameter"}), 400
+
+    try:
+        # Fetch criteria filtered by service_id
+        criteria_list = ScoringCriteria.query.filter_by(service_id=service_id).all()
+        
+        # Serialize criteria data
+        # serialize_model is a utility function already in your server.py
+        output = []
+        for c in criteria_list:
+            c_dict = serialize_model(c)
+            # Optionally add team name for better readability
+            if c.scoringteam:
+                c_dict['team_name'] = c.scoringteam.team_name
+            output.append(c_dict)
+
+        logger.info(f"/get_scoring_criteria - User {current_user.id} fetched criteria for service {service_id}")
+        return jsonify(output)
+
+    except Exception as e:
+        logger.error(f"/get_scoring_criteria - Error for service {service_id}: {e}")
+        return jsonify({"error": "Failed to retrieve scoring criteria"}), 500
+        
 @app.route("/set_criteria", methods=["POST"])
 def set_criteria():
     """Wipes existing criteria for a service and sets new ones."""

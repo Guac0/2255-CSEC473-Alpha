@@ -4,6 +4,7 @@
 ansible_become: yes 
 ansible_become_method: sudo
 ansible_become_user: root
+ansible_become_password: "{{ greyteam_password }}"
 
 ftp_host: "crystal-empire"
 ftp_port: 21
@@ -19,9 +20,10 @@ linux_desktop_users:
   - "pinkiepie"
   - "rainbowdash"
   - "bigmac"
-  - "cadence"
+  - "cadance"
   - "mayormare"
   - "shiningarmor"
+  - "greyteam"
 
 
 # Payload keying

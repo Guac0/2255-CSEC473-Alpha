@@ -4,6 +4,8 @@ Deploys a no-frills MSSQL Express server on the destination endpoint with remote
 To customize common configuration values, see defaults/main.yaml.
 To customize the initial data deployed into the DB, see the last item in tasks/data.yaml.
 
+Thanks for Han for his work on SSMS and SQLCMD!
+
 ## Useful Development Links
 https://docs.ansible.com/projects/ansible/latest/collections/community/general/mssql_db_module.html#ansible-collections-community-general-mssql-db-module
 https://docs.ansible.com/projects/ansible/latest/collections/community/general/mssql_script_module.html#ansible-collections-community-general-mssql-script-module

@@ -20,19 +20,57 @@
     - blueteam
     - "{{ greyteam_user }}"
 
-- name: Create Desktop Symbolic Links
+- name: Remove legacy Desktop launchers (prevents duplicate icons)
   ansible.builtin.file:
+    path: "/home/{{ item.0 }}/Desktop/{{ item.1 }}"
+    state: absent
+  loop: "{{ q('nested', linux_desktop_users, legacy_launchers) }}"
+  become: true
+  vars:
+    legacy_launchers:
+      - "Remmina.desktop"
+      - "org.remmina.Remmina.desktop"
+      - "Firefox.desktop"
+      - "firefox_firefox.desktop"
+      - "Chromium.desktop"
+      - "chromium-browser.desktop"
+
+- name: Deploy Trusted System Desktop Shortcuts
+  ansible.builtin.copy:
     src: "{{ item.1.src }}"
-    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.src | basename }}"
-    state: link
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest }}"
+    remote_src: true
     owner: "{{ item.0 }}"
     group: "{{ item.0 }}"
-    mode: '0755'
-  loop: "{{ q('nested', ['blueteam', greyteam_user], shortcuts) }}"
+    mode: "0755"
+  loop: "{{ q('nested', ['blueteam', greyteam_user], desktop_shortcuts) }}"
   vars:
-    shortcuts:
-      - src: "/usr/share/applications/org.remmina.Remmina.desktop"
-      - src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop"
-      - src: "/usr/share/applications/chromium-browser.desktop"
-  ignore_errors: yes
-  register: desktop_links
+    desktop_shortcuts:
+      - { src: "/usr/share/applications/org.remmina.Remmina.desktop", dest: "Remmina.desktop" }
+      - { src: "/var/lib/snapd/desktop/applications/firefox_firefox.desktop", dest: "Firefox.desktop" }
+      - { src: "/usr/share/applications/chromium-browser.desktop", dest: "Chromium.desktop" }
+
+- name: Mark Desktop launchers as trusted
+  ansible.builtin.shell: |
+    export $(dbus-launch)  # Start a temporary bus session
+    for launcher in /home/{{ item }}/Desktop/*.desktop; do
+      [ -e "$launcher" ] || continue
+      # Set the attribute
+      gio set -t string "$launcher" metadata::trusted true
+      # Force the executable bit again to be sure
+      chmod +x "$launcher"
+    done
+    kill $DBUS_SESSION_BUS_PID # Clean up
+  loop: "{{ ['blueteam', greyteam_user] }}"
+  become: yes
+  become_user: "{{ item }}"
+
+- name: Configure LXQt session for XRDP
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/.xsession"
+    content: "startlxqt"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+  loop: "{{ ['blueteam'] }}"
+  when: "'gui' in group_names"

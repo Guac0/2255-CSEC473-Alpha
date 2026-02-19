@@ -1,7 +1,7 @@
 ---
 - name: Copy in website files and overwrite existing
   ansible.builtin.copy:
-    src: /files/
+    src: files/
     dest: /var/www/html
 
 -  name: Set ownership of html directory
