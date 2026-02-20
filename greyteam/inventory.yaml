@@ -227,6 +227,14 @@ all:
     unix:
       children:
         linux:
+    debian:
+      children:
+        ponyville:
+        seaddle:
+        trotsylvania:
+        crystal-empire:
+        everfree-forest:
+        griffonstone:
     
     gui:
       children:
