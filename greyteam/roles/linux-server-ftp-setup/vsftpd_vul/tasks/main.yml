@@ -134,12 +134,12 @@
   ignore_errors: yes
 
 # -------- Feature Set 1 --------
-- name: Feature 1 – Enable anonymous FTP
-  lineinfile:
-    path: /etc/vsftpd.conf
-    regexp: '^anonymous_enable='
-    line: 'anonymous_enable=YES'
-  notify: restart vsftpd
+#- name: Feature 1 – Enable anonymous FTP
+#  lineinfile:
+#    path: /etc/vsftpd.conf
+#    regexp: '^anonymous_enable='
+#    line: 'anonymous_enable=YES'
+#  notify: restart vsftpd
 
 # -------- Feature Set 2 --------
 - name: Feature 2 – Enable local users + uploads
@@ -156,12 +156,12 @@
   notify: restart vsftpd
 
 # -------- Feature Set 3 --------
-- name: Feature 3 – Disable chroot (Option A)
-  lineinfile:
-    path: /etc/vsftpd.conf
-    regexp: '^chroot_local_user='
-    line: 'chroot_local_user=NO'
-  notify: restart vsftpd
+#- name: Feature 3 – Disable chroot (Option A)
+#  lineinfile:
+#    path: /etc/vsftpd.conf
+#    regexp: '^chroot_local_user='
+#    line: 'chroot_local_user=NO'
+#  notify: restart vsftpd
 
 # ==============================
 # 4. Service control (LAST)
