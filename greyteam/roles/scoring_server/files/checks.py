@@ -7,6 +7,8 @@ import paramiko
 from winrm.protocol import Protocol
 import smbclient
 from ftplib import FTP
+import time
+import socket
 
 MAX_ERROR_LEN = 200
 DOMAIN = ""
@@ -151,11 +153,6 @@ class Dns (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        hosts:list[Host] = Host.query.all()
-
-        for host in hosts:
-            self.hosts.append((host.hostname, host.ip))
-
     def check (self):
         host = random.choice(self.hosts)
         
@@ -163,19 +160,19 @@ class Dns (Check):
         for criterion in self.criteria:
             try:
                 res = subprocess.run(
-                    ["nslookup", f"{host[0]}.mlp.local", self.host_ip],
+                    ["nslookup", criterion.loc, self.host_ip],
                     capture_output=True,
                     text=True
                 )
                 
                 # Check succeeded
-                if res.returncode == 0 and host[1] in res.stdout:
+                if res.returncode == 0 and criterion.content in res.stdout:
                     return (criterion.team, f"Found expected content for check {criterion.id}")
                 # Command failed
                 elif res.returncode != 0:
                     err.insert(0, res.stderr)
                 # Incorrect output
-                elif host[1] not in res.stdout:
+                elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content for check {criterion.id}")
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
@@ -307,6 +304,116 @@ class Mssql (Check):
         
         return (0, err[0])
     
+class Cups (Check):
+    def __init__ (self, check: Service) -> None:
+        super().__init__(check)
+
+    def check (self):
+        err = []
+        for criterion in self.criteria:
+            try:
+                #lp -h 10.10.0.5 -d printer testfile.pdf
+                res = subprocess.run(
+                    ["lp", "-h", self.host_ip,
+                     "-d", "printer",
+                     "testfile.pdf"],
+                    capture_output=True,
+                    text=True
+                )
+
+                time.sleep(5)
+
+                # Print command didn't go through
+                if res.returncode != 0:
+                    err.insert(0, res.stderr)
+                    continue
+
+                # SSH into the box to check if print job went through
+                client = paramiko.SSHClient()
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                client.connect(self.host_ip, username="greyteam", password="ponyuploc0!")
+
+                # Check successful print jobs
+                stdin, stdout, stderr = client.exec_command("lpstat -W successful | head -n 1")
+
+                status = stdout.channel.recv_exit_status()
+                res = stdout.read()
+
+                client.close()
+
+                # printer-2               greyteam         74752   Wed 18 Feb 2026 05:54:17 PM EST
+                
+                # Check succeeded
+                # Sometimes segfaults but still outputs what we want
+                if criterion.content in res:
+                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                # Command failed. 139 is segfault
+                elif status != 0 and status != 139:
+                    err.insert(0, stderr.read()[:MAX_ERROR_LEN])
+                # Incorrect output
+                elif criterion.content not in res:
+                    err.append(f"Could not find expected content for check {criterion.id}")
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
+        
+        return (0, err[0])
+
+class Irc (Check):
+    def __init__(self, check: Service) -> None:
+        super().__init__(check)
+
+    def recv_until(sock, expected_strings, timeout=5):
+        """Receive data until one of the expected_strings appears or timeout."""
+        sock.settimeout(timeout)
+        buffer = ""
+        start_time = time.time()
+        while True:
+            try:
+                chunk = sock.recv(4096).decode(errors='ignore')
+                buffer += chunk
+            except socket.timeout:
+                pass
+            if any(s in buffer for s in expected_strings):
+                return buffer
+            if time.time() - start_time > timeout:
+                break
+        return buffer
+
+    def check(self) -> tuple[int, str]:
+        try:
+            sock = sock.create_connection((self.host, 6667), timeout = 5)
+        except Exception as e:
+            return (0, f"Service not available: {e}")
+
+        try:
+            sock.sendall(("NICK scorebot\r\n").encode())
+            sock.sendall(("USER scorebot 0 * :Score Bot\r\n").encode())
+
+            response = self.recv_until(sock, ["001"], timeout=10)
+            if "001" not in response:
+                return (0, f"Handshake failed: Did not receive welcome message")
+            
+            err = []
+            for criterion in self.criteria:
+                sock.sendall((f"JOIN {criterion.loc}\r\n").encode())
+                response = self.recv_until(sock, [f"JOIN :{criterion.loc}", "ERROR"])
+                if f"JOIN :{criterion.loc}" not in response:
+                    err.append(f"Channel join failed: {criterion.loc}")
+                    continue
+
+                # Test send
+                sock.sendall((f"PRIVMSG {criterion.loc} :scorecheck\r\n").encode())
+                msg_response = self.recv_until(sock, ["PRIVMSG", "ERROR"])
+                if "ERROR" in msg_response.upper():
+                    err.append("Message send failed")
+                    continue
+                
+                return (criterion.team, "Irc check successful")
+        finally:
+            sock.close()
+        
+        return (0, err[0])
+
 class Workstation_linux (Check):
     users:list[tuple[str,str]]  
 

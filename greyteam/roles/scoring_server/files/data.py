@@ -84,8 +84,8 @@ def insert_initial_data(logger):
             crit_content=""
             if ("dns" in service_name_simple):
                 generic_name="dns"
-                crit_location=""
-                crit_content=""
+                crit_location="baltamare.mlp.local"
+                crit_content="10.0.30.1"
             elif ("mssql" in service_name_simple):
                 generic_name="mssql"
                 crit_location="'SELECT E.Virtue AS [The Element], C.Name AS [Bearer], C.Species AS [Species], C.LoreTitle AS [Known As], L.PlaceName AS [Resides In] FROM [dbo].[Elements] E JOIN [dbo].[Characters] C ON E.BearerID = C.CharID JOIN [dbo].[Locations] L ON C.HomeLocationID = L.LocationID ORDER BY C.Name;'"
