@@ -229,12 +229,12 @@ all:
         linux:
     debian:
       children:
-        ponyville:
-        seaddle:
-        trotsylvania:
-        crystal-empire:
-        everfree-forest:
-        griffonstone:
+        apache2:
+        mariadb:
+        cups:
+        vsftpd:
+        irc:
+        nginx:
     
     gui:
       children:
