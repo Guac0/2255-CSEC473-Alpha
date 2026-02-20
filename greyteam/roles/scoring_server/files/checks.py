@@ -9,6 +9,7 @@ import smbclient
 from ftplib import FTP
 import time
 import socket
+import re
 
 MAX_ERROR_LEN = 200
 DOMAIN = ""
@@ -334,6 +335,7 @@ class Cups (Check):
                 client.connect(self.host_ip, username="greyteam", password="ponyuploc0!")
 
                 # Check successful print jobs
+                start_time = time.gmtime()
                 stdin, stdout, stderr = client.exec_command("lpstat -W successful | head -n 1")
 
                 status = stdout.channel.recv_exit_status()
@@ -341,12 +343,13 @@ class Cups (Check):
 
                 client.close()
 
-                # printer-2               greyteam         74752   Wed 18 Feb 2026 05:54:17 PM EST
-                
-                # Check succeeded
-                # Sometimes segfaults but still outputs what we want
-                if criterion.content in res:
-                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                # Get the time the print was submitted
+                pattern = r"\d{2}:\d{2}:\d{2} (A|P)M"
+                res = re.findall(pattern, res)[0]
+                time_elapsed = time.strptime(res, '%H:%M:%S %p') - start_time
+
+                if time_elapsed.total_seconds() >= 0:
+                    return (criterion.team, f"Print succeeded")
                 # Command failed. 139 is segfault
                 elif status != 0 and status != 139:
                     err.insert(0, stderr.read()[:MAX_ERROR_LEN])
