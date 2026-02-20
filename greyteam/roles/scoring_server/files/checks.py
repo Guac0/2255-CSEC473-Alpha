@@ -7,6 +7,7 @@ import paramiko
 from winrm.protocol import Protocol
 import smbclient
 from ftplib import FTP
+import time
 
 MAX_ERROR_LEN = 200
 DOMAIN = ""
@@ -302,6 +303,60 @@ class Mssql (Check):
         
         return (0, err[0])
     
+class Cups (Check):
+    def __init__ (self, check: Service) -> None:
+        super().__init__(check)
+
+    def check (self):
+        err = []
+        for criterion in self.criteria:
+            try:
+                #lp -h 10.10.0.5 -d printer testfile.pdf
+                res = subprocess.run(
+                    ["lp", "-h", self.host_ip,
+                     "-d", "printer",
+                     "testfile.pdf"],
+                    capture_output=True,
+                    text=True
+                )
+
+                time.sleep(5)
+
+                # Print command didn't go through
+                if res.returncode != 0:
+                    err.insert(0, res.stderr)
+                    continue
+
+                # SSH into the box to check if print job went through
+                client = paramiko.SSHClient()
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                client.connect(self.host_ip, username="greyteam", password="ponyuploc0!")
+
+                # Check successful print jobs
+                stdin, stdout, stderr = client.exec_command("lpstat -W successful | head -n 1")
+
+                status = stdout.channel.recv_exit_status()
+                res = stdout.read()
+
+                client.close()
+
+                # printer-2               greyteam         74752   Wed 18 Feb 2026 05:54:17 PM EST
+                
+                # Check succeeded
+                # Sometimes segfaults but still outputs what we want
+                if criterion.content in res:
+                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                # Command failed. 139 is segfault
+                elif status != 0 and status != 139:
+                    err.insert(0, stderr.read()[:MAX_ERROR_LEN])
+                # Incorrect output
+                elif criterion.content not in res:
+                    err.append(f"Could not find expected content for check {criterion.id}")
+            except Exception as E:
+                err.append(f"{E[:MAX_ERROR_LEN]}")
+        
+        return (0, err[0])
+
 class Workstation_linux (Check):
     users:list[tuple[str,str]]  
 
