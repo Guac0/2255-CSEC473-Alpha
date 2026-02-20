@@ -8,6 +8,7 @@ from winrm.protocol import Protocol
 import smbclient
 from ftplib import FTP
 import time
+import socket
 
 MAX_ERROR_LEN = 200
 DOMAIN = ""
@@ -354,6 +355,62 @@ class Cups (Check):
                     err.append(f"Could not find expected content for check {criterion.id}")
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
+        
+        return (0, err[0])
+
+class Irc (Check):
+    def __init__(self, check: Service) -> None:
+        super().__init__(check)
+
+    def recv_until(sock, expected_strings, timeout=5):
+        """Receive data until one of the expected_strings appears or timeout."""
+        sock.settimeout(timeout)
+        buffer = ""
+        start_time = time.time()
+        while True:
+            try:
+                chunk = sock.recv(4096).decode(errors='ignore')
+                buffer += chunk
+            except socket.timeout:
+                pass
+            if any(s in buffer for s in expected_strings):
+                return buffer
+            if time.time() - start_time > timeout:
+                break
+        return buffer
+
+    def check(self) -> tuple[int, str]:
+        try:
+            sock = sock.create_connection((self.host, 6667), timeout = 5)
+        except Exception as e:
+            return (0, f"Service not available: {e}")
+
+        try:
+            sock.sendall(("NICK scorebot\r\n").encode())
+            sock.sendall(("USER scorebot 0 * :Score Bot\r\n").encode())
+
+            response = self.recv_until(sock, ["001"], timeout=10)
+            if "001" not in response:
+                return (0, f"Handshake failed: Did not receive welcome message")
+            
+            err = []
+            for criterion in self.criteria:
+                sock.sendall((f"JOIN {criterion.loc}\r\n").encode())
+                response = self.recv_until(sock, [f"JOIN :{criterion.loc}", "ERROR"])
+                if f"JOIN :{criterion.loc}" not in response:
+                    err.append(f"Channel join failed: {criterion.loc}")
+                    continue
+
+                # Test send
+                sock.sendall((f"PRIVMSG {criterion.loc} :scorecheck\r\n").encode())
+                msg_response = self.recv_until(sock, ["PRIVMSG", "ERROR"])
+                if "ERROR" in msg_response.upper():
+                    err.append("Message send failed")
+                    continue
+                
+                return (criterion.team, "Irc check successful")
+        finally:
+            sock.close()
         
         return (0, err[0])
 
