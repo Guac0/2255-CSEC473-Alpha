@@ -151,14 +151,10 @@ class Mysql (Check):
         return (0, err[0])
 
 class Dns (Check):
-    hosts:list[tuple[str,str]]
-
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-    def check (self):
-        host = random.choice(self.hosts)
-        
+    def check (self):        
         err = []
         for criterion in self.criteria:
             try:
@@ -374,7 +370,7 @@ class Irc (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-    def recv_until(sock, expected_strings, timeout=5):
+    def recv_until(self, sock:socket.socket, expected_strings, timeout=5):
         """Receive data until one of the expected_strings appears or timeout."""
         sock.settimeout(timeout)
         buffer = ""
@@ -393,7 +389,7 @@ class Irc (Check):
 
     def check(self) -> tuple[int, str]:
         try:
-            sock = sock.create_connection((self.host, 6667), timeout = 5)
+            sock = socket.create_connection((str(self.host_ip), 6667), timeout = 5)
         except Exception as e:
             return (0, f"Service not available: {e}")
 
