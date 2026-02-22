@@ -13,10 +13,10 @@ import re
 
 MAX_ERROR_LEN = 200
 DOMAIN = ""
-DOMAIN_ADMINS = ["celestia", "discord", "luna", "starswirl"]
-DOMAIN_USERS = ["spike", "starlight", "trixie", "derpy", "snips", "snails"]
-LOCAL_ADMINS = ["bigmac", "mayormare", "shiningarmor", "cadance"]
-LOCAL_USERS = ["twilight", "pinkiepie", "applejack", "rarity", "rainbowdash", "fluttershy"]
+DOMAIN_ADMINS = []
+DOMAIN_USERS = []
+LOCAL_ADMINS = []
+LOCAL_USERS = []
 ALL_DOMAIN = DOMAIN_ADMINS + DOMAIN_USERS
 ALL_LOCAL = LOCAL_ADMINS + LOCAL_USERS
 ALL_ADMINS = DOMAIN_ADMINS + LOCAL_ADMINS
