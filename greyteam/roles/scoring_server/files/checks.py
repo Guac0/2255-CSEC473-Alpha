@@ -96,13 +96,13 @@ class Http (Check):
                 
                 # Check succeeded
                 if res.returncode == 0 and criterion.content in res.stdout:
-                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                    return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
                     err.insert(0, res.stderr)
                 # Incorrect output
                 elif criterion.content not in res.stdout:
-                    err.append(f"Could not find expected content for check {criterion.id}")
+                    err.append(f"Could not find expected content")
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
         
@@ -136,13 +136,13 @@ class Mysql (Check):
                 
                 # Check succeeded
                 if res.returncode == 0 and criterion.content in res.stdout:
-                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                    return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
                     err.insert(0, res.stderr)
                 # Incorrect output
                 elif criterion.content not in res.stdout:
-                    err.append(f"Could not find expected content for check {criterion.id}")
+                    err.append(f"Could not find expected content")
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
         
@@ -168,13 +168,13 @@ class Dns (Check):
                 
                 # Check succeeded
                 if res.returncode == 0 and criterion.content in res.stdout:
-                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                    return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
                     err.insert(0, res.stderr)
                 # Incorrect output
                 elif criterion.content not in res.stdout:
-                    err.append(f"Could not find expected content for check {criterion.id}")
+                    err.append(f"Could not find expected content")
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
         
@@ -195,9 +195,9 @@ class Smb (Check):
                         res = fd.read()
 
                         if criterion.content in res:
-                            return (criterion.team, f"Found expected content for check {criterion.id}")
+                            return (criterion.team, f"Found expected content")
                         else:
-                            err.append(f"Could not find expected content for check {criterion.id}")
+                            err.append(f"Could not find expected content")
                 else:
                     err.insert(0, f"Scoring file does not exist")
 
@@ -230,9 +230,9 @@ class Ftp (Check):
                     ftp.retrlines(criterion.loc, res.append)
 
                 if criterion.content in "\n".join(res).strip():
-                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                    return (criterion.team, f"Found expected content")
                 else:
-                    err.append(f"Could not find expected content for check {criterion.id}")
+                    err.append(f"Could not find expected content")
 
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
@@ -292,13 +292,13 @@ class Mssql (Check):
 
                 # Check succeeded
                 if res.returncode == 0 and criterion.content in final_string:
-                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                    return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
                     err.insert(0, res.stderr)
                 # Incorrect output
                 elif criterion.content not in final_string:
-                    err.append(f"Could not find expected content for check {criterion.id}")
+                    err.append(f"Could not find expected content")
 
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
@@ -355,7 +355,7 @@ class Cups (Check):
                     err.insert(0, stderr.read()[:MAX_ERROR_LEN])
                 # Incorrect output
                 elif criterion.content not in res:
-                    err.append(f"Could not find expected content for check {criterion.id}")
+                    err.append(f"Could not find expected content")
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
         
@@ -453,7 +453,7 @@ class Workstation_linux (Check):
 
                 if not is_executable:
                     client.close()
-                    err.append(f"File {filepath} is not executable or does not exist for check {criterion.id}")
+                    err.append(f"File {filepath} is not executable or does not exist")
                     continue
 
                 # 2. Check the File Hash
@@ -465,9 +465,9 @@ class Workstation_linux (Check):
                 client.close()
 
                 if actual_hash == expected_hash:
-                    return (criterion.team, f"Found expected content for check {criterion.id}")
+                    return (criterion.team, f"Found expected content")
                 else:
-                    err.append(f"File {filepath} does not match expected hash for check {criterion.id}")
+                    err.append(f"File {filepath} does not match expected hash")
 
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
@@ -542,9 +542,9 @@ class Workstation_windows (Check):
                     raise ValueError(output)
                 
                 if firstword == "Found":
-                    return (criterion.team, f"{output} for check {criterion.id}")
+                    return (criterion.team, f"{output}")
                 else:
-                    err.append(f"{output} for check {criterion.id}")
+                    err.append(f"{output}")
 
             except Exception as E:
                 err.append(f"{E[:MAX_ERROR_LEN]}")
