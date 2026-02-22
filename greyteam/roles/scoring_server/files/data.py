@@ -113,7 +113,7 @@ def insert_initial_data(logger):
             elif ("smb" in service_name_simple):
                 generic_name="smb"
                 crit_location="\\\\appleloosa\\Appleloosa_Archives\\Starswirl_Banishment_Notes.txt"
-                crit_content="Confidential Archive - Appleloosa Region\n These documents are required to reconstruct the ancient banishment spell.\nUnauthorized access may aid the Legion of Doom."
+                crit_content="Confidential Archive - Appleloosa Region\nThese documents are required to reconstruct the ancient banishment spell.\nUnauthorized access may aid the Legion of Doom."
             elif ("irc" in service_name_simple):
                 generic_name="irc"
                 crit_location=""

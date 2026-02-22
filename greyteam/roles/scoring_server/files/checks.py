@@ -179,14 +179,25 @@ class Dns (Check):
         return (0, err[0])
 
 class Smb (Check):
+    users:list[tuple[str,str]]
+
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-    def check (self):        
+        users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
+
+        self.users = []
+        for user in users:
+            if user.username in ALL_LOCAL:
+                self.users.append((user.username, user.password))
+
+    def check (self):
+        user = random.choice(self.users)
+
         err = []
         for criterion in self.criteria:
             try:
-                smbclient.register_session(server="Appleloosa")
+                smbclient.register_session(server="Appleloosa", username=user[0], password=user[1])
 
                 if (smbclient.path.exists(criterion.loc)):
                     with smbclient.open_file(criterion.loc, mode="r") as fd:
