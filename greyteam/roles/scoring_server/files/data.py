@@ -88,8 +88,8 @@ def insert_initial_data(logger):
                 crit_content="10.0.30.1"
             elif ("mssql" in service_name_simple):
                 generic_name="mssql"
-                crit_location="'SELECT E.Virtue AS [The Element], C.Name AS [Bearer], C.Species AS [Species], C.LoreTitle AS [Known As], L.PlaceName AS [Resides In] FROM [dbo].[Elements] E JOIN [dbo].[Characters] C ON E.BearerID = C.CharID JOIN [dbo].[Locations] L ON C.HomeLocationID = L.LocationID ORDER BY C.Name;'"
-                crit_content="['Honesty,applejack,Earth Pony,Element of Honesty,Ponyville Kindness,fluttershy,Pegasus,Voice of Kindness,Ponyville Laughter,pinkiepie,Earth Pony,Minister of Merriment,Ponyville Loyalty,rainbowdash,Pegasus,Loyalty incarnate,Ponyville Generosity,rarity,Unicorn,Lady of Generosity,Ponyville Magic,twilight,Alicorn,Princess of Friendship,Ponyville (6 rows affected)']"
+                crit_location="SELECT E.Virtue AS [The Element], C.Name AS [Bearer], C.Species AS [Species], C.LoreTitle AS [Known As], L.PlaceName AS [Resides In] FROM [dbo].[Elements] E JOIN [dbo].[Characters] C ON E.BearerID = C.CharID JOIN [dbo].[Locations] L ON C.HomeLocationID = L.LocationID ORDER BY C.Name;"
+                crit_content="Honesty,applejack,Earth Pony,Element of Honesty,PonyvilleKindness,fluttershy,Pegasus,Voice of Kindness,PonyvilleLaughter,pinkiepie,Earth Pony,Minister of Merriment,PonyvilleLoyalty,rainbowdash,Pegasus,Loyalty incarnate,PonyvilleGenerosity,rarity,Unicorn,Lady of Generosity,PonyvilleMagic,twilight,Alicorn,Princess of Friendship,Ponyville(6 rows affected)"
             elif ("apache" in service_name_simple):
                 generic_name="http"
                 crit_location="80/doku.php?id=wiki:wikipage"

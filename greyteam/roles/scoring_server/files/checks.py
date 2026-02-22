@@ -277,7 +277,7 @@ class Mssql (Check):
 
                 # Pipe the password to kinit using the input parameter
                 kinit_proc = subprocess.run(
-                    ['kinit', f"{username}@{DOMAIN}"],
+                    ['kinit', f"{username}@{DOMAIN.upper()}"],
                     input=password.encode(),
                     capture_output=True,
                     check=True
@@ -304,7 +304,7 @@ class Mssql (Check):
                 )
 
                 lines = [line.strip() for line in res.splitlines() if line.strip()]
-                final_string = lines[0]
+                final_string = "".join(lines)
 
                 # Check succeeded
                 if res.returncode == 0 and criterion.content in final_string:
