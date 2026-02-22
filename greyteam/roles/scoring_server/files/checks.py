@@ -129,9 +129,8 @@ class Mysql (Check):
                 res = subprocess.run(
                     ["mysql", "-h", self.host_ip,
                     "-u", f"{user[0]}",
-                    "-p",
-                    criterion.loc],
-                    input=user[1],
+                    f"-p{user[1]}",
+                    "-e", criterion.loc],
                     capture_output=True,
                     text=True
                 )

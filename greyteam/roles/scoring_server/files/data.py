@@ -96,7 +96,7 @@ def insert_initial_data(logger):
                 crit_content="Equestria faces an unprecedented threat. A coordinated assault on our magical infrastructure has disrupted harmony across multiple regions. Early investigations confirm the involvement of Queen Chrysalis, Cozy Glow, and Lord Tirek, now operating together under the name Legion of Doom."
             elif ("mariadb" in service_name_simple):
                 generic_name="mariadb"
-                crit_location="Ponies -e 'SELECT COUNT(*) FROM ponies'"
+                crit_location="SELECT COUNT(*) FROM Ponies.ponies"
                 crit_content="30"
             elif ("cups" in service_name_simple):
                 generic_name="cups"
