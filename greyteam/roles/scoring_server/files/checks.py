@@ -116,6 +116,7 @@ class Mysql (Check):
 
         users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
+        self.users = []
         for user in users:
             self.users.append((user.username, user.password))
     
@@ -214,6 +215,7 @@ class Ftp (Check):
 
         users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
+        self.users = []
         for user in users:
             self.users.append((user.username, user.password))
 
@@ -247,6 +249,7 @@ class Mssql (Check):
 
         users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
+        self.users = []
         for user in users:
             if user in DOMAIN_ADMINS:
                 self.users.append((user.username, user.password))
@@ -425,6 +428,7 @@ class Workstation_linux (Check):
 
         users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
+        self.users = []
         for user in users:
             if user in ALL_LOCAL:
                 self.users.append((user.username, user.password))
@@ -482,6 +486,7 @@ class Workstation_windows (Check):
 
         users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
+        self.users = []
         for user in users:
             if user in ALL_LOCAL:
                 self.users.append((user.username, user.password))
