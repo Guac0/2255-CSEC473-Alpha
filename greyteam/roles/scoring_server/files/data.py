@@ -72,9 +72,9 @@ def insert_initial_data(logger):
         ]
 
         scoring_usernames = [
-            "twilightsparkle", "applejack", "fluttershy", "rarity", 
-            "pinkiepie", "rainbowdash", "spikedragon", "starlightglimmer", 
-            "trixielulamoon", "princesscelestia"
+            "twilight", "applejack", "fluttershy", "rarity", 
+            "pinkiepie", "rainbowdash", "spike", "starlight", 
+            "trixie", "celestia"
         ]
 
         for ip, hostname, os_name, service_name in raw_csv_data:

@@ -13,10 +13,10 @@ import re
 
 MAX_ERROR_LEN = 200
 DOMAIN = ""
-DOMAIN_ADMINS = []
-DOMAIN_USERS = []
-LOCAL_ADMINS = []
-LOCAL_USERS = []
+DOMAIN_ADMINS = ["celestia", "discord", "luna", "starswirl"]
+DOMAIN_USERS = ["spike", "starlight", "trixie", "derpy", "snips", "snails"]
+LOCAL_ADMINS = ["bigmac", "mayormare", "shiningarmor", "cadance"]
+LOCAL_USERS = ["twilight", "pinkiepie", "applejack", "rarity", "rainbowdash", "fluttershy"]
 ALL_DOMAIN = DOMAIN_ADMINS + DOMAIN_USERS
 ALL_LOCAL = LOCAL_ADMINS + LOCAL_USERS
 ALL_ADMINS = DOMAIN_ADMINS + LOCAL_ADMINS
@@ -118,7 +118,8 @@ class Mysql (Check):
 
         self.users = []
         for user in users:
-            self.users.append((user.username, user.password))
+            if user.username in ALL_LOCAL:
+                self.users.append((user.username, user.password))
     
     def check (self):
         user = random.choice(self.users)
@@ -251,7 +252,7 @@ class Mssql (Check):
 
         self.users = []
         for user in users:
-            if user in DOMAIN_ADMINS:
+            if user.username in DOMAIN_ADMINS:
                 self.users.append((user.username, user.password))
 
     def check (self):
@@ -430,7 +431,7 @@ class Workstation_linux (Check):
 
         self.users = []
         for user in users:
-            if user in ALL_LOCAL:
+            if user.username in ALL_LOCAL:
                 self.users.append((user.username, user.password))
 
     def check (self):
@@ -488,7 +489,7 @@ class Workstation_windows (Check):
 
         self.users = []
         for user in users:
-            if user in ALL_LOCAL:
+            if user.username in ALL_LOCAL:
                 self.users.append((user.username, user.password))
 
     def check (self):
