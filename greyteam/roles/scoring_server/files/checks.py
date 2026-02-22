@@ -114,7 +114,7 @@ class Mysql (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+        users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
         for user in users:
             self.users.append((user.username, user.password))
@@ -212,7 +212,7 @@ class Ftp (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+        users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
         for user in users:
             self.users.append((user.username, user.password))
@@ -245,7 +245,7 @@ class Mssql (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+        users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
         for user in users:
             if user in DOMAIN_ADMINS:
@@ -423,7 +423,7 @@ class Workstation_linux (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+        users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
         for user in users:
             if user in ALL_LOCAL:
@@ -480,7 +480,7 @@ class Workstation_windows (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        users:list[ScoringUser] = ScoringUser.query.filter_by(host_id == self.host)
+        users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
 
         for user in users:
             if user in ALL_LOCAL:
