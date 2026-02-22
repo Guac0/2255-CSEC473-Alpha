@@ -218,7 +218,8 @@ class Ftp (Check):
 
         self.users = []
         for user in users:
-            self.users.append((user.username, user.password))
+            if user.username in ALL_LOCAL:
+                self.users.append((user.username, user.password))
 
     def check(self):
         user = random.choice(self.users)
@@ -230,7 +231,7 @@ class Ftp (Check):
                 res = []
                 with FTP(self.host_ip) as ftp:
                     ftp.login(user[0], user[1])
-                    ftp.retrlines(criterion.loc, res.append)
+                    ftp.retrlines(f'RETR {criterion.loc}', res.append)
 
                 if criterion.content in "\n".join(res).strip():
                     return (criterion.team, f"Found expected content")
