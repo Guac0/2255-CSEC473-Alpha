@@ -104,7 +104,7 @@ class Http (Check):
                 elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content")
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
@@ -146,7 +146,7 @@ class Mysql (Check):
                 elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content")
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
@@ -178,7 +178,7 @@ class Dns (Check):
                 elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content")
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
@@ -204,7 +204,7 @@ class Smb (Check):
                     err.insert(0, f"Scoring file does not exist")
 
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
@@ -239,7 +239,7 @@ class Ftp (Check):
                     err.append(f"Could not find expected content")
 
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
@@ -276,6 +276,10 @@ class Mssql (Check):
                     check=True
                 )
 
+                if kinit_proc.returncode != 0:
+                    err.append(kinit_proc.stderr)
+                    continue
+
                 # Execute sqlcmd using the Kerberos ticket (-E)
                 # -s"," sets comma as separator, -W removes trailing spaces, -h-1 removes headers
                 res = subprocess.run(
@@ -306,7 +310,7 @@ class Mssql (Check):
                     err.append(f"Could not find expected content")
 
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
     
@@ -362,7 +366,7 @@ class Cups (Check):
                 elif criterion.content not in res:
                     err.append(f"Could not find expected content")
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
@@ -476,7 +480,7 @@ class Workstation_linux (Check):
                     err.append(f"File {filepath} does not match expected hash")
 
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
 
@@ -554,6 +558,6 @@ class Workstation_windows (Check):
                     err.append(f"{output}")
 
             except Exception as E:
-                err.append(f"{E[:MAX_ERROR_LEN]}")
+                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
         return (0, err[0])
