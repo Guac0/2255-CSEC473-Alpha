@@ -124,7 +124,7 @@
     - generic
 
 - name: Set evil Wallpaper
-  hosts: windows #:!cement
+  hosts: ad
   roles:
     - windows_evilwall
   tags:
