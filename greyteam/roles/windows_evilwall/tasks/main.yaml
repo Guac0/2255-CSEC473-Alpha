@@ -1,16 +1,9 @@
----
-- name: Push wallpaper PNG to Windows workstations
-  hosts: windows
-  gather_facts: no
+- name: Ensure branding directory exists
+  ansible.windows.win_file:
+    path: C:\ProgramData\Inscope\Branding
+    state: directory
 
-  tasks:
-
-    - name: Ensure Public directory exists
-      ansible.windows.win_file:
-        path: C:\Users\Public
-        state: directory
-
-    - name: Copy wallpaper to Public folder
-      ansible.windows.win_copy:
-        src: ./evilwallpaper.jpg
-        dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
+- name: Copy wallpaper to branding directory
+  ansible.windows.win_copy:
+    src: evilwallpaper.jpg
+    dest: C:\ProgramData\Inscope\Branding\wallpaper.jpg
