@@ -845,19 +845,50 @@ def update_scoring_user_pwd():
         logger.error(f"/update_scoring_user_pwd - Database error: {e}")
         return jsonify({"error": "Database error while updating password"}), 500
     
-@app.route("/get_scoring_users", methods=["GET"])
+#@app.route("/get_scoring_users", methods=["GET"])
+#def get_scoring_users():
+#    """Returns all users without passwords for general display."""
+#    try:
+#        users = ScoringUser.query.all()
+#        # Custom dict comprehension to exclude password
+#        user_list = [{"id": u.id, "host_id": u.host_id, "username": u.username} for u in users]
+#        
+#        logger.info(f"/get_scoring_users - Successful connection from {current_user.id} at {request.remote_addr}. Returned {len(user_list)} users.")
+#        return jsonify(user_list)
+#    except Exception as e:
+#        logger.error(f"/get_scoring_users - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+#        return jsonify({"error": "Database error"}), 500
+
 def get_scoring_users():
-    """Returns all users without passwords for general display."""
+    """
+    Returns users without passwords, filtered by host_id.
+    """
+    # 1. Extract the host_id from the URL query parameters
+    host_id = request.args.get('host_id')
+    
+    if not host_id:
+        logger.warning(f"/get_scoring_users - User {current_user.id} requested users without providing host_id")
+        return jsonify({"error": "Missing host_id parameter"}), 400
+
     try:
-        users = ScoringUser.query.all()
-        # Custom dict comprehension to exclude password
-        user_list = [{"id": u.id, "host_id": u.host_id, "username": u.username} for u in users]
+        # 2. Filter the query so it only returns users belonging to that specific host
+        users = ScoringUser.query.filter_by(host_id=host_id).all()
         
-        logger.info(f"/get_scoring_users - Successful connection from {current_user.id} at {request.remote_addr}. Returned {len(user_list)} users.")
+        # 3. Serialize the data (excluding passwords for security)
+        user_list = [
+            {
+                "id": u.id, 
+                "host_id": u.host_id, 
+                "username": u.username
+            } for u in users
+        ]
+        
+        logger.info(f"/get_scoring_users - User {current_user.id} retrieved {len(user_list)} users for host {host_id}")
         return jsonify(user_list)
+
     except Exception as e:
-        logger.error(f"/get_scoring_users - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
-        return jsonify({"error": "Database error"}), 500
+        logger.error(f"/get_scoring_users - Database error: {e}")
+        return jsonify({"error": "Database error while retrieving users"}), 500
 
 @app.route("/get_scoring_users_with_pwd", methods=["GET"])
 def get_scoring_users_with_pwd():

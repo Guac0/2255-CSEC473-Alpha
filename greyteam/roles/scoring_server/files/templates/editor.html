@@ -24,7 +24,7 @@
             <h1 class="text-3xl font-black tracking-tight text-white uppercase">System Configuration</h1>
             <p class="text-slate-400 text-lg">Manage credentials and scoring logic</p>
         </div>
-        <a href="/scoreboard" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-bold transition flex items-center border border-slate-700">
+        <a href="scoreboard" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-bold transition flex items-center border border-slate-700">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Return to Dashboard
         </a>
@@ -85,6 +85,7 @@
 
 <script>
 let selectedServiceId = null;
+let currentUserRole = '';
 
 function notify(message, isError = false) {
     const toast = document.getElementById('toast');
@@ -106,25 +107,18 @@ function notify(message, isError = false) {
 // --- INITIALIZATION & ACCESS CONTROL ---
 async function init() {
     try {
-        // 1. Check identity and role
         const whoamiRes = await fetch('/whoami');
         const user = await whoamiRes.json();
+        currentUserRole = user.role.toLowerCase(); // 'blue', 'red', or 'admin'
         
-        // 2. Handle Role-Based Access Control
-        if (user.role === 'blue') {
+        if (currentUserRole === 'blue') {
             const criteriaSection = document.getElementById('criteria-section');
             if (criteriaSection) criteriaSection.remove();
-            
-            // Adjust layout to center the single column for better UX
-            const mainGrid = document.querySelector('main');
-            mainGrid.classList.remove('lg:grid-cols-2');
-            mainGrid.classList.add('max-w-4xl', 'mx-auto');
+            document.querySelector('main').classList.replace('lg:grid-cols-2', 'max-w-4xl');
+            document.querySelector('main').classList.add('mx-auto');
         } else {
-            // Only load services/criteria if user is NOT 'blue'
             await loadServices();
         }
-
-        // 3. Load host data (accessible to everyone)
         await loadHosts();
     } catch (err) {
         notify("Failed to initialize session", true);
@@ -138,30 +132,32 @@ async function loadHosts() {
     const list = document.getElementById('host-list');
     
     list.innerHTML = hosts.map(h => {
-        // Calculate remaining budget (starts from 3)
-        const redRemaining = 3 - (h.pwds_red || 0);
-        const blueRemaining = 3 - (h.pwds_blue || 0);
+        let budgetHtml = '';
         
+        // Only show the budget for the user's specific team
+        if (currentUserRole === 'blue') {
+            const remaining = 3 - (h.pwds_blue || 0);
+            const colorClass = remaining <= 0 ? 'text-blue-500 font-black' : 'text-blue-400';
+            budgetHtml = `<span class="text-xl font-mono ${colorClass}">[${remaining}/3]</span>`;
+        } 
+        else if (currentUserRole === 'red') {
+            const remaining = 3 - (h.pwds_red || 0);
+            const colorClass = remaining <= 0 ? 'text-red-500 font-black' : 'text-red-400';
+            budgetHtml = `<span class="text-xl font-mono ${colorClass}">[${remaining}/3]</span>`;
+        }
+        // Admins see both for monitoring purposes
+        else if (currentUserRole === 'admin') {
+            budgetHtml = `<span class="text-sm font-mono text-slate-500">R:${3-h.pwds_red} B:${3-h.pwds_blue}</span>`;
+        }
+
         return `
             <div class="p-5 border-b border-slate-800 cursor-pointer hover:bg-slate-800 transition sidebar-item" 
                  onclick="loadScoringUsers(${h.id}, this)">
-                <div class="font-black text-white text-lg">${h.hostname}</div>
-                <div class="text-sm font-mono text-slate-500 mb-2">${h.ip}</div>
-                
-                <div class="flex gap-3 pt-2 border-t border-slate-800/50">
-                    <div class="flex flex-col">
-                        <span class="text-[9px] uppercase font-bold text-slate-500">Red Budget</span>
-                        <span class="text-xs font-mono ${redRemaining <= 0 ? 'text-red-500 font-bold' : 'text-red-400'}">
-                            ${redRemaining} / 3
-                        </span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[9px] uppercase font-bold text-slate-500">Blue Budget</span>
-                        <span class="text-xs font-mono ${blueRemaining <= 0 ? 'text-blue-500 font-bold' : 'text-blue-400'}">
-                            ${blueRemaining} / 3
-                        </span>
-                    </div>
+                <div class="flex justify-between items-center mb-1">
+                    <div class="font-black text-white text-2xl tracking-tighter">${h.hostname}</div>
+                    ${budgetHtml}
                 </div>
+                <div class="text-sm font-mono text-slate-500">${h.ip}</div>
             </div>
         `;
     }).join('');
