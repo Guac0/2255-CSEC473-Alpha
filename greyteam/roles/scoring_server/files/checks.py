@@ -385,7 +385,7 @@ class Cups (Check):
                 if criterion.content in print_hash:
                     return (criterion.team, "Found expected content")
                 # Incorrect output
-                elif criterion.content not in res:
+                elif criterion.content not in print_hash:
                     err.append(f"Could not find expected content")
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")

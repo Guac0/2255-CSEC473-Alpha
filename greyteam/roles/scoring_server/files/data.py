@@ -101,7 +101,7 @@ def insert_initial_data(logger):
             elif ("cups" in service_name_simple):
                 generic_name="cups"
                 crit_location=""
-                crit_content="5c162b85bbe427984153868a3f569defb24c4f9c8d45689e680b8f070c6ec824"
+                crit_content="5c162b85bbe427984153868a3f569defb24c4f9c8d45689e680b8f070c6ec824" # TODO: this changes based on the source pdf, which is affected by creation date. will finalize pdf later.
             elif ("vsftpd" in service_name_simple):
                 generic_name="ftp"
                 crit_location="~/Legion_Activity_Log.txt"
