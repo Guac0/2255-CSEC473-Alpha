@@ -86,6 +86,46 @@
 <script>
 let selectedServiceId = null;
 let currentUserRole = '';
+const SERVICE_GUIDE = {
+    "dns": {
+        location_desc: "DNS record to query:",
+        content_desc: "The expected IP Address output of the DNS record:"
+    },
+    "mssql": {
+        location_desc: "SQL Query:",
+        content_desc: "Expected Result (concatenated one line):"
+    },
+    "apache": {
+        location_desc: "MUST BE 80/doku.php?id=wiki:wikipage:",
+        content_desc: "Webpage Content (raw value from curl):"
+    },
+    "mariadb": {
+        location_desc: "SQL Query:",
+        content_desc: "Expected Result (must be one line):"
+    },
+    "cups": {
+        location_desc: "NOT USED",
+        content_desc: "Expected File Hash:"
+    },
+    "vsftpd": {
+        location_desc: "Absolute Local Path:",
+        content_desc: "Expected File Content: "
+    },
+    "iis": {
+        location_desc: "MUST BE 80:",
+        content_desc: "Website Content (curl):"
+    },
+    "smb": {
+        location_desc: "Absolute Network Path:",
+        content_desc: "File Contents:"
+    },
+    "irc": {
+        location_desc: "IRC Channel:",
+        content_desc: "NOT USED"
+    },
+    // Add more services here as needed
+};
+let serviceNamesById = {};
 
 function notify(message, isError = false) {
     const toast = document.getElementById('toast');
@@ -219,6 +259,12 @@ async function loadServices() {
     const res = await fetch('/get_services');
     const services = await res.json();
     const list = document.getElementById('service-list');
+    
+    // Build the ID -> Name map for the guide lookup
+    services.forEach(s => {
+        serviceNamesById[s.id] = s.display_name;
+    });
+
     list.innerHTML = services.map(s => `
         <div class="p-5 border-b border-slate-800 cursor-pointer hover:bg-slate-800 transition sidebar-item" 
              onclick="loadCriteria(${s.id}, this)">
@@ -232,16 +278,32 @@ async function loadCriteria(serviceId, el) {
     selectedServiceId = serviceId;
     document.getElementById('add-btn').classList.remove('hidden');
     document.querySelectorAll('#service-list .sidebar-item').forEach(i => i.classList.remove('sidebar-active'));
-    el.classList.add('sidebar-active');
+    el.classList.add('active'); // CSS for highlighting
 
     const res = await fetch(`/get_scoring_criteria?service_id=${serviceId}`);
     const data = await res.json();
     const workspace = document.getElementById('criteria-workspace');
 
+    // Look up the guide for this specific service
+    const serviceName = serviceNamesById[serviceId];
+    const guide = SERVICE_GUIDE[serviceName] || null;
+
     workspace.innerHTML = data.map(c => `
-        <div class="bg-slate-800 border-l-4 border-emerald-500 rounded-r-xl p-6 mb-4 shadow-lg">
-            <div class="text-xs font-bold text-emerald-500 uppercase tracking-tighter mb-2">Requirement Target: ${c.location}</div>
-            <div class="criteria-text font-mono text-white bg-slate-950 p-4 rounded-lg break-all border border-slate-700">${c.content}</div>
+        <div class="bg-slate-800 border-l-4 border-emerald-500 rounded-r-xl p-6 mb-6 shadow-lg">
+            <div class="mb-6">
+                <div class="flex items-center space-x-2 mb-1">
+                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest">Target Path</span>
+                    ${guide ? `<span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/20">GUIDE AVAILABLE</span>` : ''}
+                </div>
+                <div class="text-xl font-mono text-white bg-slate-950 p-3 rounded border border-slate-700 mb-2">${c.location}</div>
+                ${guide ? `<p class="text-slate-400 text-sm italic ml-1">💡 ${guide.location_desc}</p>` : ''}
+            </div>
+
+            <div>
+                <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-1">Required Content / Logic</span>
+                <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700 mb-2 break-all">${c.content}</div>
+                ${guide ? `<p class="text-slate-400 text-sm italic ml-1">💡 ${guide.content_desc}</p>` : ''}
+            </div>
         </div>
     `).join('');
 }

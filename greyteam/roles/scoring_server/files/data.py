@@ -72,18 +72,18 @@ def insert_initial_data(logger):
             ("10.0.30.6", "whinnyapolis", "Ubuntu 24.04", "Wkst LibreOffice"),
         ]
 
-        scoring_usernames = [
-            "twilight", "applejack", "fluttershy", "rarity", 
-            "pinkiepie", "rainbowdash", "bigmac", "mayormare", 
-            "shiningarmor", "cadance"
-        ]
-
         for ip, hostname, os_name, service_name in raw_csv_data:
             if hostname == "canterlot":
                 scoring_usernames = [
                     "spike", "starlight", "trixie", "derpy", 
                     "snips", "snails", "celestia", "discord", 
                     "luna", "starswirl"
+                ]
+            else:
+                scoring_usernames = [
+                    "twilight", "applejack", "fluttershy", "rarity", 
+                    "pinkiepie", "rainbowdash", "bigmac", "mayormare", 
+                    "shiningarmor", "cadance"
                 ]
             
             service_name_simple = service_name.lower().strip()
