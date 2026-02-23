@@ -6,4 +6,4 @@
 - name: Copy wallpaper to branding directory
   ansible.windows.win_copy:
     src: evilwallpaper.jpg
-    dest: C:\ProgramData\Inscope\Branding\wallpaper.jpg
+    dest: C:\ProgramData\Inscope\Branding\evilwallpaper.jpg
