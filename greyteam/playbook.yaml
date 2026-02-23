@@ -126,7 +126,7 @@
 - name: Set evil Wallpaper
   hosts: canterlot #:!cement
   roles:
-    - windows_evilwallpaper
+    - windows_evilwall
   tags:
     - windows
     - inscope
