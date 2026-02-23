@@ -33,19 +33,27 @@ def check(service:Service) -> tuple[int, str]:
 
     match service.scorecheck_name:
         case 'http': #nginx, apache
-            check_obj = checks.Http(service)
+          check_obj = checks.Http(service)
         case 'mariadb':
             check_obj = checks.Mysql(service)
         case 'ftp':
             check_obj = checks.Ftp(service)
         case 'mssql':
             check_obj = checks.Mssql(service)
-        # case 'workstation_linux':
-        #     check_obj = checks.Workstation_linux(service)
-        # case 'workstation_windows':
-        #     check_obj = checks.Workstation_windows(service)
+        case 'workstation_linux':
+            check_obj = checks.Workstation_linux(service)
+        case 'workstation_windows':
+            check_obj = checks.Workstation_windows(service)
+        case 'irc':
+            check_obj = checks.Irc(service)
+        case 'dns':
+            check_obj = checks.Dns(service)
+        case 'cups':
+            check_obj = checks.Cups(service)
+        case 'smb':
+            check_obj = checks.Smb(service)
         case _: # Default: no class match
-            return (0, f'Check type "{service.scorecheck_name}" not implemented.')
+            return (0, f'Check type "{service.scorecheck_name}" not implemented.')  
 
     return check_obj.check()
 

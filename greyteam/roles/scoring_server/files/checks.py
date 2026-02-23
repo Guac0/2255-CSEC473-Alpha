@@ -8,6 +8,7 @@ from winrm.protocol import Protocol
 import smbclient
 from ftplib import FTP
 import time
+from datetime import datetime
 import socket
 import re
 
@@ -303,7 +304,7 @@ class Mssql (Check):
                     text=True
                 )
 
-                lines = [line.strip() for line in res.splitlines() if line.strip()]
+                lines = [line.strip() for line in res.stdout.splitlines() if line.strip()]
                 final_string = "".join(lines)
 
                 # Check succeeded
@@ -329,11 +330,13 @@ class Cups (Check):
         err = []
         for criterion in self.criteria:
             try:
+                start_time = datetime.now().replace(year=1900, month=1, day=1)
+
                 #lp -h 10.10.0.5 -d printer testfile.pdf
                 res = subprocess.run(
                     ["lp", "-h", self.host_ip,
                      "-d", "printer",
-                     "testfile.pdf"],
+                     "test.pdf"],
                     capture_output=True,
                     text=True
                 )
@@ -350,19 +353,17 @@ class Cups (Check):
                 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 client.connect(self.host_ip, username="greyteam", password="ponyuploc0!")
 
-                # Check successful print jobs
-                start_time = time.gmtime()
-                #ls -ot --time-style=+%X /home/cadance/print | head -n 2
-                stdin, stdout, stderr = client.exec_command("lpstat -W successful | head -n 1")
+                # Check successful print jobs                
+                stdin, stdout, stderr = client.exec_command("sudo ls -ot --time-style=+%X /home/cadance/print | head -n 2")
                 if stdout.channel.recv_exit_status() != 0:
                     err.append("Could not access print output directory")
                     continue
-                string = stdout.read()
+                string = stdout.read().decode()
 
                 # Get the time the print was submitted
-                pattern = r"\d{2}:\d{2}:\d{2} (A|P)M"
-                res = re.findall(pattern, string)[0]
-                time_elapsed = time.strptime(res, '%H:%M:%S %p') - start_time
+                pattern = r"\d{2}:\d{2}:\d{2} (AM|PM)"
+                res = re.search(pattern, string).group(0)
+                time_elapsed = start_time - datetime.strptime(res, '%I:%M:%S %p')
                 if time_elapsed.total_seconds() < 0:
                     err.append("Print job did not output file")
                     continue
@@ -371,15 +372,18 @@ class Cups (Check):
                 filename = string.split(" ")[-1]
 
                 # Get hash
-                stdin, stdout, stderr = client.exec_command(f"sha256sum /home/cadance/print/filename")
+                stdin, stdout, stderr = client.exec_command(f"sudo sha256sum /home/cadance/print/{filename}")
                 if stdout.channel.recv_exit_status() != 0:
                     err.append("Could not generate hash for print file")
                     continue
-                print_hash = stdout.read()
+                print_hash = stdout.read().decode()
+
+                # Clean up our tracks, just 'cause
+                client.exec_command(f"sudo rm /home/cadance/print/{filename}")
 
                 # Evaluate hash
                 if criterion.content in print_hash:
-                    return (0, "Found expected content")
+                    return (criterion.team, "Found expected content")
                 # Incorrect output
                 elif criterion.content not in res:
                     err.append(f"Could not find expected content")
