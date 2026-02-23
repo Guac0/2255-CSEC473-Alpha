@@ -66,11 +66,11 @@
             <div class="space-y-6">
                 <input type="hidden" id="modal-service-id">
                 <div>
-                    <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wide">File Location / Target</label>
+                    <label id="loc-label-text" class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wide">File Location / Target</label>
                     <input type="text" id="new-location" placeholder="/etc/ssh/sshd_config" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-4 text-lg text-emerald-400 focus:border-emerald-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wide">Required Content / Regex</label>
+                    <label id="content-label-text" class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wide">Required Content / Regex</label>
                     <textarea id="new-content" rows="4" placeholder="PermitRootLogin no" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-4 text-lg font-mono text-emerald-400 focus:border-emerald-500 outline-none"></textarea>
                 </div>
                 <div class="flex justify-end space-x-4 pt-4">
@@ -254,10 +254,15 @@ async function updatePassword(userId) {
     }
 }
 
+let serviceToHostMap = {};
 // --- SCORING CRITERIA ---
 async function loadServices() {
     const res = await fetch('/get_services');
     const services = await res.json();
+    services.forEach(s => {
+        serviceNamesById[s.id] = s.display_name;
+        serviceToHostMap[s.id] = s.host_id; // Store the host_id
+    });
     const list = document.getElementById('service-list');
     
     // Build the ID -> Name map for the guide lookup
@@ -278,44 +283,66 @@ async function loadCriteria(serviceId, el) {
     selectedServiceId = serviceId;
     document.getElementById('add-btn').classList.remove('hidden');
     document.querySelectorAll('#service-list .sidebar-item').forEach(i => i.classList.remove('sidebar-active'));
-    el.classList.add('active'); // CSS for highlighting
+    el.classList.add('sidebar-active');
 
     const res = await fetch(`/get_scoring_criteria?service_id=${serviceId}`);
     const data = await res.json();
     const workspace = document.getElementById('criteria-workspace');
 
-    // Look up the guide for this specific service
-    const serviceName = serviceNamesById[serviceId];
-    const guide = SERVICE_GUIDE[serviceName] || null;
+    // 1. Get the service name and normalize it to lowercase
+    const rawName = serviceNamesById[serviceId] || "";
+    const normalizedName = rawName.toLowerCase();
+    
+    // 2. Fetch the override from our map
+    const guide = SERVICE_GUIDE[normalizedName];
 
-    workspace.innerHTML = data.map(c => `
-        <div class="bg-slate-800 border-l-4 border-emerald-500 rounded-r-xl p-6 mb-6 shadow-lg">
-            <div class="mb-6">
-                <div class="flex items-center space-x-2 mb-1">
-                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest">Target Path</span>
-                    ${guide ? `<span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/20">GUIDE AVAILABLE</span>` : ''}
+    // 3. Render existing criteria using the replacement logic
+    workspace.innerHTML = data.map(c => {
+        // Use guide values if they exist, otherwise fallback to database values
+        const displayLoc = guide ? guide.location : c.location;
+        const displayContent = guide ? guide.content : c.content;
+
+        return `
+            <div class="bg-slate-800 border-l-4 border-emerald-500 rounded-r-xl p-6 mb-6 shadow-lg">
+                <div class="mb-6">
+                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-2">Target Area</span>
+                    <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700">${displayLoc}</div>
                 </div>
-                <div class="text-xl font-mono text-white bg-slate-950 p-3 rounded border border-slate-700 mb-2">${c.location}</div>
-                ${guide ? `<p class="text-slate-400 text-sm italic ml-1">💡 ${guide.location_desc}</p>` : ''}
+                <div>
+                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-2">Policy Requirement</span>
+                    <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700 break-all">${displayContent}</div>
+                </div>
             </div>
-
-            <div>
-                <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-1">Required Content / Logic</span>
-                <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700 mb-2 break-all">${c.content}</div>
-                ${guide ? `<p class="text-slate-400 text-sm italic ml-1">💡 ${guide.content_desc}</p>` : ''}
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function showNewCriteriaModal() {
+    const rawName = serviceNamesById[selectedServiceId] || "";
+    const guide = SERVICE_GUIDE[rawName.toLowerCase()];
+    
+    const locLabel = document.querySelector('label[for="new-location"]') || document.getElementById('loc-label-text');
+    const contentLabel = document.querySelector('label[for="new-content"]') || document.getElementById('content-label-text');
+
+    // Replace modal labels with custom text if available
+    if (guide) {
+        if (locLabel) locLabel.innerText = `Location: ${guide.location}`;
+        if (contentLabel) contentLabel.innerText = `Content: ${guide.content}`;
+    } else {
+        // Standard fallback
+        if (locLabel) locLabel.innerText = "File Location / Target";
+        if (contentLabel) contentLabel.innerText = "Required Content / Regex";
+    }
+
     document.getElementById('modal-service-id').value = selectedServiceId;
     toggleModal('criteria-modal');
 }
 
 async function submitNewCriteria() {
+    const sId = document.getElementById('modal-service-id').value;
     const payload = {
-        service_id: document.getElementById('modal-service-id').value,
+        service_id: sId,
+        host_id: serviceToHostMap[sId], // Added this line
         location: document.getElementById('new-location').value,
         content: document.getElementById('new-content').value
     };
