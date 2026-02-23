@@ -352,23 +352,34 @@ class Cups (Check):
 
                 # Check successful print jobs
                 start_time = time.gmtime()
+                #ls -ot --time-style=+%X /home/cadance/print | head -n 2
                 stdin, stdout, stderr = client.exec_command("lpstat -W successful | head -n 1")
-
-                status = stdout.channel.recv_exit_status()
-                res = stdout.read()
-
-                client.close()
+                if stdout.channel.recv_exit_status() != 0:
+                    err.append("Could not access print output directory")
+                    continue
+                string = stdout.read()
 
                 # Get the time the print was submitted
                 pattern = r"\d{2}:\d{2}:\d{2} (A|P)M"
-                res = re.findall(pattern, res)[0]
+                res = re.findall(pattern, string)[0]
                 time_elapsed = time.strptime(res, '%H:%M:%S %p') - start_time
+                if time_elapsed.total_seconds() < 0:
+                    err.append("Print job did not output file")
+                    continue
 
-                if time_elapsed.total_seconds() >= 0:
-                    return (criterion.team, f"Print succeeded")
-                # Command failed. 139 is segfault
-                elif status != 0 and status != 139:
-                    err.insert(0, stderr.read()[:MAX_ERROR_LEN])
+                # Get filename
+                filename = string.split(" ")[-1]
+
+                # Get hash
+                stdin, stdout, stderr = client.exec_command(f"sha256sum /home/cadance/print/filename")
+                if stdout.channel.recv_exit_status() != 0:
+                    err.append("Could not generate hash for print file")
+                    continue
+                print_hash = stdout.read()
+
+                # Evaluate hash
+                if criterion.content in print_hash:
+                    return (0, "Found expected content")
                 # Incorrect output
                 elif criterion.content not in res:
                     err.append(f"Could not find expected content")
