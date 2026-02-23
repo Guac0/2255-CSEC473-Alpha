@@ -73,11 +73,18 @@ def insert_initial_data(logger):
 
         scoring_usernames = [
             "twilight", "applejack", "fluttershy", "rarity", 
-            "pinkiepie", "rainbowdash", "spike", "starlight", 
-            "trixie", "celestia"
+            "pinkiepie", "rainbowdash", "bigmac", "mayormare", 
+            "shiningarmor", "cadance"
         ]
 
         for ip, hostname, os_name, service_name in raw_csv_data:
+            if hostname == "canterlot":
+                scoring_usernames = [
+                    "spike", "starlight", "trixie", "derpy", 
+                    "snips", "snails", "celestia", "discord", 
+                    "luna", "starswirl"
+                ]
+            
             service_name_simple = service_name.lower().strip()
             generic_name="UNKNOWN"
             crit_location=""
