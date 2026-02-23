@@ -198,6 +198,48 @@ def insert_initial_data(logger):
         db.session.rollback()
         logger.fatal(f"Failed to insert initial data into DB: {e}")
 
+def insert_initial_round(logger):
+    try:
+        logger.info(f"Starting insertion for Round 0...")
+        
+        # 1. Get all services and teams
+        services = Service.query.all()
+        blue_team = ScoringTeams.query.filter_by(team_name="blue").first()
+        red_team = ScoringTeams.query.filter_by(team_name="red").first()
+        offline_team = ScoringTeams.query.filter_by(team_name="offline").first()
+
+        if not services or not blue_team or not offline_team:
+            logger.error("Required initial data (services/teams) missing. Run insert_initial_data first.")
+            return
+
+        round_num = 0
+        round_entries = []
+        
+        for service in services:
+            assigned_team_id = offline_team.id
+            msg = "Round 0 Placeholder."
+            #offline_team.score += 1
+
+            history_entry = ScoringHistory(
+                service_id=service.id,
+                host_id=service.host_id,
+                round=round_num,
+                value=assigned_team_id,
+                message=msg
+            )
+            round_entries.append(history_entry)
+        
+        db.session.add_all(round_entries)
+        logger.info(f"Round {round_num}: Inserted {len(round_entries)} service results.")
+
+        # 3. Commit all changes
+        db.session.commit()
+        logger.info("Successfully committed Round 0 to the database.")
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Failed to insert test rounds: {e}")
+
 def insert_test_rounds(logger, num_rounds=10):
     """
     Inserts dummy scoring history data for 10 rounds.
@@ -269,6 +311,7 @@ def create_db_tables(logger):
     db.create_all()
     if not db_exists:
         insert_initial_data(logger)
+        insert_initial_round(logger)
         if CREATE_TEST_DATA:
             logger.info(f"Inserting test data into database.")
             insert_test_rounds(logger,10)
