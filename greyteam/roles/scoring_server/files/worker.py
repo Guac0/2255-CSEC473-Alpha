@@ -21,6 +21,8 @@ from tabulate import tabulate
 from server import app, get_scoring_data_latest
 from data import create_db_tables
 import copy
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 logger = setup_logging("server_worker")
 MAX_MESSAGE_DISCORD = 130
@@ -45,7 +47,7 @@ def webhook_main():
                 task = WebhookQueue.query.order_by(WebhookQueue.created_at.asc()).first()
                 
                 if not task:
-                    logger.info("/webhook_main - no webhooks in queue, sleeping.")
+                    #logger.info("/webhook_main - no webhooks in queue, sleeping.")
                     time.sleep(2) # Wait a bit before checking for new tasks again
                     continue
 
@@ -144,12 +146,14 @@ def discord_webhook(task,url=WEBHOOK_URL):
         pass
 
     #data that the webhook will receive and use to display the alert in discord chat
+    tz_est = ZoneInfo('America/New_York')
+    now_est = datetime.now(tz=tz_est)
     payload = json.dumps({
     "embeds": [
         {
         "title": f"{task.title}"[:250] if task.title.strip() else "No Title",
         "color": int(color,16),
-        "description": f"{task.content}"[:4000] if task.content.strip() else "No Content"#,
+        "description": f"{task.content}. Time: now_est.strftime('%Y-%m-%d %H:%M:%S %Z%z')"[:4000] if task.content.strip() else "No Content"#,
         #"url": f"{PUBLIC_URL}/incidents?incident_id={incident_id}",
         #"fields": [
         #    {
@@ -254,8 +258,8 @@ class ScoreboardManager:
             
             # Build a single line or small block per host
             # Format: [Status] Hostname (IP) - Service: Message
-            line = f"{emoji} **{row['hostname']}** ({row['ip']})\n"
-            line += f"┕ *{row['service']}*: `{row['message'][:50]}`"
+            line = f"{emoji} **{row['hostname']}** ({row['ip']})"
+            #line += f"\n┕ *{row['service']}*: `{row['message'][:50]}`"
             lines.append(line)
         
         return "\n\n".join(lines)
