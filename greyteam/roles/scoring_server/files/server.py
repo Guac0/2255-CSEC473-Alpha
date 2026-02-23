@@ -859,6 +859,7 @@ def update_scoring_user_pwd():
 #        logger.error(f"/get_scoring_users - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
 #        return jsonify({"error": "Database error"}), 500
 
+@app.route("/get_scoring_users", methods=["GET"])
 def get_scoring_users():
     """
     Returns users without passwords, filtered by host_id.

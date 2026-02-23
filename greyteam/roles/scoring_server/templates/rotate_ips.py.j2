@@ -10,15 +10,15 @@ TEST_USER = "{{ scoring_user }}"  # The linux user running the python test suite
 STATE_FILE = "/tmp/scoring_test_ip_index"
 CHAIN_NAME = "SCORING_ROTATION"
 
-def run_cmd(cmd):
+def run_cmd(cmd,logger):
     """Helper to run shell commands safely."""
     sudo_cmd = f"sudo {cmd}"
     try:
         subprocess.run(sudo_cmd, check=True, shell=True, capture_output=True)
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e.stderr.decode()}")
+        logger.error(f"Error executing command: {e.stderr.decode()}")
 
-def setup_iptables(target_ip):
+def setup_iptables(target_ip,logger):
     # 1. Ensure the custom chain exists in the nat table
     # We ignore errors here because it might already exist
     subprocess.run(f"iptables -t nat -N {CHAIN_NAME}", shell=True, capture_output=True)
@@ -35,9 +35,9 @@ def setup_iptables(target_ip):
     # 4. Add the new SNAT rule for the specific user
     run_cmd(f"iptables -t nat -A {CHAIN_NAME} -m owner --uid-owner {TEST_USER} -j SNAT --to-source {target_ip}")
     
-    print(f"Successfully rotated outbound IP to: {target_ip}")
+    logger.info(f"Successfully rotated outbound IP to: {target_ip}")
 
-def get_next_ip():
+def get_next_ip(logger):
     # Read the last index used
     if os.path.exists(STATE_FILE):
         with open(STATE_FILE, "r") as f:

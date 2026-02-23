@@ -37,7 +37,7 @@
 - name: Render rotate_ips.py from template
   template:
     src: "rotate_ips.py.j2"
-    dest: "{{ [scoring_deploy_dir, 'rotate_ips'] | path_join }}"
+    dest: "{{ [scoring_deploy_dir, 'rotate_ips.py'] | path_join }}"
 
 - name: Create venv and install requirements
   ansible.builtin.pip:

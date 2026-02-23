@@ -7,11 +7,11 @@ scoring_user: scoring_worker
 scoring_host: "0.0.0.0"
 scoring_interface: eth0
 scoring_ips:
-  - 172.20.0.67/26
-  - 172.20.0.82/26
-  - 172.20.0.90/26
-  - 172.20.0.106/26
-  - 172.20.0.115/26
+  - 172.20.0.67 #/26
+  - 172.20.0.82 #/26
+  - 172.20.0.90 #/26
+  - 172.20.0.106 #/26
+  - 172.20.0.115 #/26
 
 # Derived values can still be overridden if needed
 public_url: "https://{{ ansible_host }}:{{ scoring_port }}"

@@ -106,7 +106,7 @@ def run_scoring_round(round_num:int, services:list[Service]):
             except mp.TimeoutError as e:
                 res = (0, "Check timed out")
             except Exception as e:
-                res = (0, "Something went wrong with scoring multiprocessing")
+                res = (0, f"Something went wrong with scoring multiprocessing: {e}")
 
             logger.info(f"Inserting score for Service {services[i].scorecheck_name}: ({res[0]}, {res[1]})")
 
@@ -142,8 +142,8 @@ if __name__ == "__main__":
             # Pull services from db
             services = get_services()
             # Run round
-            new_ip = rotate_ips.get_next_ip()
+            new_ip = rotate_ips.get_next_ip(logger)
             logger.info(f"Starting scorechecks for Round {round_num} from IP {new_ip}")
-            rotate_ips.setup_iptables(new_ip)
+            rotate_ips.setup_iptables(new_ip,logger)
             run_scoring_round(round_num, services)
             round_num += 1
