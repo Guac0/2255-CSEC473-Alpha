@@ -48,6 +48,8 @@ class Host(db.Model):
     hostname = db.Column(db.String(64), unique=True, nullable=False)
     ip = db.Column(db.String(50), unique=True, nullable=False)
     os = db.Column(db.String(32), nullable=False)
+    pwds_red = db.Column(db.Integer, default=0, nullable=False)
+    pwds_blue = db.Column(db.Integer, default=0, nullable=False)
 
     scoringusers = db.relationship('ScoringUser', backref='host')
     services = db.relationship('Service', backref='host')

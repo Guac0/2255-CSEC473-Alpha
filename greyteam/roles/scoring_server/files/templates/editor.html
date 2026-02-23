@@ -103,18 +103,68 @@ function notify(message, isError = false) {
     }, 3000);
 }
 
+// --- INITIALIZATION & ACCESS CONTROL ---
+async function init() {
+    try {
+        // 1. Check identity and role
+        const whoamiRes = await fetch('/whoami');
+        const user = await whoamiRes.json();
+        
+        // 2. Handle Role-Based Access Control
+        if (user.role === 'blue') {
+            const criteriaSection = document.getElementById('criteria-section');
+            if (criteriaSection) criteriaSection.remove();
+            
+            // Adjust layout to center the single column for better UX
+            const mainGrid = document.querySelector('main');
+            mainGrid.classList.remove('lg:grid-cols-2');
+            mainGrid.classList.add('max-w-4xl', 'mx-auto');
+        } else {
+            // Only load services/criteria if user is NOT 'blue'
+            await loadServices();
+        }
+
+        // 3. Load host data (accessible to everyone)
+        await loadHosts();
+    } catch (err) {
+        notify("Failed to initialize session", true);
+    }
+}
+
 // --- USER MANAGEMENT ---
 async function loadHosts() {
     const res = await fetch('/get_hosts');
     const hosts = await res.json();
     const list = document.getElementById('host-list');
-    list.innerHTML = hosts.map(h => `
-        <div class="p-5 border-b border-slate-800 cursor-pointer hover:bg-slate-800 transition sidebar-item" 
-             onclick="loadScoringUsers(${h.id}, this)">
-            <div class="font-black text-white text-lg">${h.hostname}</div>
-            <div class="text-sm font-mono text-blue-500">${h.ip}</div>
-        </div>
-    `).join('');
+    
+    list.innerHTML = hosts.map(h => {
+        // Calculate remaining budget (starts from 3)
+        const redRemaining = 3 - (h.pwds_red || 0);
+        const blueRemaining = 3 - (h.pwds_blue || 0);
+        
+        return `
+            <div class="p-5 border-b border-slate-800 cursor-pointer hover:bg-slate-800 transition sidebar-item" 
+                 onclick="loadScoringUsers(${h.id}, this)">
+                <div class="font-black text-white text-lg">${h.hostname}</div>
+                <div class="text-sm font-mono text-slate-500 mb-2">${h.ip}</div>
+                
+                <div class="flex gap-3 pt-2 border-t border-slate-800/50">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] uppercase font-bold text-slate-500">Red Budget</span>
+                        <span class="text-xs font-mono ${redRemaining <= 0 ? 'text-red-500 font-bold' : 'text-red-400'}">
+                            ${redRemaining} / 3
+                        </span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[9px] uppercase font-bold text-slate-500">Blue Budget</span>
+                        <span class="text-xs font-mono ${blueRemaining <= 0 ? 'text-blue-500 font-bold' : 'text-blue-400'}">
+                            ${blueRemaining} / 3
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 async function loadScoringUsers(hostId, el) {
@@ -143,7 +193,8 @@ async function loadScoringUsers(hostId, el) {
 }
 
 async function updatePassword(userId) {
-    const pwd = document.getElementById(`pw-${userId}`).value;
+    const pwdInput = document.getElementById(`pw-${userId}`);
+    const pwd = pwdInput.value;
     if(!pwd) return notify("Password cannot be empty", true);
 
     try {
@@ -152,11 +203,19 @@ async function updatePassword(userId) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ user_id: userId, password: pwd })
         });
+        
         if (res.ok) {
             notify("Credential updated successfully");
-            document.getElementById(`pw-${userId}`).value = '';
-        } else { notify("Update failed", true); }
-    } catch (e) { notify("Server error", true); }
+            pwdInput.value = '';
+            // REFRESH HOSTS: Ensures the budget count updates immediately on the UI
+            await loadHosts();
+        } else { 
+            const error = await res.text();
+            notify(`Update failed: ${error}`, true); 
+        }
+    } catch (e) { 
+        notify("Server connection error", true); 
+    }
 }
 
 // --- SCORING CRITERIA ---
@@ -221,6 +280,7 @@ async function submitNewCriteria() {
 function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
 
 // Initial Load
-loadHosts();
-loadServices();
+init();
+//loadHosts();
+//loadServices();
 </script>

@@ -34,8 +34,8 @@ webgui_users:
   redteam:
     #password: "Frenemies0!"
     password: "getout"
-    role: "redteam"
+    role: "red"
   blueteam:
     #password: "Friendship0!"
     password: "getout"
-    role: "blueteam"
+    role: "blue"

@@ -793,38 +793,66 @@ def remove_scoring_user():
         return jsonify({"error": "Database error while deleting user"}), 500
 
 @app.route("/update_scoring_user_pwd", methods=["POST"])
+@login_required
 def update_scoring_user_pwd():
     data = request.json
-    user_id = data.get("id")
+    # Note: Ensure your frontend sends 'user_id' or 'id'. 
+    # This matches the 'user_id' key used in our previous Javascript update.
+    user_id = data.get("user_id") or data.get("id")
     new_password = data.get("password")
 
     if not all([user_id, new_password]):
-        logger.warning(f"/update_scoring_user_pwd - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {[user_id]}")
+        logger.warning(f"/update_scoring_user_pwd - Failed connection from {current_user.id} - missing data: {data}")
         return "Missing data", 400
 
     user = ScoringUser.query.get(user_id)
     if not user:
-        logger.warning(f"/update_scoring_user_pwd - Failed connection from {current_user.id} at {request.remote_addr} - user not found. Full details: {[user_id]}")
-        return "User not found", 400
+        logger.warning(f"/update_scoring_user_pwd - User not found: {user_id}")
+        return "User not found", 404
+
+    # Fetch the host associated with this user to update the budget
+    host = Host.query.get(user.host_id)
+    if not host:
+        return "Associated host not found", 404
 
     try:
+        # 1. Update the actual credential
         user.password = new_password
+        
+        # 2. Increment the budget counter based on current_user.role
+        # We normalize to lowercase to handle any casing discrepancies
+        user_role = current_user.role.lower()
+        
+        if user_role == 'red':
+            host.pwds_red += 1
+            logger.info(f"Incremented Red password count for {host.hostname} (Total: {host.pwds_red})")
+        elif user_role == 'blue':
+            host.pwds_blue += 1
+            logger.info(f"Incremented Blue password count for {host.hostname} (Total: {host.pwds_blue})")
+        
+        # 3. Commit the changes (Password + Host Budget)
         db.session.commit()
 
+        # 4. Queue the audit log/webhook
         task = WebhookQueue(
             title="Scoring User Password Changed",
-            content=f"Scoring User password changed for host_id {user.host_id} with username {user.username} by user {current_user.id}"
+            content=(f"Credential updated for {user.username} on host {host.hostname}. "
+                     f"New Budget Usage - Red: {host.pwds_red}, Blue: {host.pwds_blue}. "
+                     f"Action by: {current_user.id} ({current_user.role})")
         )
         db.session.add(task)
         db.session.commit()
 
-        logger.info(f"/update_scoring_user_pwd - Successful connection from {current_user.id} at {request.remote_addr}. Updated password for user {user.username} (ID: {user_id})")
-        return jsonify({"status": "ok"})
+        logger.info(f"/update_scoring_user_pwd - Success: {current_user.id} updated {user.username}")
+        return jsonify({
+            "status": "ok"
+        })
+
     except Exception as e:
         db.session.rollback()
-        logger.error(f"/update_scoring_user_pwd - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+        logger.error(f"/update_scoring_user_pwd - Database error: {e}")
         return jsonify({"error": "Database error while updating password"}), 500
-
+    
 @app.route("/get_scoring_users", methods=["GET"])
 def get_scoring_users():
     """Returns all users without passwords for general display."""
