@@ -142,7 +142,8 @@ if __name__ == "__main__":
             # Pull services from db
             services = get_services()
             # Run round
-            logger.info(f"Starting scorechecks for Round {round_num}")
-            rotate_ips.setup_iptables(rotate_ips.get_next_ip())
+            new_ip = rotate_ips.get_next_ip()
+            logger.info(f"Starting scorechecks for Round {round_num} from IP {new_ip}")
+            rotate_ips.setup_iptables(new_ip)
             run_scoring_round(round_num, services)
             round_num += 1

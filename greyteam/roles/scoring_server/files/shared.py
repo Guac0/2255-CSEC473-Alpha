@@ -3,6 +3,8 @@ import os, json, logging, time
 from datetime import datetime, timedelta
 from concurrent_log_handler import ConcurrentRotatingFileHandler
 
+os.umask(0) # 666/777
+
 CONFIG_DEFAULTS = {
     "HOST": "0.0.0.0",
     "PORT": 8080,

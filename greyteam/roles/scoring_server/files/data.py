@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import time
 import os
 import random
+from sqlalchemy import event
 
 def insert_initial_data(logger):
     """
@@ -303,6 +304,15 @@ def insert_test_rounds(logger, num_rounds=10):
 
 def create_db_tables(logger):
     # must be called in app context
+
+    # Enable write ahead logging
+    # TODO app.context
+    @event.listens_for(db.engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.close()
 
     db_exists = os.path.exists(os.path.join("instance",SAVEFILE))
     # This checks the database file defined in SQLALCHEMY_DATABASE_URI.
