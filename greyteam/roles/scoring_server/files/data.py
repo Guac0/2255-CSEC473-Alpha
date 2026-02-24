@@ -125,7 +125,7 @@ def insert_initial_data(logger):
             elif ("irc" in service_name_simple):
                 generic_name="irc"
                 crit_location="#operations"
-                crit_content=""
+                crit_content="PRIVMSG"
             elif ("nginx" in service_name_simple):
                 generic_name="http"
                 crit_location="80"
