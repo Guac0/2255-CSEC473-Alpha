@@ -1,0 +1,27 @@
+---
+- name: Check if computer is joined and if trust is valid
+  ansible.windows.win_shell: |
+    $sysInfo = Get-CimInstance Win32_ComputerSystem
+    if ($sysInfo.PartOfDomain) {
+        if (!(Test-ComputerSecureChannel)) {
+            return "BROKEN"
+        }
+        return "VALID"
+    }
+    return "WORKGROUP"
+  register: domain_status
+  changed_when: false
+
+- name: Unjoin from domain if trust is broken
+  ansible.windows.win_domain_membership:
+    state: workgroup
+    workgroup_name: WORKGROUP
+    # Use local admin credentials since domain auth is broken
+    domain_admin_user: "{{ local_admin_user }}"
+    domain_admin_password: "{{ local_admin_password }}"
+  when: "'BROKEN' in domain_status.stdout"
+  register: unjoin_result
+
+- name: Reboot after unjoining
+  ansible.windows.win_reboot:
+  when: unjoin_result.reboot_required
