@@ -73,7 +73,7 @@ def insert_initial_data(logger):
         ]
 
         for ip, hostname, os_name, service_name in raw_csv_data:
-            if hostname == "canterlot":
+            if hostname == "canterlot" or hostname == "manehatten":
                 scoring_usernames = [
                     "spike", "starlight", "trixie", "derpy", 
                     "snips", "snails", "celestia", "discord", 
