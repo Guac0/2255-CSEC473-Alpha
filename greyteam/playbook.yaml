@@ -123,6 +123,16 @@
     - wallpaper
     - generic
 
+- name: Set evil Wallpaper
+  hosts: ad
+  roles:
+    - windows_evilwall
+  tags:
+    - windows
+    - inscope
+    - wallpaperevil
+    - generic
+
 - name: Deploy Cursor
   hosts: windows #:!cement
   roles:

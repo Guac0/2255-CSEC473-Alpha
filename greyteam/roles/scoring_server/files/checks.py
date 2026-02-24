@@ -336,7 +336,7 @@ class Cups (Check):
                 res = subprocess.run(
                     ["lp", "-h", self.host_ip,
                      "-d", "printer",
-                     "test.pdf"],
+                     "cadance.pdf"],
                     capture_output=True,
                     text=True
                 )
@@ -437,7 +437,7 @@ class Irc (Check):
 
                 # Test send
                 sock.sendall((f"PRIVMSG {criterion.loc} :scorecheck\r\n").encode())
-                msg_response = self.recv_until(sock, ["PRIVMSG", "ERROR"])
+                msg_response = self.recv_until(sock, [criterion.content, "ERROR"])
                 if "ERROR" in msg_response.upper():
                     err.append("Message send failed")
                     continue
