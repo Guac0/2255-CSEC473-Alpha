@@ -16,4 +16,4 @@
     local_admin_user: "{{ greyteam_user }}"
     local_admin_password: "{{ greyteam_password }}"
     reboot: true
-  when: trust_check.stdout == "BROKEN"
+  when: trust_check.stdout.trim() == "BROKEN"
