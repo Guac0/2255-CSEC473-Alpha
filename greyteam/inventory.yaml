@@ -91,6 +91,25 @@ all:
       hosts:
         deploy:
           ansible_host: "172.20.0.80"
+    
+    testbox1:
+      hosts:
+        test1:
+          ansible_host: "10.0.10.11"
+    testbox2:
+      hosts:
+        test2:
+          ansible_host: "10.0.10.12"
+    testbox3:
+      hosts:
+        test3:
+          ansible_host: "10.0.10.13"
+    
+    testboxes:
+      children:
+        testbox1:
+        testbox2:
+        testbox3:
 
 # Groups
     # Workstation Hosts
@@ -123,6 +142,7 @@ all:
         linux_wkst2:
         cement:
         void:
+        testboxes:
     # Hosts for scoring
     scoring_workers:
       hosts:
@@ -224,6 +244,7 @@ all:
         jumpboxes:
         scoring_all:
         controller:
+        testboxes:
     unix:
       children:
         linux:

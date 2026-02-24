@@ -39,6 +39,9 @@ deb13 = {
   "vsftpd" = { hostname = "crystal-empire", ip = "10.0.10.6", network = "core"}
   "irc" = { hostname = "everfree-forest", ip = "10.0.20.3", network = "dmz"}
   "nginx" = { hostname = "griffonstone", ip = "10.0.20.4", network = "dmz"}
+  "test1" = { hostname = "test1", ip = "10.0.10.11", network = "core"}
+  "test2" = { hostname = "test2", ip = "10.0.10.12", network = "core"}
+  "test3" = { hostname = "test3", ip = "10.0.10.13", network = "core"}
 }
 ubun24 = {
   "linux_wkst1" = { hostname = "cloudsdale", ip = "10.0.30.4", network = "internal"}
