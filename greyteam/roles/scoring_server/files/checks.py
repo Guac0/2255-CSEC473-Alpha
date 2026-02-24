@@ -336,7 +336,7 @@ class Cups (Check):
                 res = subprocess.run(
                     ["lp", "-h", self.host_ip,
                      "-d", "printer",
-                     "test.pdf"],
+                     "cadance.pdf"],
                     capture_output=True,
                     text=True
                 )
