@@ -218,7 +218,7 @@ def insert_initial_round(logger):
         
         for service in services:
             assigned_team_id = offline_team.id
-            msg = "Round 0 Placeholder."
+            msg = "Round 0 Placeholder"
             #offline_team.score += 1
 
             history_entry = ScoringHistory(

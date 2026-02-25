@@ -149,7 +149,7 @@ class Mysql (Check):
                 elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content")
             except Exception as E:
-                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
+                err.append(f"{user[0]} - {str(E)[:MAX_ERROR_LEN]}")
         
         return (OFFLINE_TEAM_ID, err[0])
 
@@ -214,7 +214,7 @@ class Smb (Check):
                     err.insert(OFFLINE_TEAM_ID, f"Scoring file does not exist")
 
             except Exception as E:
-                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
+                err.append(f"{user[0]} - {str(E)[:MAX_ERROR_LEN]}")
         
         return (OFFLINE_TEAM_ID, err[0])
 
@@ -249,7 +249,7 @@ class Ftp (Check):
                     err.append(f"Could not find expected content")
 
             except Exception as E:
-                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
+                err.append(f"{user[0]} - {str(E)[:MAX_ERROR_LEN]}")
         
         return (OFFLINE_TEAM_ID, err[0])
 
@@ -317,13 +317,13 @@ class Mssql (Check):
                     return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
-                    err.insert(OFFLINE_TEAM_ID, res.stderr)
+                    err.insert(OFFLINE_TEAM_ID, f"{user[0]} - {res.stderr}")
                 # Incorrect output
                 elif criterion.content not in final_string:
                     err.append(f"Could not find expected content")
 
             except Exception as E:
-                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
+                err.append(f"{user[0]} - {str(E)[:MAX_ERROR_LEN]}")
         
         return (OFFLINE_TEAM_ID, err[0])
     
@@ -511,7 +511,7 @@ class Workstation_linux (Check):
                     err.append(f"File {filepath} does not match expected hash")
 
             except Exception as E:
-                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
+                err.append(f"{user[0]} - {str(E)[:MAX_ERROR_LEN]}")
         
         return (OFFLINE_TEAM_ID, err[0])
 
@@ -591,6 +591,6 @@ class Workstation_windows (Check):
                     err.append(f"{output}")
 
             except Exception as E:
-                err.append(f"{str(E)[:MAX_ERROR_LEN]}")
+                err.append(f"{user[0]} - {str(E)[:MAX_ERROR_LEN]}")
         
         return (OFFLINE_TEAM_ID, err[0])
