@@ -17,6 +17,7 @@ import checks
 import multiprocessing as mp
 import sys
 
+OFFLINE_TEAM_ID = 1
 logger = setup_logging("scoring_worker")
 
 def check(service:Service) -> tuple[int, str]:
@@ -53,7 +54,7 @@ def check(service:Service) -> tuple[int, str]:
         case 'smb':
             check_obj = checks.Smb(service)
         case _: # Default: no class match
-            return (0, f'Check type "{service.scorecheck_name}" not implemented.')  
+            return (OFFLINE_TEAM_ID, f'Check type "{service.scorecheck_name}" not implemented.')  
 
     return check_obj.check()
 
@@ -104,9 +105,9 @@ def run_scoring_round(round_num:int, services:list[Service]):
                 # Use of async is mostly to get the timeout error
                 res = processes[i].get(0)
             except mp.TimeoutError as e:
-                res = (0, "Check timed out")
+                res = (OFFLINE_TEAM_ID, "Check timed out")
             except Exception as e:
-                res = (0, f"Something went wrong with scoring multiprocessing: {e}")
+                res = (OFFLINE_TEAM_ID, f"Something went wrong with scoring multiprocessing: {e}")
 
             logger.info(f"Inserting score for Service {services[i].scorecheck_name}: ({res[0]}, {res[1]})")
 
@@ -142,8 +143,9 @@ if __name__ == "__main__":
             # Pull services from db
             services = get_services()
             # Run round
-            new_ip = rotate_ips.get_next_ip(logger)
-            logger.info(f"Starting scorechecks for Round {round_num} from IP {new_ip}")
-            rotate_ips.setup_iptables(new_ip,logger)
+            #new_ip = rotate_ips.get_next_ip(logger)
+            #logger.info(f"Starting scorechecks for Round {round_num} from IP {new_ip}")
+            #rotate_ips.setup_iptables(new_ip,logger)
+            logger.info(f"Starting scorechecks for Round {round_num}")
             run_scoring_round(round_num, services)
             round_num += 1

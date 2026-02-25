@@ -3,7 +3,7 @@ scoring_gunicorn_workers: 3
 scoring_port: 443
 scoring_server_start: true
 scoring_worker_start: false
-scoring_user: scoring_worker
+scoring_user: root
 scoring_host: "0.0.0.0"
 scoring_interface: eth0
 scoring_ips:
@@ -32,10 +32,10 @@ webgui_users:
     password: "ponyuploc0!"
     role: "admin"
   redteam:
-    #password: "Frenemies0!"
-    password: "getout"
+    password: "Frenemies0!"
+    #password: "getout"
     role: "red"
   blueteam:
-    #password: "Friendship0!"
-    password: "getout"
+    password: "Friendship0!"
+    #password: "getout"
     role: "blue"

@@ -1,7 +1,7 @@
 import subprocess
 import random
 from server import (
-    Service, ScoringUser, ScoringCriteria, Host
+    Service, ScoringUser, ScoringCriteria, Host, db
 )
 import paramiko
 from winrm.protocol import Protocol
@@ -11,7 +11,9 @@ import time
 from datetime import datetime
 import socket
 import re
+import base64
 
+OFFLINE_TEAM_ID = 1
 MAX_ERROR_LEN = 200
 DOMAIN = ""
 DOMAIN_ADMINS = []
@@ -78,7 +80,7 @@ class Check:
         :rtype: tuple[int,str]
         '''
 
-        return (0, "Check class")
+        return (OFFLINE_TEAM_ID, "Check class")
 
 class Http (Check):
 
@@ -100,14 +102,14 @@ class Http (Check):
                     return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
-                    err.insert(0, res.stderr)
+                    err.insert(OFFLINE_TEAM_ID, res.stderr)
                 # Incorrect output
                 elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content")
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
 
 class Mysql (Check):
     users:list[tuple[str,str]]
@@ -142,14 +144,14 @@ class Mysql (Check):
                     return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
-                    err.insert(0, res.stderr)
+                    err.insert(OFFLINE_TEAM_ID, res.stderr)
                 # Incorrect output
                 elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content")
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
 
 class Dns (Check):
     def __init__(self, check: Service) -> None:
@@ -170,14 +172,14 @@ class Dns (Check):
                     return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
-                    err.insert(0, res.stderr)
+                    err.insert(OFFLINE_TEAM_ID, res.stderr)
                 # Incorrect output
                 elif criterion.content not in res.stdout:
                     err.append(f"Could not find expected content")
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
 
 class Smb (Check):
     users:list[tuple[str,str]]
@@ -209,12 +211,12 @@ class Smb (Check):
                         else:
                             err.append(f"Could not find expected content")
                 else:
-                    err.insert(0, f"Scoring file does not exist")
+                    err.insert(OFFLINE_TEAM_ID, f"Scoring file does not exist")
 
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
 
 class Ftp (Check):
     users:list[tuple[str,str]]  
@@ -249,7 +251,7 @@ class Ftp (Check):
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
 
 class Mssql (Check):
     users:list[tuple[str,str]]  
@@ -257,7 +259,10 @@ class Mssql (Check):
     def __init__(self, check: Service) -> None:
         super().__init__(check)
 
-        users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
+        #users:list[ScoringUser] = ScoringUser.query.filter(ScoringUser.host_id == self.host)
+        users = db.session.query(ScoringUser).join(Host).filter(
+            Host.hostname == "canterlot"
+        ).all()
 
         self.users = []
         for user in users:
@@ -312,7 +317,7 @@ class Mssql (Check):
                     return (criterion.team, f"Found expected content")
                 # Command failed
                 elif res.returncode != 0:
-                    err.insert(0, res.stderr)
+                    err.insert(OFFLINE_TEAM_ID, res.stderr)
                 # Incorrect output
                 elif criterion.content not in final_string:
                     err.append(f"Could not find expected content")
@@ -320,7 +325,7 @@ class Mssql (Check):
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
     
 class Cups (Check):
     def __init__ (self, check: Service) -> None:
@@ -345,7 +350,7 @@ class Cups (Check):
 
                 # Print command didn't go through
                 if res.returncode != 0:
-                    err.insert(0, res.stderr)
+                    err.insert(OFFLINE_TEAM_ID, res.stderr)
                     continue
 
                 # SSH into the box to check if print job went through
@@ -364,8 +369,7 @@ class Cups (Check):
                 pattern = r"\d{2}:\d{2}:\d{2} (AM|PM)"
                 try:
                     res = re.search(pattern, string).group(0)
-                except:
-                    # If no match is found nothing got printed
+                except Exception as e:
                     err.append("Print job did not output file")
                     continue
                 time_elapsed = start_time - datetime.strptime(res, '%I:%M:%S %p')
@@ -395,7 +399,7 @@ class Cups (Check):
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
 
 class Irc (Check):
     def __init__(self, check: Service) -> None:
@@ -422,7 +426,7 @@ class Irc (Check):
         try:
             sock = socket.create_connection((str(self.host_ip), 6667), timeout = 5)
         except Exception as e:
-            return (0, f"Service not available: {e}")
+            return (OFFLINE_TEAM_ID, f"Service not available: {e}")
 
         try:
             sock.sendall(("NICK scorebot\r\n").encode())
@@ -430,7 +434,7 @@ class Irc (Check):
 
             response = self.recv_until(sock, ["001"], timeout=10)
             if "001" not in response:
-                return (0, f"Handshake failed: Did not receive welcome message")
+                return (OFFLINE_TEAM_ID, f"Handshake failed: Did not receive welcome message")
             
             err = []
             for criterion in self.criteria:
@@ -447,11 +451,11 @@ class Irc (Check):
                     err.append("Message send failed")
                     continue
                 
-                return (criterion.team, "Irc check successful")
+                return (criterion.team, "Found expected content")
         finally:
             sock.close()
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
 
 class Workstation_linux (Check):
     users:list[tuple[str,str]]  
@@ -509,7 +513,7 @@ class Workstation_linux (Check):
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])
 
 class Workstation_windows (Check):
     users:list[tuple[str,str]]  
@@ -548,28 +552,30 @@ class Workstation_windows (Check):
                 # 1. Get-Item -Path follows symlinks/junctions by default.
                 # 2. Check if the file has 'Execute' permissions for the current user.
                 # 3. Calculate SHA256 hash.
+
+                #$perm = (Get-Acl $item.FullName).Access | Where-Object {{ 
+                    #    $_.IdentityReference -eq "{username}" -or $_.IdentityReference -eq "Everyone" 
+                    #}} | Where-Object {{ $_.FileSystemRights -match "ExecuteFile|FullControl" }}
                 ps_script = f"""
                 $path = "{filepath}"
                 if (Test-Path $path) {{
                     $item = Get-Item -Path $path
-                    $perm = (Get-Acl $item.FullName).Access | Where-Object {{ 
-                        $_.IdentityReference -eq "{username}" -or $_.IdentityReference -eq "Everyone" 
-                    }} | Where-Object {{ $_.FileSystemRights -match "ExecuteFile|FullControl" }}
                     
                     $hash = (Get-FileHash $item.FullName -Algorithm SHA256).Hash
                     
-                    if ($perm -and ($hash -eq "{expected_hash}")) {{
+                    if ($hash -eq "{expected_hash}") {{
                         Write-Output "Found expected content"
                     }} else {{
-                        Write-Output "File {filepath} does not match expected hash or is not executable"
+                        Write-Output "File does not match expected hash"
                     }}
                 }} else {{
-                    Write-Output "File {filepath} does not exist"
+                    Write-Output "File does not exist"
                 }}
                 """
-
+                encoded_ps = base64.b64encode(ps_script.encode('utf-16-le')).decode('utf-8')
                 shell_id = p.open_shell()
-                command_id = p.run_command(shell_id, 'powershell', ['-Command', ps_script])
+                #command_id = p.run_command(shell_id, 'powershell', ['-Command', ps_script])
+                command_id = p.run_command(shell_id, 'powershell', ['-EncodedCommand', encoded_ps])
                 std_out, std_err, status_code = p.get_command_output(shell_id, command_id)
                 p.cleanup_command(shell_id, command_id)
                 p.close_shell(shell_id)
@@ -587,4 +593,4 @@ class Workstation_windows (Check):
             except Exception as E:
                 err.append(f"{str(E)[:MAX_ERROR_LEN]}")
         
-        return (0, err[0])
+        return (OFFLINE_TEAM_ID, err[0])

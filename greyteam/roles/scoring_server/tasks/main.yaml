@@ -17,8 +17,8 @@
 - name: Deploy IP Aliases
   ansible.builtin.include_tasks: ip.yaml
 
-- name: Deploy User
-  ansible.builtin.include_tasks: user.yaml
+#- name: Deploy User
+#  ansible.builtin.include_tasks: user.yaml
 
 - name: Setup MSSQL prerequs
   ansible.builtin.include_tasks: mssql.yaml

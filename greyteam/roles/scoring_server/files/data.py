@@ -39,7 +39,7 @@ def insert_initial_data(logger):
             db.session.add(new_user)
         
         # --- Insert Teams ---
-        teams_to_create = ["blue", "red", "offline"]
+        teams_to_create = ["offline", "blue", "red"]
         team_objs = {}
         for t_name in teams_to_create:
             team = ScoringTeams(
@@ -120,7 +120,7 @@ def insert_initial_data(logger):
                 crit_content="<dd><b>Fluttershy</b>: Everypony, <i>stop!</i> I appreciate you sharing your thoughts, but I need everypony to respect mine. Other ponies may be experts in <i>their</i> fields, but animals are <i>my</i> field of expertise. And if I say this is what I want, then this is what needs to happen!</dd></dl>"
             elif ("smb" in service_name_simple):
                 generic_name="smb"
-                crit_location="\\\\appleloosa\\Appleloosa_Archives\\Starswirl_Banishment_Notes.txt"
+                crit_location="\\\\10.0.20.2\\Appleloosa_Archives\\Starswirl_Banishment_Notes.txt"
                 crit_content="Confidential Archive - Appleloosa Region\nThese documents are required to reconstruct the ancient banishment spell.\nUnauthorized access may aid the Legion of Doom."
             elif ("irc" in service_name_simple):
                 generic_name="irc"

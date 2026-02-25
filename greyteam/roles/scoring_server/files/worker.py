@@ -153,7 +153,7 @@ def discord_webhook(task,url=WEBHOOK_URL):
         {
         "title": f"{task.title}"[:250] if task.title.strip() else "No Title",
         "color": int(color,16),
-        "description": f"{task.content}. Time: now_est.strftime('%Y-%m-%d %H:%M:%S %Z%z')"[:4000] if task.content.strip() else "No Content"#,
+        "description": f"{task.content}. Time: {now_est.strftime('%Y-%m-%d %H:%M:%S %Z%z')}"[:4000] if task.content.strip() else "No Content"#,
         #"url": f"{PUBLIC_URL}/incidents?incident_id={incident_id}",
         #"fields": [
         #    {
@@ -288,6 +288,7 @@ class ScoreboardManager:
                             row['message'] = row['message'][:MAX_MESSAGE_DISCORD] + "..." if len(row['message']) > MAX_MESSAGE_DISCORD else row['message']
                         table = tabulate(data_discord, headers="keys", tablefmt="simple")#tablefmt="grid")
                         """
+                        logger.info(f"format_as_cards input: len {len(data_discord)}, type {type(data_discord)}, content {data_discord}")
                         discord_content = self.format_as_cards(data_discord)
                         task = WebhookQueue(
                             title=f"Scoring Round {current_round}",
