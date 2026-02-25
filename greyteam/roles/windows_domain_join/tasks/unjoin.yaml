@@ -1,8 +1,8 @@
 ---
-- name: Unjoin computer from domain and move to WORKGROUP
+- name: Force unjoin from domain
   microsoft.ad.membership:
     state: workgroup
     workgroup_name: WORKGROUP
     domain_admin_user: "{{ greyteam_user }}"
     domain_admin_password: "{{ greyteam_password }}"
-  register: unjoin_result
+    reboot: true
