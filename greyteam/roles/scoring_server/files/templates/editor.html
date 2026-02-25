@@ -88,42 +88,41 @@ let selectedServiceId = null;
 let currentUserRole = '';
 const SERVICE_GUIDE = {
     "dns": {
-        location_desc: "DNS record to query:",
-        content_desc: "The expected IP Address output of the DNS record:"
+        location: "DNS record to query:",
+        content: "The expected IP Address output of the DNS record:"
     },
     "mssql": {
-        location_desc: "SQL Query:",
-        content_desc: "Expected Result (concatenated one line):"
+        location: "SQL Query:",
+        content: "Expected Result (concatenated one line):"
     },
     "apache": {
-        location_desc: "MUST BE 80/doku.php?id=wiki:wikipage:",
-        content_desc: "Webpage Content (raw value from curl):"
+        location: "MUST BE 80/doku.php?id=wiki:wikipage:",
+        content: "Webpage Content (raw value from curl):"
     },
     "mariadb": {
-        location_desc: "SQL Query:",
-        content_desc: "Expected Result (must be one line):"
+        location: "SQL Query:",
+        content: "Expected Result (must be one line):"
     },
     "cups": {
-        location_desc: "NOT USED",
-        content_desc: "Expected File Hash:"
+        location: "NOT USED",
+        content: "Expected File Hash:"
     },
     "vsftpd": {
-        location_desc: "Absolute Local Path:",
-        content_desc: "Expected File Content: "
+        location: "Absolute Local Path:",
+        content: "Expected File Content: "
     },
     "iis": {
-        location_desc: "MUST BE 80:",
-        content_desc: "Website Content (curl):"
+        location: "MUST BE 80:",
+        content: "Website Content (curl):"
     },
     "smb": {
-        location_desc: "Absolute Network Path:",
-        content_desc: "File Contents:"
+        location: "Absolute Network Path:",
+        content: "File Contents:"
     },
     "irc": {
-        location_desc: "IRC Channel:",
-        content_desc: "NOT USED"
-    },
-    // Add more services here as needed
+        location: "IRC Channel:",
+        content: "NOT USED"
+    }
 };
 let serviceNamesById = {};
 
@@ -298,9 +297,10 @@ async function loadCriteria(serviceId, el) {
 
     // 3. Render existing criteria using the replacement logic
     workspace.innerHTML = data.map(c => {
-        // Use guide values if they exist, otherwise fallback to database values
-        const displayLoc = guide ? guide.location : c.location;
-        const displayContent = guide ? guide.content : c.content;
+        // Logic: If guide exists AND has a specific override, use it. 
+        // Otherwise, use the raw data from the database.
+        const displayLoc = (guide && guide.location) ? guide.location : (c.location || "No Location Set");
+        const displayContent = (guide && guide.content) ? guide.content : (c.content || "No Content Set");
 
         return `
             <div class="bg-slate-800 border-l-4 border-emerald-500 rounded-r-xl p-6 mb-6 shadow-lg">
@@ -314,22 +314,21 @@ async function loadCriteria(serviceId, el) {
                 </div>
             </div>
         `;
-    }).join('');
+    }).join('');    
 }
 
 function showNewCriteriaModal() {
     const rawName = serviceNamesById[selectedServiceId] || "";
     const guide = SERVICE_GUIDE[rawName.toLowerCase()];
     
-    const locLabel = document.querySelector('label[for="new-location"]') || document.getElementById('loc-label-text');
-    const contentLabel = document.querySelector('label[for="new-content"]') || document.getElementById('content-label-text');
+    const locLabel = document.getElementById('loc-label-text');
+    const contentLabel = document.getElementById('content-label-text');
 
-    // Replace modal labels with custom text if available
     if (guide) {
-        if (locLabel) locLabel.innerText = `Location: ${guide.location}`;
-        if (contentLabel) contentLabel.innerText = `Content: ${guide.content}`;
+        // Use the updated key names here
+        if (locLabel) locLabel.innerText = guide.location;
+        if (contentLabel) contentLabel.innerText = guide.content;
     } else {
-        // Standard fallback
         if (locLabel) locLabel.innerText = "File Location / Target";
         if (contentLabel) contentLabel.innerText = "Required Content / Regex";
     }

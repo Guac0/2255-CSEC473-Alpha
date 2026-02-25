@@ -249,7 +249,7 @@ class ScoreboardManager:
         footer = f"\nUpdated: {time.strftime('%H:%M:%S')} | Active Clients: {len(self.clients)}\n"
         return clear_screen + header + table + footer
 
-    def format_as_cards(data):
+    def format_as_cards(self, data):
         lines = []
         for row in data:
             # Determine status emoji
@@ -269,7 +269,7 @@ class ScoreboardManager:
         while True:
             with app.app_context():
                 data, current_round = get_scoring_data_latest()
-                logger.info(f"raw round data: {data}")
+                #logger.info(f"raw round data: {data}")
 
                 if current_round and current_round > self.last_round:
                     logger.info(f"New round {current_round} detected! Broadcasting to {len(self.clients)} clients...")
@@ -288,7 +288,7 @@ class ScoreboardManager:
                             row['message'] = row['message'][:MAX_MESSAGE_DISCORD] + "..." if len(row['message']) > MAX_MESSAGE_DISCORD else row['message']
                         table = tabulate(data_discord, headers="keys", tablefmt="simple")#tablefmt="grid")
                         """
-                        logger.info(f"format_as_cards input: len {len(data_discord)}, type {type(data_discord)}, content {data_discord}")
+                        #logger.info(f"format_as_cards input: len {len(data_discord)}, type {type(data_discord)}, content {data_discord}")
                         discord_content = self.format_as_cards(data_discord)
                         task = WebhookQueue(
                             title=f"Scoring Round {current_round}",
