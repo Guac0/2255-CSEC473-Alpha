@@ -362,7 +362,12 @@ class Cups (Check):
 
                 # Get the time the print was submitted
                 pattern = r"\d{2}:\d{2}:\d{2} (AM|PM)"
-                res = re.search(pattern, string).group(0)
+                try:
+                    res = re.search(pattern, string).group(0)
+                except:
+                    # If no match is found nothing got printed
+                    err.append("Print job did not output file")
+                    continue
                 time_elapsed = start_time - datetime.strptime(res, '%I:%M:%S %p')
                 if time_elapsed.total_seconds() < 0:
                     err.append("Print job did not output file")
