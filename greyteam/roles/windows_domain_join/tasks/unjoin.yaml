@@ -3,6 +3,6 @@
   microsoft.ad.membership:
     state: workgroup
     workgroup_name: WORKGROUP
-    domain_admin_user: "{{ greyteam_user }}"
+    domain_admin_user: "MLP\\greyteam"
     domain_admin_password: "{{ greyteam_password }}"
     reboot: true
