@@ -16,11 +16,10 @@
     state: domain
     reboot: true
 
-
 - name: Create Domain Account Profiles
   ansible.windows.win_user_profile:
     username: "{{ item }}"
     state: present
-  loop:"{{ domain_users + domain_admins }}" #['greyteam_user'] conflicts with local user and cant figure out domain specifier. doesnt matter.
+  loop: "{{ domain_users + domain_admins }}" #['greyteam_user'] conflicts with local user and cant figure out domain specifier. doesnt matter.
 
 #todo - import full user profile creation from local users
