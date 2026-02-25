@@ -238,7 +238,7 @@ EOF
 echo "Finalizing system configuration..."
 
 # Re-enable standard PAM selection and flush broken manual changes
-pam-auth-update --package --force
+DEBIAN_FRONTEND=noninteractive pam-auth-update --package --force
 
 # Reload SSH service to apply config changes
 systemctl reload sshd
