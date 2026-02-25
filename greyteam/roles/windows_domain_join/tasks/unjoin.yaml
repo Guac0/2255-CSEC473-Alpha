@@ -5,4 +5,5 @@
     workgroup_name: WORKGROUP
     domain_admin_user: "MLP\\greyteam"
     domain_admin_password: "{{ greyteam_password }}"
+    domain_server: canterlot.mlp.local
     reboot: true
