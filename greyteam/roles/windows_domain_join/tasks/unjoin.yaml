@@ -1,9 +1,15 @@
 ---
-- name: Force unjoin from domain
+- name: Attempt clean domain unjoin
   microsoft.ad.membership:
     state: workgroup
     workgroup_name: WORKGROUP
-    domain_admin_user: "MLP\\greyteam"
+    domain_admin_user: "{{ greyteam_user }}"
     domain_admin_password: "{{ greyteam_password }}"
     domain_server: canterlot.mlp.local
-    reboot: true
+  register: unjoin_attempt
+  ignore_errors: true
+
+- name: Force unjoin if SID mapping fails
+  ansible.windows.win_shell: |
+    Remove-Computer -WorkgroupName WORKGROUP -Force -Restart
+  when: unjoin_attempt is failed
