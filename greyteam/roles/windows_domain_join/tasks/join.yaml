@@ -3,30 +3,24 @@
   ansible.windows.win_dns_client:
     adapter_names: '*'
     dns_servers: "{{ mgmt_dns }}"
+  # Support mgmt dns having zero entries (why?)
   when: mgmt_dns is defined and mgmt_dns | length > 0
 
-- name: Join the host to the domain
+- name: Join to domain
   microsoft.ad.membership:
     dns_domain_name: "{{ domain }}"
     domain_admin_user: "{{ greyteam_user }}@{{ domain }}"
     domain_admin_password: "{{ greyteam_password }}"
+    #domain_ou_path: "OU=Windows,OU=Servers,DC=mlp,DC=local" # TODO - dynamic
     hostname: "{{ inventory_hostname_short }}"
     state: domain
     reboot: true
 
-- name: Wait for host to reboot and reconnect
-  ansible.windows.win_reboot:
-    reboot_timeout: 1800
-
-- name: Ensure the secure channel is established
-  ansible.windows.win_shell: nltest /sc_verify:{{ domain }}
-  register: trust_check
-  retries: 5
-  delay: 15
-  until: trust_check.rc == 0
 
 - name: Create Domain Account Profiles
   ansible.windows.win_user_profile:
-    username: "{{ domain }}\\{{ item }}"
+    username: "{{ item }}"
     state: present
-  loop: "{{ domain_users + domain_admins }}"
+  loop:"{{ domain_users + domain_admins }}" #['greyteam_user'] conflicts with local user and cant figure out domain specifier. doesnt matter.
+
+#todo - import full user profile creation from local users
