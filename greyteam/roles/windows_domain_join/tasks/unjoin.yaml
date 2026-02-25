@@ -11,16 +11,25 @@
   register: unjoin_attempt
   ignore_errors: true
 
-# HARD FAILOVER: local-admin forced unjoin (NO domain auth)
-- name: Force local unjoin when trust is broken
+# HARD FAILOVER: unjoin as SYSTEM (works even when admin is disabled)
+- name: Force unjoin as SYSTEM using scheduled task
   ansible.windows.win_shell: |
-    Remove-Computer `
-      -WorkgroupName 'WORKGROUP' `
-      -Force `
-      -Restart
-  args:
-    executable: powershell.exe
+    $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument `
+      "Remove-Computer -WorkgroupName 'WORKGROUP' -Force -Restart"
+
+    $principal = New-ScheduledTaskPrincipal `
+      -UserId "SYSTEM" `
+      -LogonType ServiceAccount `
+      -RunLevel Highest
+
+    $task = New-ScheduledTask `
+      -Action $action `
+      -Principal $principal
+
+    Register-ScheduledTask `
+      -TaskName "ForceDomainUnjoin" `
+      -InputObject $task `
+      -Force
+
+    Start-ScheduledTask -TaskName "ForceDomainUnjoin"
   when: unjoin_attempt is failed
-  become: true
-  become_method: runas
-  become_user: Administrator
