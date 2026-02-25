@@ -1,4 +1,5 @@
 ---
+# Attempt a clean, supported domain unjoin first
 - name: Attempt clean domain unjoin
   microsoft.ad.membership:
     state: workgroup
@@ -6,10 +7,21 @@
     domain_admin_user: "{{ greyteam_user }}"
     domain_admin_password: "{{ greyteam_password }}"
     domain_server: canterlot.mlp.local
+    reboot: false
   register: unjoin_attempt
   ignore_errors: true
 
-- name: Force unjoin if SID mapping fails
+# Force unjoin if SID mapping / trust is broken
+- name: Force unjoin if SID mapping fails (explicit credentials)
   ansible.windows.win_shell: |
-    Remove-Computer -WorkgroupName WORKGROUP -Force -Restart
+    $sec = ConvertTo-SecureString "{{ greyteam_password }}" -AsPlainText -Force
+    $cred = New-Object System.Management.Automation.PSCredential("MLP\greyteam", $sec)
+
+    Remove-Computer `
+      -WorkgroupName "WORKGROUP" `
+      -Credential $cred `
+      -Force `
+      -Restart
+  args:
+    executable: powershell.exe
   when: unjoin_attempt is failed
