@@ -1,6 +1,6 @@
 ---
-- name: Unjoin Windows hosts from AD if broken
-  ansible.builtin.include_tasks: unjoin.yaml
+##- name: Unjoin Windows hosts from AD if broken
+ # ansible.builtin.include_tasks: unjoin.yaml
 
 - name: Join Windows hosts to AD
   ansible.builtin.include_tasks: join.yaml
