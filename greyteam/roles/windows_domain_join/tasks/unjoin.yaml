@@ -1,5 +1,5 @@
 ---
-# Attempt a clean, supported domain unjoin first
+# Attempt clean domain unjoin (best case)
 - name: Attempt clean domain unjoin
   microsoft.ad.membership:
     state: workgroup
@@ -11,24 +11,16 @@
   register: unjoin_attempt
   ignore_errors: true
 
-# Force unjoin when SID mapping / trust is broken
-- name: Force unjoin if SID mapping fails (explicit credentials)
+# HARD FAILOVER: local-admin forced unjoin (NO domain auth)
+- name: Force local unjoin when trust is broken
   ansible.windows.win_shell: |
-    $securePassword = ConvertTo-SecureString '{{ greyteam_password }}' -AsPlainText -Force
-    $credential = New-Object System.Management.Automation.PSCredential `
-      -ArgumentList '{{ greyteam_user }}@{{ domain }}', $securePassword
-
     Remove-Computer `
       -WorkgroupName 'WORKGROUP' `
-      -Credential $credential `
       -Force `
       -Restart
+  args:
+    executable: powershell.exe
   when: unjoin_attempt is failed
-
-# Reboot only if clean unjoin succeeded and requires it
-- name: Reboot after successful clean unjoin
-  ansible.windows.win_reboot:
-    reboot_timeout: 900
-  when:
-    - unjoin_attempt is succeeded
-    - unjoin_attempt.reboot_required | default(false)
+  become: true
+  become_method: runas
+  become_user: Administrator
