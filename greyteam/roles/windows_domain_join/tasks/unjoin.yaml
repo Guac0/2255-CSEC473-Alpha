@@ -1,19 +1,8 @@
 ---
-- name: Check if computer is joined and if trust is valid
-  ansible.windows.win_shell: |
-    try {
-        if (Test-ComputerSecureChannel) { return "VALID" } else { return "BROKEN" }
-    } catch {
-        return "BROKEN"
-    }
-  register: trust_check
-  changed_when: false
-
-- name: Force Unjoin from Domain if Trust is Broken
+- name: Unjoin computer from domain and move to WORKGROUP
   microsoft.ad.membership:
-    membership_state: workgroup
+    state: workgroup
     workgroup_name: WORKGROUP
-    local_admin_user: "{{ greyteam_user }}"
-    local_admin_password: "{{ greyteam_password }}"
-    reboot: true
-  when: trust_check.stdout | trim == "BROKEN"
+    domain_admin_user: "{{ greyteam_user }}"
+    domain_admin_password: "{{ greyteam_password }}"
+  register: unjoin_result
