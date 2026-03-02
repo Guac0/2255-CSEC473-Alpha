@@ -51,7 +51,7 @@ class Check:
     '''
     check_id:int
     host:str
-    host_ip:int
+    host_ip:str
     criteria:list[Criterion]
 
     def __init__(self, check:Service) -> None:
@@ -204,7 +204,8 @@ class Smb (Check):
         err = []
         for criterion in self.criteria:
             try:
-                smbclient.register_session(server="Appleloosa", username=user[0], password=user[1])
+                smbclient.ClientConfig(username=user[0], password=user[1])
+                smbclient.register_session(server=self.host_ip, username=user[0], password=user[1])
 
                 if (smbclient.path.exists(criterion.loc)):
                     with smbclient.open_file(criterion.loc, mode="r") as fd:
@@ -380,7 +381,7 @@ class Cups (Check):
                 except Exception as e:
                     err.append("Print job did not output file")
                     continue
-                time_elapsed = start_time - datetime.strptime(res, '%I:%M:%S %p')
+                time_elapsed = datetime.strptime(res, '%I:%M:%S %p') - start_time
                 if time_elapsed.total_seconds() < 0:
                     err.append("Print job did not output file")
                     continue
