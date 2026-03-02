@@ -120,6 +120,12 @@ def run_scoring_round(round_num:int, services:list[Service]):
                 message = res[1]
             )
             db.session.add(new_score)
+
+            team = ScoringTeams.query.get(res[0])
+            if team:
+                # Increment by 1 (or team.multiplier if you want to use that logic)
+                team.score += (1 * team.multiplier)
+                logger.debug(f"Incremented score for Team {team.team_name}. New score: {team.score}")
         
     db.session.commit()
 

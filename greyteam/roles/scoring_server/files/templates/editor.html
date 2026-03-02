@@ -278,6 +278,7 @@ async function loadServices() {
     `).join('');
 }
 
+
 async function loadCriteria(serviceId, el) {
     selectedServiceId = serviceId;
     document.getElementById('add-btn').classList.remove('hidden');
@@ -288,30 +289,25 @@ async function loadCriteria(serviceId, el) {
     const data = await res.json();
     const workspace = document.getElementById('criteria-workspace');
 
-    // 1. Get the service name and normalize it to lowercase
     const rawName = serviceNamesById[serviceId] || "";
-    const normalizedName = rawName.toLowerCase();
-    
-    // 2. Fetch the override from our map
-    const guide = SERVICE_GUIDE[normalizedName];
+    const guide = SERVICE_GUIDE[rawName.toLowerCase()];
 
-    // 3. Render existing criteria using the replacement logic
     workspace.innerHTML = data.map(c => {
-        // Logic: If guide exists AND has a specific override, use it. 
-        // Otherwise, use the raw data from the database.
-        const displayLoc = (guide && guide.location) ? guide.location : (c.location || "No Location Set");
-        const displayContent = (guide && guide.content) ? guide.content : (c.content || "No Content Set");
+        // FIX: Use guide for labels only, 'c' for the actual data values
+        const labelLoc = (guide && guide.location) ? guide.location : "Location";
+        const labelContent = (guide && guide.content) ? guide.content : "Content";
 
         return `
             <div class="bg-slate-800 border-l-4 border-emerald-500 rounded-r-xl p-6 mb-6 shadow-lg">
                 <div class="mb-6">
-                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-2">Target Area</span>
-                    <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700">${displayLoc}</div>
+                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-2">${labelLoc}</span>
+                    <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700">${c.location}</div>
                 </div>
                 <div>
-                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-2">Policy Requirement</span>
-                    <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700 break-all">${displayContent}</div>
+                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-2">${labelContent}</span>
+                    <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700 break-all">${c.content}</div>
                 </div>
+                <div class="mt-2 text-xs text-slate-500">Managed by: ${c.team_name || 'System'}</div>
             </div>
         `;
     }).join('');    
@@ -341,9 +337,10 @@ async function submitNewCriteria() {
     const sId = document.getElementById('modal-service-id').value;
     const payload = {
         service_id: sId,
-        host_id: serviceToHostMap[sId], // Added this line
+        host_id: serviceToHostMap[sId],
         location: document.getElementById('new-location').value,
-        content: document.getElementById('new-content').value
+        content: document.getElementById('new-content').value,
+        team_id: 2 // FIX: Explicitly set team_id (e.g., 2 for White Team/Admin) to satisfy DB constraint
     };
     
     if(!payload.location || !payload.content) return notify("All fields required", true);
@@ -356,9 +353,15 @@ async function submitNewCriteria() {
 
     if (res.ok) {
         notify("New criteria added");
+        // Clear inputs
+        document.getElementById('new-location').value = '';
+        document.getElementById('new-content').value = '';
         toggleModal('criteria-modal');
         loadCriteria(selectedServiceId, document.querySelector('#service-list .sidebar-active'));
-    } else { notify("Error saving criteria", true); }
+    } else { 
+        const errData = await res.json();
+        notify(`Error: ${errData.error || "Saving failed"}`, true); 
+    }
 }
 
 function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }

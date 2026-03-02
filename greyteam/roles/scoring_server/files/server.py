@@ -1206,9 +1206,9 @@ def add_criteria():
     service_id = data.get("service_id")
     content = data.get("content")
     location = data.get("location")
+    team_id = data.get("team_id", 2)
 
-    if not all([host_id, service_id, content, location]):
-        logger.warning(f"/add_criteria - Failed connection from {current_user.id} at {request.remote_addr} - missing data. Full details: {data}")
+    if not all([host_id, service_id, content, location, team_id]):
         return "Missing data", 400
 
     try:
@@ -1216,7 +1216,8 @@ def add_criteria():
             host_id=host_id,
             service_id=service_id,
             content=content,
-            location=location
+            location=location,
+            team_id=team_id
         )
         db.session.add(new_criteria)
         db.session.commit()
