@@ -10,6 +10,7 @@
         .pane-container { height: calc(100vh - 160px); }
         .sidebar-active { background-color: #1e293b; border-right: 4px solid #3b82f6; }
         .criteria-text { font-size: 1.25rem; line-height: 1.75rem; }
+        /* Smooth fade for notifications */
         #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
     </style>
 </head>
@@ -30,6 +31,7 @@
     </header>
 
     <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 pane-container">
+        
         <section class="flex flex-col bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
             <div class="bg-slate-800/50 p-4 border-b border-slate-800 flex justify-between items-center">
                 <h2 class="text-xl font-bold text-blue-400 uppercase tracking-widest">Credential Manager</h2>
@@ -78,23 +80,51 @@
             </div>
         </div>
     </div>
+</body>
+</html>
 
 <script>
 let selectedServiceId = null;
 let currentUserRole = '';
 const SERVICE_GUIDE = {
-    "dns": { location: "DNS record to query:", content: "Expected IP Address:" },
-    "mssql": { location: "SQL Query:", content: "Expected Result:" },
-    "apache": { location: "URL Path (e.g. /index.php):", content: "Expected Page Content:" },
-    "mariadb": { location: "SQL Query:", content: "Expected Result:" },
-    "cups": { location: "File Path:", content: "Expected File Hash:" },
-    "vsftpd": { location: "Absolute Local Path:", content: "Expected File Content:" },
-    "iis": { location: "Port/Path:", content: "Website Content:" },
-    "smb": { location: "Absolute Network Path:", content: "File Contents:" },
-    "irc": { location: "IRC Channel:", content: "Expected Welcome Message:" }
+    "dns": {
+        location: "DNS record to query:",
+        content: "The expected IP Address output of the DNS record:"
+    },
+    "mssql": {
+        location: "SQL Query:",
+        content: "Expected Result (concatenated one line):"
+    },
+    "apache": {
+        location: "MUST BE 80/doku.php?id=wiki:wikipage:",
+        content: "Webpage Content (raw value from curl):"
+    },
+    "mariadb": {
+        location: "SQL Query:",
+        content: "Expected Result (must be one line):"
+    },
+    "cups": {
+        location: "NOT USED",
+        content: "Expected File Hash:"
+    },
+    "vsftpd": {
+        location: "Absolute Local Path:",
+        content: "Expected File Content: "
+    },
+    "iis": {
+        location: "MUST BE 80:",
+        content: "Website Content (curl):"
+    },
+    "smb": {
+        location: "Absolute Network Path:",
+        content: "File Contents:"
+    },
+    "irc": {
+        location: "IRC Channel:",
+        content: "NOT USED"
+    }
 };
 let serviceNamesById = {};
-let serviceToHostMap = {};
 
 function notify(message, isError = false) {
     const toast = document.getElementById('toast');
@@ -113,11 +143,12 @@ function notify(message, isError = false) {
     }, 3000);
 }
 
+// --- INITIALIZATION & ACCESS CONTROL ---
 async function init() {
     try {
         const whoamiRes = await fetch('/whoami');
         const user = await whoamiRes.json();
-        currentUserRole = user.role.toLowerCase();
+        currentUserRole = user.role.toLowerCase(); // 'blue', 'red', or 'admin'
         
         if (currentUserRole === 'blue') {
             const criteriaSection = document.getElementById('criteria-section');
@@ -133,6 +164,7 @@ async function init() {
     }
 }
 
+// --- USER MANAGEMENT ---
 async function loadHosts() {
     const res = await fetch('/get_hosts');
     const hosts = await res.json();
@@ -140,13 +172,20 @@ async function loadHosts() {
     
     list.innerHTML = hosts.map(h => {
         let budgetHtml = '';
+        
+        // Only show the budget for the user's specific team
         if (currentUserRole === 'blue') {
             const remaining = 3 - (h.pwds_blue || 0);
-            budgetHtml = `<span class="text-xl font-mono ${remaining <= 0 ? 'text-blue-500' : 'text-blue-400'}">[${remaining}/3]</span>`;
-        } else if (currentUserRole === 'red') {
+            const colorClass = remaining <= 0 ? 'text-blue-500 font-black' : 'text-blue-400';
+            budgetHtml = `<span class="text-xl font-mono ${colorClass}">[${remaining}/3]</span>`;
+        } 
+        else if (currentUserRole === 'red') {
             const remaining = 3 - (h.pwds_red || 0);
-            budgetHtml = `<span class="text-xl font-mono ${remaining <= 0 ? 'text-red-500' : 'text-red-400'}">[${remaining}/3]</span>`;
-        } else if (currentUserRole === 'admin') {
+            const colorClass = remaining <= 0 ? 'text-red-500 font-black' : 'text-red-400';
+            budgetHtml = `<span class="text-xl font-mono ${colorClass}">[${remaining}/3]</span>`;
+        }
+        // Admins see both for monitoring purposes
+        else if (currentUserRole === 'admin') {
             budgetHtml = `<span class="text-sm font-mono text-slate-500">R:${3-h.pwds_red} B:${3-h.pwds_blue}</span>`;
         }
 
@@ -179,8 +218,8 @@ async function loadScoringUsers(hostId, el) {
             </div>
             <div class="text-2xl font-bold text-white mb-6">${u.username}</div>
             <div class="flex space-x-3">
-                <input type="password" id="pw-${u.id}" placeholder="New password..." 
-                       class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none">
+                <input type="password" id="pw-${u.id}" placeholder="Enter new password..." 
+                       class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none">
                 <button onclick="updatePassword(${u.id})" 
                         class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg font-bold transition">Update</button>
             </div>
@@ -191,7 +230,7 @@ async function loadScoringUsers(hostId, el) {
 async function updatePassword(userId) {
     const pwdInput = document.getElementById(`pw-${userId}`);
     const pwd = pwdInput.value;
-    if(!pwd) return notify("Password required", true);
+    if(!pwd) return notify("Password cannot be empty", true);
 
     try {
         const res = await fetch('/update_scoring_user_pwd', {
@@ -199,22 +238,35 @@ async function updatePassword(userId) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ user_id: userId, password: pwd })
         });
+        
         if (res.ok) {
-            notify("Credential updated");
+            notify("Credential updated successfully");
             pwdInput.value = '';
+            // REFRESH HOSTS: Ensures the budget count updates immediately on the UI
             await loadHosts();
-        } else { notify("Update failed", true); }
-    } catch (e) { notify("Server error", true); }
+        } else { 
+            const error = await res.text();
+            notify(`Update failed: ${error}`, true); 
+        }
+    } catch (e) { 
+        notify("Server connection error", true); 
+    }
 }
 
+let serviceToHostMap = {};
+// --- SCORING CRITERIA ---
 async function loadServices() {
     const res = await fetch('/get_services');
     const services = await res.json();
-    const list = document.getElementById('service-list');
-    
     services.forEach(s => {
         serviceNamesById[s.id] = s.display_name;
-        serviceToHostMap[s.id] = s.host_id;
+        serviceToHostMap[s.id] = s.host_id; // Store the host_id
+    });
+    const list = document.getElementById('service-list');
+    
+    // Build the ID -> Name map for the guide lookup
+    services.forEach(s => {
+        serviceNamesById[s.id] = s.display_name;
     });
 
     list.innerHTML = services.map(s => `
@@ -225,6 +277,7 @@ async function loadServices() {
         </div>
     `).join('');
 }
+
 
 async function loadCriteria(serviceId, el) {
     selectedServiceId = serviceId;
@@ -240,9 +293,9 @@ async function loadCriteria(serviceId, el) {
     const guide = SERVICE_GUIDE[rawName.toLowerCase()];
 
     workspace.innerHTML = data.map(c => {
-        // FIX: Use guide for labels, use criteria (c) for the actual values
-        const labelLoc = (guide && guide.location) ? guide.location : "Location / Target";
-        const labelContent = (guide && guide.content) ? guide.content : "Required Content";
+        // FIX: Use guide for labels only, 'c' for the actual data values
+        const labelLoc = (guide && guide.location) ? guide.location : "Location";
+        const labelContent = (guide && guide.content) ? guide.content : "Content";
 
         return `
             <div class="bg-slate-800 border-l-4 border-emerald-500 rounded-r-xl p-6 mb-6 shadow-lg">
@@ -254,6 +307,7 @@ async function loadCriteria(serviceId, el) {
                     <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-2">${labelContent}</span>
                     <div class="text-xl font-mono text-white bg-slate-950 p-4 rounded border border-slate-700 break-all">${c.content}</div>
                 </div>
+                <div class="mt-2 text-xs text-slate-500">Managed by: ${c.team_name || 'System'}</div>
             </div>
         `;
     }).join('');    
@@ -266,8 +320,14 @@ function showNewCriteriaModal() {
     const locLabel = document.getElementById('loc-label-text');
     const contentLabel = document.getElementById('content-label-text');
 
-    locLabel.innerText = (guide && guide.location) ? guide.location : "File Location / Target";
-    contentLabel.innerText = (guide && guide.content) ? guide.content : "Required Content / Regex";
+    if (guide) {
+        // Use the updated key names here
+        if (locLabel) locLabel.innerText = guide.location;
+        if (contentLabel) contentLabel.innerText = guide.content;
+    } else {
+        if (locLabel) locLabel.innerText = "File Location / Target";
+        if (contentLabel) contentLabel.innerText = "Required Content / Regex";
+    }
 
     document.getElementById('modal-service-id').value = selectedServiceId;
     toggleModal('criteria-modal');
@@ -276,11 +336,11 @@ function showNewCriteriaModal() {
 async function submitNewCriteria() {
     const sId = document.getElementById('modal-service-id').value;
     const payload = {
-        service_id: parseInt(sId),
-        host_id: parseInt(serviceToHostMap[sId]), 
+        service_id: sId,
+        host_id: serviceToHostMap[sId],
         location: document.getElementById('new-location').value,
         content: document.getElementById('new-content').value,
-        team_id: 2 // Assign to Admin/White team by default
+        team_id: 2 // FIX: Explicitly set team_id (e.g., 2 for White Team/Admin) to satisfy DB constraint
     };
     
     if(!payload.location || !payload.content) return notify("All fields required", true);
@@ -293,18 +353,21 @@ async function submitNewCriteria() {
 
     if (res.ok) {
         notify("New criteria added");
+        // Clear inputs
         document.getElementById('new-location').value = '';
         document.getElementById('new-content').value = '';
         toggleModal('criteria-modal');
         loadCriteria(selectedServiceId, document.querySelector('#service-list .sidebar-active'));
     } else { 
-        notify("Error saving: check backend logs", true); 
+        const errData = await res.json();
+        notify(`Error: ${errData.error || "Saving failed"}`, true); 
     }
 }
 
 function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
 
+// Initial Load
 init();
+//loadHosts();
+//loadServices();
 </script>
-</body>
-</html>

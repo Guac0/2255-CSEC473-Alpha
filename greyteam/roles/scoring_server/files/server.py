@@ -1199,43 +1199,102 @@ def set_criteria():
         logger.error(f"/set_criteria - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
         return jsonify({"error": str(e)}), 500
 
+#@app.route("/add_criteria", methods=["POST"])
+#def add_criteria():
+#    data = request.json
+#    host_id = data.get("host_id")
+#    service_id = data.get("service_id")
+#    content = data.get("content")
+#    location = data.get("location")
+#    team_id = data.get("team_id", 2)
+#
+#    if not all([host_id, service_id, content, location, team_id]):
+#        return "Missing data", 400
+#
+#    try:
+#        new_criteria = ScoringCriteria(
+#            host_id=host_id,
+#            service_id=service_id,
+#            content=content,
+#            location=location,
+#            team_id=team_id
+#        )
+#        db.session.add(new_criteria)
+#        db.session.commit()
+#
+#        task = WebhookQueue(
+#            title="Scoring Criteria Added",
+#            content=f"Scoring Criteria added for host_id {host_id} and service_id {service_id} with location {location} and content {content[:10]}... by user {current_user.id}"
+#        )
+#        db.session.add(task)
+#        db.session.commit()
+#
+#        logger.info(f"/add_criteria - Successful connection from {current_user.id} at {request.remote_addr}. Added criteria ID {new_criteria.id}")
+#        return jsonify({"status": "ok", "id": new_criteria.id})
+#    except Exception as e:
+#        db.session.rollback()
+#        logger.error(f"/add_criteria - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
+#        return jsonify({"error": "Database error"}), 500
+
 @app.route("/add_criteria", methods=["POST"])
+@login_required
 def add_criteria():
     data = request.json
-    host_id = data.get("host_id")
-    service_id = data.get("service_id")
-    content = data.get("content")
-    location = data.get("location")
-    team_id = data.get("team_id", 2)
+    
+    # 1. Force conversion to integers to prevent type mismatch errors
+    try:
+        service_id = int(data.get("service_id"))
+        # If host_id is missing, we will fetch it from the service table below
+        host_id = data.get("host_id")
+        if host_id:
+            host_id = int(host_id)
+            
+        content = data.get("content")
+        location = data.get("location")
+        team_id = int(data.get("team_id", 2))
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid numeric data for IDs"}), 400
 
-    if not all([host_id, service_id, content, location, team_id]):
-        return "Missing data", 400
+    # 2. Validation: Ensure required text fields are present
+    if not all([service_id, content, location]):
+        return jsonify({"error": "Missing required text fields"}), 400
+
+    # 3. Data Integrity: Lookup the service to ensure it exists and get its host_id
+    service = Service.query.get(service_id)
+    if not service:
+        return jsonify({"error": f"Service ID {service_id} not found"}), 404
+    
+    # Always use the host_id associated with the service to prevent data corruption
+    actual_host_id = service.host_id
 
     try:
         new_criteria = ScoringCriteria(
-            host_id=host_id,
+            host_id=actual_host_id,
             service_id=service_id,
             content=content,
             location=location,
             team_id=team_id
         )
         db.session.add(new_criteria)
-        db.session.commit()
+        db.session.flush() # Get the ID before committing
 
+        # Add to Webhook Notification Queue
         task = WebhookQueue(
             title="Scoring Criteria Added",
-            content=f"Scoring Criteria added for host_id {host_id} and service_id {service_id} with location {location} and content {content[:10]}... by user {current_user.id}"
+            content=f"Criteria added for {service.scorecheck_display_name} on {service.host.hostname}. Content: {content[:20]}..."
         )
         db.session.add(task)
+        
         db.session.commit()
 
-        logger.info(f"/add_criteria - Successful connection from {current_user.id} at {request.remote_addr}. Added criteria ID {new_criteria.id}")
+        logger.info(f"/add_criteria - User {current_user.id} added criteria ID {new_criteria.id}")
         return jsonify({"status": "ok", "id": new_criteria.id})
+
     except Exception as e:
         db.session.rollback()
-        logger.error(f"/add_criteria - Failed connection from {current_user.id} at {request.remote_addr} - Database error: {e}")
-        return jsonify({"error": "Database error"}), 500
-
+        logger.error(f"/add_criteria - Database error: {e}")
+        return jsonify({"error": "Database write failed"}), 500
+    
 @app.route("/remove_criteria", methods=["POST"])
 def remove_criteria():
     data = request.json

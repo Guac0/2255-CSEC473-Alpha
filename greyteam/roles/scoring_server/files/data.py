@@ -135,7 +135,7 @@ def insert_initial_data(logger):
                 if "hexchat" in service_name_simple:
                     crit_location="C:\\Program Files\\HexChat\\hexchat.exe"
                     crit_content="8B02D5E8376FE9BA4169692E273DAB3DE8F39907CC8F3ECE6F7611AC07202E07"
-                if "filzilla" in service_name_simple:
+                if "filezilla" in service_name_simple:
                     crit_location="C:\\Program Files\\FileZilla FTP Client\\filezilla.exe"
                     crit_content="34CC44587089222E09A105494A175191B99061CECCB265389CF58B58F35A0DA3"
                 if "libreoffice" in service_name_simple:
