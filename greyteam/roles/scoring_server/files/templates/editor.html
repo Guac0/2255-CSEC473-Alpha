@@ -280,7 +280,7 @@ async function submitNewCriteria() {
         host_id: parseInt(serviceToHostMap[sId]), 
         location: document.getElementById('new-location').value,
         content: document.getElementById('new-content').value,
-        team_id: 2 // Assign to Admin/White team by default
+        team_id: 3 // Assign to Admin/White team by default
     };
     
     if(!payload.location || !payload.content) return notify("All fields required", true);

@@ -1251,7 +1251,7 @@ def add_criteria():
             
         content = data.get("content")
         location = data.get("location")
-        team_id = int(data.get("team_id", 2))
+        team_id = int(data.get("team_id", 3))
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid numeric data for IDs"}), 400
 
