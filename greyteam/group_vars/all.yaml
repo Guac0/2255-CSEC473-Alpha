@@ -33,11 +33,13 @@ local_users:
   - rarity
   - rainbowdash
   - fluttershy
+# "twilight","pinkiepie","applejack","rarity","rainbowdash","fluttershy"
 local_admins:
   - bigmac
   - mayormare
   - shiningarmor
   - cadance
+# "bigmac","mayormare","shiningarmor","cadance"
 domain_users:
   - spike
   - starlight
@@ -45,11 +47,13 @@ domain_users:
   - derpy
   - snips
   - snails
+# "spike","starlight","trixie","derpy","snips","snails"
 domain_admins:
   - celestia
   - discord
   - luna
   - starswirl
+# "celestia","discord","luna","starswirl"
 
 dns_overrides:
   - { ip: '10.0.10.1',    name: 'mlp.local' }

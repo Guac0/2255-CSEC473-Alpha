@@ -18,6 +18,26 @@ resource "openstack_compute_instance_v2" "scoring" {
     uuid        = openstack_networking_network_v2.network_grey.id
     fixed_ip_v4 = "172.20.0.100"
   }
+  #network {
+  #  uuid        = openstack_networking_network_v2.network_grey.id
+  #  fixed_ip_v4 = "172.20.0.67"
+  #}
+  #network {
+  #  uuid        = openstack_networking_network_v2.network_grey.id
+  #  fixed_ip_v4 = "172.20.0.82"
+  #}
+  #network {
+  #  uuid        = openstack_networking_network_v2.network_grey.id
+  #  fixed_ip_v4 = "172.20.0.90"
+  #}
+  #network {
+  #  uuid        = openstack_networking_network_v2.network_grey.id
+  #  fixed_ip_v4 = "172.20.0.106"
+  #}
+  #network {
+  #  uuid        = openstack_networking_network_v2.network_grey.id
+  #  fixed_ip_v4 = "172.20.0.115"
+  #}
 
   security_groups = ["secgroup_grey"]
 

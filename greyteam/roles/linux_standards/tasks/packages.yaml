@@ -26,6 +26,7 @@
     - "mysql-client" #ubuntu
     - "mariadb-client-compat" #debian
     - "network-manager"
+    - "qemu-guest-agent" #needed on debian for snapshots
   ignore_errors: yes
 
 - name: Install Remmina and Web Browsers for GUI hosts
