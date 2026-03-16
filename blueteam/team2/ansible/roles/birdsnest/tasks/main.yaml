@@ -1,0 +1,4 @@
+---
+- name: Deploy Birdsnest
+  ansible.builtin.include_tasks: deploy.yaml
+  when: ansible_default_ipv4.address == birdsnest_host_ip

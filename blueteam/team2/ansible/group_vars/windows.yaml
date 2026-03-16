@@ -1,0 +1,4 @@
+---
+ansible_connection: winrm
+ansible_winrm_server_cert_validation: ignore
+working_dir: C:\\tmp\\ansible

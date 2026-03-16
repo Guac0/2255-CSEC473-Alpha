@@ -2,6 +2,18 @@
 
 Contains the full implementation for the Rochester Institute of Technology Spring 2026's CSEC 473 Cyber Defense Techiques Section 01 Group Alpha's competition (our 'greyteam' rotation). This repository contains the full infrastructure as code implementation of our competition, which was themed after the My Little Pony franchise.
 
+Team Members:
+* Andrew Niebur - Terraform, Windows Ansible (Generic setup / MSSQL), Linux Ansible (Generic setup / NGINX), Scoring Frontend
+* [redacted for privacy] - Terraform, Injects, Windows DNS / Wallpaper / Cursors
+* [redacted for privacy] - Linux Ansible (Workstations), Injects
+* [redacted for privacy] - CUPS, Scoring Backend
+* [redacted for privacy] - Apache2 (Docuwiki)
+* [redacted for privacy] - NGIRCD
+* [redacted for privacy] - IIS, Windows Firewall / Client Programs
+* [redacted for privacy] - VSFTPD
+* [redacted for privacy] - SMB, Windows Defender / Payload Key
+* [redacted for privacy] - MariaDB
+
 ## Competition Information
 
 This competition took the format of a semi-asymmetrical Service Uptime competition. Services started in a "good" state serving legitimate content, with the Blue Team scoring 1 point per scoring round (every minute) per good service. The Red Team was tasked with gaining and maintaining access to each system, and was scored by adding thematic malicious content to scored services. If a scored service contains malicious content (with the Red Team uploading criteria of what counts as malicious to the scoring engine), the Red Team receives 1 point per scoring round per infected service. Offline services (whether unreachable or just containing no content for either team) do not score any points for either team, although the total count of offline "points" is tracked for referential usage.
@@ -21,19 +33,24 @@ The Red Team was provided with a shared Openstack network instance that was manu
 
 ### Setup
 
-- Navigate to the terraform/ folder.
+- Download this repo and navigate to the terraform/ folder.
+- Install Terraform on your host machine if you haven't already.
 - Update config.tf with information for your cloud provider. You will likely need to provide an appcred file or clouds.yaml file (appcred source script seems to work best for the Cyber Range Openstack).
 - If you are not using Openstack, you will likely need to update almost every Terraform file to use the equivalent for your provider. If you are using Openstack, carry on with the following steps.
 - Upload an ssh key with the identifer "cdt" to your environment.
 - If you are using a different Openstack instance than the RIT cyber range, you will likely need to update the volume identifers for each provisioned OS in the hosts files. Additionally, each host has been provisioned with a large amount of resources due to the abundance of RAM/CPU/storage available; you may wish to decrease this to suit your provider.
 - You can change generic information about the inscope hosts by modifying the terraform.tfvars file. Other changes will have to be made in each individual resource file.
-- Once your changes have been made, run `terraform init` and `terraform apply` to deploy the infrastructure.
+
+### Usage
+
+Once your authentication information has been un `terraform init` and `terraform apply` to deploy the infrastructure.
 
 ## Ansible
 
 After each system is initiated with Terraform, Ansible is used to deploy the actual competition implementation on each host. Note that this README file sits in the root of the ansible directory as it does not have a separate folder.
 
 ### Setup
+
 Automated setup:
 curl https://raw.githubusercontent.com/Guac0/2255-CSEC473-Alpha/refs/heads/main/greyteam/setup.sh | bash
 
@@ -56,9 +73,9 @@ ansible-playbook -i inventory.yaml playbook.yaml
 For finer grained control, please review the Ansible roles available in playbook.yaml. If you wish to make changes to the Ansible implementation, first review if your intended changes can be implemented via changing the Ansible variables in group_vars/ or in the variables folder (defaults/main.yaml) in each role. If you make changes to host quantities/locations using Terraform, make sure to update the inventory.yaml file accordingly.
 
 ### Useful Command Reference
+
 ansible -c to check - https://docs.ansible.com/ansible/latest/community/other_tools_and_programs.html#validate-playbook-tools
-ansible-lint verify-apache.yml
+ansible-lint verify-apache.yaml
 
 ansible-playbook -i inventory.yaml playbook.yaml -t ping
-ansible-playbook -i inventory/inventory.yaml playbook.yaml -t flags -l unix -vvvv 
-ansible-playbook -i inventory.yaml playbook.yaml -t tag -vv -c
+ansible-playbook -i inventory/inventory.yaml playbook.yaml -t roletags -l groupname -vvvv

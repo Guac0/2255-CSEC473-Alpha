@@ -1,0 +1,20 @@
+---
+ansible_user: blueteam
+ansible_password: blueteam
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+birdsnest_token: testtoken
+birdsnest_host: 172.19.0.5:443
+
+legit_admins:
+  - king
+  - duke
+  - knight
+  - lady
+  - baron
+
+legit_users:
+  - scribe
+  - apothecary
+  - shepherd
+  - blacksmith
+  - herald

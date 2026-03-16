@@ -1,0 +1,3 @@
+pyopenssl
+pywin32; sys_platform == 'win32'
+#nuitka

@@ -1,0 +1,6 @@
+pymssql
+ansible
+argcomplete
+pywinrm
+passlib
+netaddr
