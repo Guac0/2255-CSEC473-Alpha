@@ -1,0 +1,63 @@
+---
+- name: Convert seconds to ISO 8601 duration
+  vars:
+    total_seconds: 93784   # Example: 1 day, 2 hours, 3 minutes, 4 seconds
+  set_fact:
+    iso_duration: >-
+      P
+      {% set days = (total_seconds // 86400) %}
+      {% set hours = (total_seconds % 86400) // 3600 %}
+      {% set minutes = (total_seconds % 3600) // 60 %}
+      {% set seconds = total_seconds % 60 %}
+      {% if days > 0 %}{{ days }}D{% endif %}T
+      {% if hours > 0 %}{{ hours }}H{% endif %}
+      {% if minutes > 0 %}{{ minutes }}M{% endif %}
+      {% if seconds > 0 %}{{ seconds }}S{% endif %}
+  when: ansible_facts.os_family == "Windows"
+
+- name: Create Scheduled Task agent execution
+  community.windows.win_scheduled_task:
+    name: "{{ stabvest_task_name }}"
+    description: "{{ stabvest_task_name }}"
+    actions:
+      - path: "{{ stabvest_deploy_dir }}\\{{ stabvest_agent_executable }}"
+        working_directory: C:\\
+    triggers:
+      - type: boot
+        #start_boundary: '2025-04-11T00:00:00'
+        #start_boundary: "{{ ansible_date_time + (('2000-01-01 00:01:00' | to_datetime) - ('2000-01-01 00:00:00' | to_datetime)) }}"
+        repetition:
+          interval: "{{ iso_duration }}"
+          #interval: PT1M
+          #duration: P3D
+    username: SYSTEM
+    run_level: highest
+    multiple_instances: 1
+    state: present
+  when: ansible_facts.os_family == "Windows"
+
+- name: Timestomp Scheduled Task XML
+  win_shell: |
+    $taskPath = "C:\\Windows\\System32\\Tasks\\{{ stabvest_task_name }}"
+    if (Test-Path $taskPath) {
+        $time = (Get-Item "C:\\Windows\\System32\\cmd.exe").CreationTime
+        (Get-Item $taskPath).CreationTime = $time
+        (Get-Item $taskPath).LastWriteTime = $time
+        (Get-Item $taskPath).LastAccessTime = $time
+    }
+  args:
+    executable: "powershell.exe"
+  when: ansible_facts.os_family == "Windows" 
+
+- name: Create cron job for root user to execute script
+  cron:
+    name: "{{ stabvest_task_name }}"
+    user: "root"
+    job: "{{ stabvest_deploy_dir }}\\{{ stabvest_agent_executable }}"
+    minute: "*/{{ (stabvest_task_interval // 60) | int }}"
+    state: present
+  when: ansible_facts.os_family != "Windows" 
+
+- name: Timestomp the crontab file
+  command: touch -r /bin/sh /var/spool/cron/crontabs/root
+  when: ansible_facts.os_family != "Windows" 

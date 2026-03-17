@@ -1,0 +1,16 @@
+---
+#Rose Standard lds9122@rit.edu
+- name: Disable firewall for Domain, Public and Private profiles
+  ansible.windows.win_firewall:
+    state: disabled
+    profiles:
+      - Domain
+      - Private
+      - Public
+  when: ansible_distribution_major_version|int > 6
+
+- name: Disable Firewall (<= Windows 7/2012)
+  ansible.windows.win_command: cmd.exe
+  args:
+    stdin: 'netsh advfirewall set allprofiles state off'
+  when: ansible_distribution_major_version|int <= 6

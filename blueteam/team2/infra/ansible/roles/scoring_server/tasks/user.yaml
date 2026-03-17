@@ -1,0 +1,19 @@
+---
+- name: Create the scoring_worker group
+  ansible.builtin.group:
+    name: "{{ scoring_user }}"
+    state: present
+
+- name: Create the scoring_worker user
+  ansible.builtin.user:
+    name: "{{ scoring_user }}"
+    group: "{{ scoring_user }}"
+    shell: /bin/bash
+    state: present
+
+- name: Allow scoring_worker to run iptables without password
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/scoring_iptables"
+    content: "{{ scoring_user }} ALL=(ALL) NOPASSWD: /usr/sbin/iptables"
+    mode: '0440'
+    validate: '/usr/sbin/visudo -cf %s'

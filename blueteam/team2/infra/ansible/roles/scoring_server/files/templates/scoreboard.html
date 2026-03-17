@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoring Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-team-blue { background-color: #2563eb; color: white; }
+        .bg-team-red { background-color: #dc2626; color: white; }
+        .bg-team-yellow { background-color: #facc15; color: black; }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--cols, 6), 1fr);
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .service-square-container {
+            container-type: inline-size;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .service-square {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10%;
+            position: relative; /* Needed for absolute positioning of message */
+            transition: transform 0.2s ease;
+            overflow: hidden;
+        }
+
+        .sq-hostname { font-size: 12cqw; font-weight: 900; line-height: 1; margin: 2% 0; }
+        .sq-service { font-size: 8cqw; font-weight: 450; text-transform: uppercase; opacity: 0.8; }
+        .sq-ip { font-size: 8cqw; font-weight: 450; font-family: monospace; opacity: 0.8; }
+
+        /* Message Overlay Style */
+        .sq-message {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10%;
+            font-size: 6cqw;
+            font-weight: 600;
+            background: inherit; /* Matches team color */
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        /* Hover Logic */
+        .service-square:hover { transform: scale(1.15); cursor: pointer; }
+        .service-square:hover .sq-hostname, 
+        .service-square:hover .sq-service, 
+        .service-square:hover .sq-ip { opacity: 0; }
+        .service-square:hover .sq-message { opacity: 1; }
+        .service-square:active {
+            transform: scale(1.20);
+            filter: brightness(1.2);
+        }
+
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans p-6">
+
+    <header id="stats-header" class="mb-8 bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+        <div class="flex flex-wrap justify-between items-center mb-4">
+            <h1 class="text-3xl font-bold tracking-tight">SERVICE SCOREBOARD</h1>
+            <div class="space-x-4">
+                <span id="last-updated" class="text-xs font-mono text-gray-500 bg-gray-900 px-3 py-1 rounded border border-gray-800">
+                    Last Sync: Never
+                </span>
+                <button onclick="togglePasswordModal()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-semibold transition">
+                    Change Password
+                </button>
+                <a href="editor" class="inline-block bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Edit Scoring</a>
+                <!--
+                <a href="/scoring_history" class="inline-block bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Past Rounds</a>
+                <a href="/management" class="inline-block bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm font-semibold">Admin</a>
+                -->
+            </div>
+        </div>
+        
+        <!--<div id="team-stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">-->
+        <div id="team-stats-container" class="flex flex-row gap-2 w-full mb-6">
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+            <div class="animate-pulse bg-gray-700 h-24 rounded"></div>
+        </div>
+    </header>
+
+    <section class="mb-12">
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Service Status</h2>
+        <div id="graphical-scoreboard" class="space-y-6">
+            </div>
+    </section>
+
+    <section>
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-700 pb-2">Latest Round Details</h2>
+        <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-700 text-gray-300 uppercase text-xs">
+                    <tr>
+                        <th class="p-4">Hostname</th>
+                        <th class="p-4">IP Address</th>
+                        <th class="p-4">OS</th>
+                        <th class="p-4">Service</th>
+                        <th class="p-4 text-center">Status</th>
+                        <th class="p-4">Message</th>
+                    </tr>
+                </thead>
+                <tbody id="text-table-body">
+                    </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div id="password-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold mb-4">Update Password</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">New Password</label>
+                    <input type="password" id="new-password-input" 
+                        class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button onclick="togglePasswordModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+                    <button onclick="submitPasswordChange()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-bold">
+                        Update
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const REFRESH_RATE = 20000; // Refresh every 10 seconds
+        const SUBNET_ALIASES = {
+            "10.0.10.0/24": "Core Network",
+            "10.0.20.0/24": "DMZ Network",
+            "10.0.30.0/24": "Internal Network",
+            "fallback": "Unknown Segment"
+        };
+
+        function copyWithNotify(text, element) {
+            navigator.clipboard.writeText(text);
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-10 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded-full font-bold shadow-2xl z-50 animate-bounce text-sm";
+            toast.innerText = "📋 Message Copied!";
+            
+            document.body.appendChild(toast);
+            
+            // Remove toast after 2 seconds
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        async function fetchScoreboardData() {
+            try {
+                // 1. Fetch Latest Services
+                const response = await fetch('/get_scoring_latest');
+                if (!response.ok) throw new Error("Latest services fetch failed");
+                const result = await response.json();
+                
+                const serviceData = result.data;
+                const roundNum = result.round;
+
+                if (!serviceData || serviceData.length === 0) {
+                    console.warn("No data returned for current round - services.");
+                    return;
+                }
+
+                // 2. Fetch Scoring Summary
+                const response2 = await fetch('/get_scoring_summary');
+                if (!response2.ok) throw new Error("Summary fetch failed");
+                const result2 = await response2.json();
+                
+                // FIX: Access 'teams' instead of 'data'
+                const teamData = result2.teams; 
+                const roundNum2 = result2.round;
+
+                if (!teamData || teamData.length === 0) {
+                    console.warn("No data returned for current round - summary.");
+                    return;
+                }
+
+                // 3. Update UI
+                updateStats(result2); // Pass the whole object as updateStats expects .teams
+                renderGraphicalBoard(serviceData);
+                renderTextTable(serviceData);
+
+                // Update Sync Status
+                const statusElement = document.getElementById('last-updated');
+                statusElement.innerText = `Last Sync: ${new Date().toLocaleTimeString()} (Round ${roundNum})`;
+                
+            } catch (err) {
+                console.error("Failed to fetch scoreboard:", err);
+                const statusElement = document.getElementById('last-updated');
+                if (statusElement) {
+                    statusElement.innerText = "Sync Error - Retrying...";
+                    statusElement.className = "text-red-500";
+                }
+            }
+        }
+
+        function updateStats(data) {
+            const container = document.getElementById('team-stats-container');
+            if (!data || !data.teams) return;
+
+            const teamStyles = {
+                'blue': { label: 'BLUE TEAM', border: 'border-blue-500', text: 'text-blue-400' },
+                'red': { label: 'RED TEAM', border: 'border-red-500', text: 'text-red-400' },
+                'offline': { label: 'OFFLINE', border: 'border-yellow-500', text: 'text-yellow-500' }
+            };
+
+            // 'flex-grow' on each internal block removes the "dead space" in the middle
+            container.innerHTML = data.teams.map(team => {
+                const style = teamStyles[team.team_name.toLowerCase()] || 
+                            { label: team.team_name, border: 'border-gray-600', text: 'text-gray-400' };
+                
+                return `
+                    <div class="flex-1 bg-gray-800/40 border-l-4 ${style.border} px-4 py-1 shadow-2xl flex items-center min-w-0 h-16">
+                        <div class="shrink-0 mr-4">
+                            <span class="text-sm font-black tracking-tighter ${style.text} block leading-none">${style.label}</span>
+                        </div>
+
+                        <div class="flex flex-grow items-center justify-start gap-x-8">
+                            
+                            <div class="flex items-baseline">
+                                <span class="text-4xl font-mono font-black text-white leading-none">${team.score.toLocaleString()}</span>
+                                <span class="ml-1 text-[11px] font-bold text-gray-500 uppercase">points</span>
+                            </div>
+
+                            <div class="flex items-baseline">
+                                <span class="text-2xl font-black text-gray-200 leading-none">${team.multiplier.toFixed(1)}x</span>
+                                <span class="ml-1 text-[11px] font-bold text-gray-500 uppercase">multiplier</span>
+                            </div>
+
+                            <div class="flex items-baseline">
+                                <span class="text-2xl font-black text-white leading-none">${team.services_owned}</span>
+                                <span class="ml-1 text-[11px] font-bold text-gray-500 uppercase">services owned</span>
+                            </div>
+
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGraphicalBoard(data) {
+            const board = document.getElementById('graphical-scoreboard');
+            const subnets = {};
+            let maxHosts = 0;
+
+            data.forEach(item => {
+                const parts = item.ip.split('.');
+                const subnet = `${parts[0]}.${parts[1]}.${parts[2]}.0/24`;
+                if (!subnets[subnet]) subnets[subnet] = [];
+                subnets[subnet].push(item);
+            });
+
+            Object.values(subnets).forEach(list => { if (list.length > maxHosts) maxHosts = list.length; });
+
+            board.innerHTML = Object.keys(subnets).sort().map(subnet => {
+                const alias = SUBNET_ALIASES[subnet] || SUBNET_ALIASES["fallback"];
+                
+                return `
+                <div class="flex items-center gap-6 mb-4"> 
+                    <div class="w-48 shrink-0 text-right">
+                        <div class="text-2xl font-black text-white uppercase tracking-tight leading-none">
+                            ${alias}
+                        </div>
+                        <div class="text-sm font-mono text-gray-600">${subnet}</div>
+                    </div>
+                    
+                    <div class="service-grid flex-grow" style="--cols: ${maxHosts}">
+                       ${subnets[subnet].map(h => `
+                            <div class="service-square-container">
+                                <div class="service-square rounded-xl shadow-lg ${getBgClass(h.team)}" 
+                                    onclick="copyWithNotify('${(h.message || 'No data').replace(/'/g, "\\'")}', this)">
+                                    
+                                    <div class="sq-service">${h.hostname}</div>
+                                    <div class="sq-hostname truncate px-2">${h.service}</div>
+                                    <div class="sq-ip">${h.ip}</div>
+                                    
+                                    <div class="sq-message italic">
+                                        ${h.message || 'No status available'}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function renderTextTable(data) {
+            const tbody = document.getElementById('text-table-body'); //<td class="p-4 font-mono text-xs text-blue-400">${h.ip}</td>
+            tbody.innerHTML = data.map(h => `
+                <tr class="border-b border-gray-700 hover:bg-gray-750 transition">
+                    <td class="p-4 font-semibold text-sm">${h.hostname}</td>
+                    <td class="p-4 font-mono text-xs text-blue-400 whitespace-nowrap cursor-pointer hover:text-blue-300" 
+                        onclick="copyWithNotify('${(h.ip).replace(/'/g, "\\'")}', this)">
+                        ${h.ip}
+                    </td>
+                    <td class="p-4 text-xs text-gray-400">${h.os}</td>
+                    <td class="p-4 text-sm">${h.service}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${getBgClass(h.team)}">
+                            ${h.team}
+                        </span>
+                    </td>
+                    <td class="p-4 text-xs italic text-gray-500"
+                        onclick="copyWithNotify('${(h.message || 'No data').replace(/'/g, "\\'")}', this)">
+                        ${h.message || 'No data'}
+                        </td>
+                </tr>
+            `).join('');
+        }
+
+        function getBgClass(team) {
+            if (team === 'blue') return 'bg-team-blue';
+            if (team === 'red') return 'bg-team-red';
+            return 'bg-team-yellow';
+        }
+
+        function togglePasswordModal() {
+            const modal = document.getElementById('password-modal');
+            modal.classList.toggle('hidden');
+            document.getElementById('new-password-input').value = ''; // Clear input
+        }
+
+        async function submitPasswordChange() {
+            const newPassword = document.getElementById('new-password-input').value;
+            if (!newPassword) return alert("Password cannot be empty");
+
+            try {
+                // 1. Get current username from your existing /whoami endpoint
+                const whoamiRes = await fetch('/whoami');
+                const userData = await whoamiRes.json();
+                
+                // 2. Submit to your /update_password endpoint
+                const response = await fetch('/update_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: userData.username,
+                        password: newPassword
+                    })
+                });
+
+                if (response.ok) {
+                    alert("Password updated successfully!");
+                    togglePasswordModal();
+                } else {
+                    const errorText = await response.text();
+                    alert("Error: " + errorText);
+                }
+            } catch (err) {
+                console.error("Password update failed:", err);
+                alert("Failed to connect to server.");
+            }
+        }
+
+        // Initial load and set interval
+        fetchScoreboardData();
+        setInterval(fetchScoreboardData, REFRESH_RATE);
+    </script>
+</body>
+</html>

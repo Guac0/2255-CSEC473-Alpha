@@ -1,0 +1,6 @@
+---
+mariadb_root_password: "MLProot123!"
+db_name: "Ponies"
+db_user: "pony"
+db_password: "MLPPass123!"
+mariadb_config_file: "/etc/mysql/mariadb.conf.d/competition.cnf"

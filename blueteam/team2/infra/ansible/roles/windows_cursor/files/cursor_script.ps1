@@ -1,0 +1,23 @@
+# Create Checkpoints for debugging
+New-Item -Path 'C:\ProgramData\Inscope\Cursors\checkpoint1.txt' -ItemType File -Force
+
+$path = 'HKCU:\Control Panel\Cursors'
+$cursors = @{
+    Arrow        = 'C:\ProgramData\Inscope\Cursors\Arrow.cur'
+    IBeam        = 'C:\ProgramData\Inscope\Cursors\Hand.ani'
+    Hand         = 'C:\ProgramData\Inscope\Cursors\ibeam.ani'
+    SchemeSource = 2
+}
+
+foreach ($name in $cursors.Keys) {
+    Set-ItemProperty -Path $path -Name $name -Value $cursors[$name] -Force
+}
+
+$sig = @'
+[DllImport("user32.dll", EntryPoint = "SystemParametersInfo")]
+public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, uint pvParam, uint fWinIni);
+'@
+$type = Add-Type -MemberDefinition $sig -Name "WinAPI_$(Get-Random)" -Namespace "SysParam" -PassThru -ErrorAction SilentlyContinue
+if ($type) { $type::SystemParametersInfo(0x0057, 0, $null, 0) }
+
+New-Item -Path 'C:\ProgramData\Inscope\Cursors\checkpoint4.txt' -ItemType File -Force

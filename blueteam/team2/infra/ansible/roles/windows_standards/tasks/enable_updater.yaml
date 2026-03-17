@@ -1,0 +1,13 @@
+---
+- name: make sure windows update service is running
+  ansible.windows.win_service:
+    name: wuauserv
+    start_mode: auto
+    state: started
+
+- name: make sure app readiness service is running
+  ansible.windows.win_service:
+    name: appreadiness
+    start_mode: auto
+    state: started
+  when: ansible_distribution_major_version|int > 6

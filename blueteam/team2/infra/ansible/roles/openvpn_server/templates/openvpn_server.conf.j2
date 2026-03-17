@@ -1,0 +1,56 @@
+# OpenVPN server configuration
+
+# Specify the protocol and port
+proto {{ openvpn_proto }}
+port {{ openvpn_port }}
+
+# Define the server's IP and subnet
+server {{ openvpn_network }} {{ openvpn_netmask }}
+
+# Topology setting
+topology subnet
+
+# Define the directory for keys and certificates
+ca {{ ca_cert_file }}
+cert {{ server_cert_file }}
+key {{ server_key_file }}
+dh {{ dh_param_file }}
+tls-auth {{ ta_key_file }} 0
+
+# Specify the cipher
+data-ciphers AES-256-GCM:AES-128-GCM
+data-ciphers-fallback AES-256-CBC
+
+# Disable compression
+compress stub-v2
+
+# Enable client-to-client communication
+# client-to-client
+
+# Configure logging and status files
+status {{ status_file }}
+log-append {{ log_file }}
+
+# Enable tun device for the VPN
+dev tun
+
+# Keepalive settings to detect dead clients
+keepalive 10 120
+
+# Enable user and group for added security
+user nobody
+group nogroup
+
+# Push routes to the client (example)
+push "route 100.64.0.0 255.192.0.0"
+#push "redirect-gateway def1 bypass-dhcp"
+# Push Google DNS servers
+#push "dhcp-option DNS 8.8.8.8"
+#push "dhcp-option DNS 8.8.4.4"
+
+# Persist keys and settings across restarts
+persist-key
+persist-tun
+
+# Enable log verbosity for troubleshooting
+verb 3

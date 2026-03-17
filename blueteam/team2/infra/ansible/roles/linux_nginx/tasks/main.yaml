@@ -1,0 +1,6 @@
+---
+- name: Install NGINX
+  ansible.builtin.include_tasks: install.yaml
+
+- name: Copy Over NGINX Data
+  ansible.builtin.include_tasks: data.yaml

@@ -1,0 +1,45 @@
+---
+- name: greyteam domain user
+  microsoft.ad.user:
+    name: "{{ greyteam_user }}"
+    password: "{{ greyteam_password }}"
+    state: present
+    enabled: yes
+    password_never_expires: yes
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+
+- name: Add greyteam to Domain Admins
+  microsoft.ad.group:
+    name: "Domain Admins"
+    members:
+      add:
+        - "{{ greyteam_user }}"
+    state: present
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+
+- name: redteam domain user
+  microsoft.ad.user:
+    name: "{{ redteam_user }}"
+    password: "{{ redteam_password }}"
+    state: present
+    enabled: yes
+    password_never_expires: yes
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+
+- name: Add redteam to Domain Admins
+  microsoft.ad.group:
+    name: "Domain Admins"
+    members:
+      add:
+        - "{{ redteam_user }}"
+    state: present
+    domain_username: "{{ greyteam_user }}"
+    domain_password: "{{ greyteam_password }}"
+    domain_server: "{{ domain }}"
+

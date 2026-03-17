@@ -1,0 +1,41 @@
+scoring_deploy_dir: /scoring
+scoring_gunicorn_workers: 3
+scoring_port: 443
+scoring_server_start: true
+scoring_worker_start: false
+scoring_user: root
+scoring_host: "0.0.0.0"
+scoring_interface: eth0
+scoring_ips:
+  - 172.20.0.67 #/26
+  - 172.20.0.82 #/26
+  - 172.20.0.90 #/26
+  - 172.20.0.106 #/26
+  - 172.20.0.115 #/26
+
+# Derived values can still be overridden if needed
+public_url: "https://{{ ansible_host }}:{{ scoring_port }}"
+logfile: "log.txt"
+savefile: "save.db"
+
+secret_key: "changeme"
+stale_time: 300
+default_webhook_sleep_time: 0.25
+max_webhook_msg_per_minute: 50
+webhook_url: "https://discord.com/api/webhooks/1468302694681804885/8jnjVOEXipPiY_xksMch5yI-E7l-f1KOcFWhB_8vjw5evQb4X6zEfZ15AlqiO32_yOOX?thread_id=1467968648089174178"
+create_test_data: false
+agent_auth_tokens:
+  testtoken:
+    added_by: "default"
+webgui_users:
+  greyteam:
+    password: "ponyuploc0!"
+    role: "admin"
+  redteam:
+    password: "Frenemies0!"
+    #password: "getout"
+    role: "red"
+  blueteam:
+    password: "Friendship0!"
+    #password: "getout"
+    role: "blue"

@@ -1,0 +1,57 @@
+---
+# Variables that apply to all hosts.
+
+greyteam_user: grayteam
+greyteam_password: ponyuploc0!
+#greyteam_user: tirek
+#greyteam_password: Frenemies0!
+#greyteam_user: bigmac
+#greyteam_password: Friendship0!
+
+redteam_user: redteam
+redteam_password: Frenemies0!
+
+ansible_user: "{{ greyteam_user }}"
+ansible_password: "{{ greyteam_password }}"
+ansible_ssh_private_key_file: ~/.ssh/cdt
+
+team_password: Change.me123!
+domain: ravencrest.local
+# DNS can be left empty to make no changes
+mgmt_dns:
+- 10.0.10.1
+- 129.21.3.17
+#- 8.8.8.8
+
+payload_key_content: 'Do not modify this file in any way (name, content, permissions). Contact greyteam if you have questions.'
+
+local_users:
+  - king
+  - duke
+  - knight
+  - lady
+  - baron
+local_admins:
+  - scribe
+  - apothecary
+  - shepherd
+  - blacksmith
+  - herald
+domain_users:
+  - chancellor
+  - wizard
+  - treasurer
+  - spymaster
+  - archbishop
+domain_admins:
+  - steward
+  - stablemaster
+  - royalguard
+  - inquisitor
+  - jester
+
+dns_overrides:
+  - { ip: '10.0.10.1',    name: 'ravencrest.local' }
+  - { ip: '10.0.10.1',    name: 'fortress.ravencrest.local' }
+  #- { ip: '10.0.10.1',    name: 'dc.ravencrest.local' }
+  #- { ip: '172.20.0.100', name: 'scoring.ravencrest.local' }

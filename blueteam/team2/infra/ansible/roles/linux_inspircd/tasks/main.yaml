@@ -1,0 +1,52 @@
+---
+- name: Set multiple facts
+  ansible.builtin.set_fact:
+    irc_server_name: "irc.cathedral.local"
+    irc_server_description: "Cathedral IRC Server"
+    irc_network_name: "CoreNetwork"
+    irc_port: 6667
+
+- name: Update apt cache and install InspIRCd
+  apt:
+    name: inspircd
+    state: present
+    update_cache: yes
+
+- name: Ensure InspIRCd configuration directory exists
+  file:
+    path: /etc/inspircd
+    state: directory
+    owner: irc
+    group: irc
+    mode: '0755'
+
+- name: Configure InspIRCd listeners and server info
+  blockinfile:
+    path: /etc/inspircd/inspircd.conf
+    create: yes
+    block: |
+      <server
+            name="{{ irc_server_name }}"
+            description="{{ irc_server_description }}"
+            network="{{ irc_network_name }}">
+
+      <admin
+            name="Admin"
+            nick="AdminNick"
+            email="admin@{{ irc_server_name }}">
+
+      <bind
+            address="0.0.0.0"
+            port="{{ irc_port }}"
+            type="clients">
+
+- name: Restart InspIRCd
+  service:
+    name: inspircd
+    state: restarted
+
+- name: Ensure InspIRCd service is started and enabled
+  service:
+    name: inspircd
+    state: started
+    enabled: yes

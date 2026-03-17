@@ -1,0 +1,31 @@
+- name: Stop and disable scoring services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop:
+    - scoring-server
+    - scoring-server-worker
+    - scoring-worker
+  failed_when: false # Ignore errors if services are already missing
+  ignore_errors: true
+
+- name: Remove systemd service files
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}.service"
+    state: absent
+  loop:
+    - scoring-server
+    - scoring-server-worker
+    - scoring-worker
+  ignore_errors: true
+
+- name: Reload systemd daemon to apply changes
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Delete the deploy folder folder
+  ansible.builtin.file:
+    path: "{{ scoring_deploy_dir }}"
+    state: absent
+  ignore_errors: true

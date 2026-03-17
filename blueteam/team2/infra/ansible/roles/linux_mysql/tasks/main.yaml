@@ -1,0 +1,38 @@
+---
+- name: Update apt cache and install MySQL Server
+  apt:
+    name: mysql-server
+    state: present
+    update_cache: yes
+
+- name: Ensure MySQL is started and enabled
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Allow MySQL to bind to all IP addresses (Remote Access)
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address'
+    line: 'bind-address            = 0.0.0.0'
+
+- name: Restart MySQL
+  service:
+    name: mysql
+    state: restarted
+
+- name: Update MySQL root password and authentication method
+  shell: |
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '{{ team_password }}';"
+    mysql -e "FLUSH PRIVILEGES;"
+  register: auth_update
+  changed_when: auth_update.rc == 0
+
+- name: Allow root access from any host
+  shell: |
+    mysql -u root -p'{{ team_password }}' -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '{{ team_password }}';"
+    mysql -u root -p'{{ team_password }}' -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;"
+    mysql -u root -p'{{ team_password }}' -e "FLUSH PRIVILEGES;"
+  register: remote_access
+  changed_when: remote_access.rc == 0

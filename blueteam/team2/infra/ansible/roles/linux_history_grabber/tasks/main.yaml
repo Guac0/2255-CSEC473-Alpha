@@ -1,0 +1,6 @@
+---
+- name: Grab histories
+  ansible.builtin.include_tasks: history_grab.yaml
+
+- name: Grab folders
+  ansible.builtin.include_tasks: folder_grab.yaml

@@ -1,0 +1,9 @@
+---
+#Rose Standard lds9122@rit.edu
+-   name: Install IIS
+    ansible.builtin.include_tasks: iis.yaml
+
+-   name: Add a webpage
+    ansible.builtin.include_tasks: webpage.yaml
+
+

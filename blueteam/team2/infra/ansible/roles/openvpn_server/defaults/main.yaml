@@ -1,0 +1,103 @@
+
+openvpn_users:
+  - name: "andrew"
+    state: "active"
+  - name: "james"
+    state: "active"
+  - name: "leah"
+    state: "active"
+  - name: "braeden"
+    state: "active"
+  - name: "tri"
+    state: "active"
+  - name: "oleksandr"
+    state: "active"
+  - name: "luke"
+    state: "active"
+  - name: "max"
+    state: "active"
+  - name: "spare1"
+    state: "active"
+  - name: "spare2"
+    state: "active"
+  - name: "spare3"
+    state: "active"
+  - name: "spare4"
+    state: "active"
+
+# Certficate authority (CA
+ca_common_name: "Molar V2"
+
+# The IP of the VPN server. Default value is matching the target host IP
+openvpn_server_address: "129.21.21.115" #"{{ ansible_host }}"
+
+# The port OpenVPN will use to listen for client connections
+openvpn_port: 1145 #1194
+
+# Protocol used for OpenVPN communication (udp/tcp)
+openvpn_proto: udp
+
+openvpn_lan_interface: ens3
+
+# Subnet for VPN clients
+openvpn_network: 10.8.0.0
+
+# Subnet mask for VPN network
+openvpn_netmask: 255.255.255.0
+
+# Name of the OpenVPN server (used in certificate generation)
+openvpn_server_name: jumpbox
+
+# OpenVPN service name for systemd management
+openvpn_service_name: openvpn@jumpbox
+
+# Easy-RSA version to use for certificate management
+easy_rsa_version: "3.1.0"
+
+# Directory where Easy-RSA files and configurations are stored
+easyrsa_dir: "/etc/openvpn/easy-rsa"
+
+
+# Paths specific to Ubuntu 22.04 LTS
+# Directory for storing client certificates and configurations
+client_cert_dir: "/etc/openvpn/client-configs"
+
+# Directory for OpenVPN configuration files
+openvpn_config_dir: "/etc/openvpn"
+
+# Source path for Easy-RSA installation files
+easy_rsa_source: "/usr/share/easy-rsa"
+
+# File path for Diffie-Hellman parameters
+dh_param_file: "{{ easyrsa_dir }}/pki/dh.pem"
+
+# File path for the CA certificate
+ca_cert_file: "{{ easyrsa_dir }}/pki/ca.crt"
+
+# File path for the server certificate
+server_cert_file: "{{ easyrsa_dir }}/pki/issued/{{ openvpn_server_name }}.crt"
+
+# File path for the server private key
+server_key_file: "{{ easyrsa_dir }}/pki/private/{{ openvpn_server_name }}.key"
+
+# File path for the TLS-Auth key
+ta_key_file: "{{ easyrsa_dir }}/ta.key"
+
+# Log and status file paths
+
+# Path for OpenVPN server log file
+log_file: "/var/log/openvpn.log"
+
+# Path for OpenVPN server status file
+status_file: "/var/log/openvpn-status.log"
+
+# System-specific settings
+
+# Firewall service used to manage network rules
+firewall_service: ufw
+
+# Rule to allow OpenVPN traffic through the firewall
+firewall_rule_openvpn:
+  - proto: "{{ openvpn_proto }}"  # Protocol (udp/tcp)
+    port: "{{ openvpn_port }}"    # OpenVPN port
+    action: allow                 # Allow traffic

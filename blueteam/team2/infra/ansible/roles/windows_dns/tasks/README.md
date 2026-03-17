@@ -1,0 +1,2 @@
+This project automates the installation and configuration of a Windows DNS Server using Ansible.
+It ensures the DNS role is installed, the DNS service is running, and a name server (NS) record is created for a specified zone.

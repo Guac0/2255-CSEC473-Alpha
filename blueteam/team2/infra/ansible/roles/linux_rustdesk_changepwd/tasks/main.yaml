@@ -1,0 +1,30 @@
+---
+- name: Set rustdesk password Grey
+  ansible.builtin.set_fact:
+    rustdesk_password: "{{ greyteam_password }}"
+  when: "'jumpgrey' in group_names"
+
+- name: Set rustdesk password Blue
+  ansible.builtin.set_fact:
+    rustdesk_password: "{{ team_password }}"
+  when: "'jumpblue' in group_names"
+
+- name: Reset password
+  ansible.builtin.shell: |
+    /usr/bin/rustdesk --password {{ rustdesk_password }}
+  args:
+    executable: /bin/bash
+
+- name: Get RustDesk ID
+  ansible.builtin.shell: rustdesk --get-id
+  register: rustdesk_id_applied
+  changed_when: false
+
+- name: Restart service
+  ansible.builtin.systemd:
+    name: rustdesk
+    state: restarted
+
+- name: Display Credentials
+  ansible.builtin.debug:
+    msg: "RustDesk ID: {{ rustdesk_id_applied.stdout }} -- Password: {{ rustdesk_password }}"

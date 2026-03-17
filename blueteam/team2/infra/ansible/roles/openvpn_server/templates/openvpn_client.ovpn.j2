@@ -1,0 +1,36 @@
+# OpenVPN client configuration file
+# This file is portable and includes all necessary keys and certificates.
+
+client
+dev tun
+proto {{ openvpn_proto }}
+remote {{ openvpn_server_address }} {{ openvpn_port }}
+resolv-retry infinite
+nobind
+#comp-lzo
+verb 3
+
+persist-key
+persist-tun
+remote-cert-tls server
+cipher AES-256-GCM
+
+#user nobody
+#group nogroup
+
+<ca>
+{{ ca_cert_content | trim }}
+</ca>
+
+<cert>
+{{ client_cert_content | trim }}
+</cert>
+
+<key>
+{{ client_key_content | trim }}
+</key>
+
+<tls-auth>
+{{ tls_auth_content | trim }}
+</tls-auth>
+key-direction 1

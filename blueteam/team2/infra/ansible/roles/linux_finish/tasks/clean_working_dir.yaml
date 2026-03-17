@@ -1,0 +1,5 @@
+---
+- name: Delete working dir
+  ansible.builtin.file:
+    path: "{{ working_dir }}"
+    state: absent

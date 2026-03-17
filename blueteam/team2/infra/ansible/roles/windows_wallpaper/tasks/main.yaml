@@ -1,0 +1,67 @@
+---
+# Alpha – Anny Hua
+# Feature: Windows wallpaper theming 
+- name: Determine wallpaper filename for this host (prefer hostname.jpg)
+  ansible.builtin.set_fact:
+    wallpaper_host_file: "{{ inventory_hostname.split('.')[0] }}.jpg"
+    wallpaper_default_file: "wallpaper.jpg"
+
+- name: Check if hostname-specific wallpaper exists on controller
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ wallpaper_host_file }}"
+  register: wallpaper_check
+  delegate_to: localhost
+  run_once: false
+
+- name: Choose wallpaper source file (host-specific or default)
+  ansible.builtin.set_fact:
+    wallpaper_src: "{{ wallpaper_host_file if wallpaper_check.stat.exists else wallpaper_default_file }}"
+
+- name: Ensure wallpaper directory exists
+  ansible.windows.win_file:
+    path: "C:\\ProgramData\\Inscope\\Branding"
+    state: directory
+
+- name: Copy wallpaper to host
+  ansible.windows.win_copy:
+    src: "{{ wallpaper_src }}"
+    dest: "C:\\ProgramData\\Inscope\\Branding\\wallpaper.jpg"
+
+- name: Delete existing script file
+  ansible.windows.win_file:
+    path: "C:\\ProgramData\\Inscope\\wallpaper_script.ps1"
+    state: absent
+
+- name: Copy wallpaper script to host
+  ansible.windows.win_copy:
+    src: "wallpaper_script.ps1"
+    dest: "C:\\ProgramData\\Inscope\\"
+
+- name: Allow wallpaper in Remote Desktop sessions
+  ansible.windows.win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+    name: fNoRemoteDesktopWallpaper
+    data: 0
+    type: dword
+    state: present
+
+- name: Register Wallpaper Script to run at logon
+  ansible.windows.win_regedit:
+    path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Run
+    name: "wallpaperChange"
+    data: 'powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Inscope\wallpaper_script.ps1"'
+    type: string
+
+- name: Remove existing wallpaper scheduled task if it exists
+  community.windows.win_scheduled_task:
+    name: WallpaperInit
+    state: absent
+    
+#- name: Create wallpaper scheduled task (run at logon with delay)
+#  ansible.windows.win_shell: >
+#    schtasks /create /tn WallpaperInit
+#    /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\ProgramData\Inscope\wallpaper_script.ps1"
+#    /sc onlogon
+#    /delay 0000:5
+#    /rl highest
+#    /f

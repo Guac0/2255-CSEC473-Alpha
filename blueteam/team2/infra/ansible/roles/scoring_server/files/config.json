@@ -1,0 +1,23 @@
+{
+  "HOST": "127.0.0.1",
+  "PORT": 8080,
+  "PUBLIC_URL": "https://{HOST}:{PORT}",
+  "LOGFILE": "log.txt",
+  "SAVEFILE": "save_{timestamp}.db",
+  "SECRET_KEY": "changeme",
+  "STALE_TIME": 300,
+  "DEFAULT_WEBHOOK_SLEEP_TIME": 0.25,
+  "MAX_WEBHOOK_MSG_PER_MINUTE": 50,
+  "WEBHOOK_URL": "",
+  "CREATE_TEST_DATA": true,
+  "AGENT_AUTH_TOKENS": {
+        "testtoken": { 
+            "added_by": "default"
+        }
+    },
+    "WEBGUI_USERS": {
+        "admin": {"password": "admin", "role": "admin"},
+        "analyst": {"password": "analyst", "role": "analyst"},
+        "guest": {"password": "guest", "role": "guest"}
+    }
+}

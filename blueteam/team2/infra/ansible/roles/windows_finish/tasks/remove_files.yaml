@@ -1,0 +1,5 @@
+---
+- name: remove working directory files
+  win_file:
+    path: "{{ working_dir }}"
+    state: absent

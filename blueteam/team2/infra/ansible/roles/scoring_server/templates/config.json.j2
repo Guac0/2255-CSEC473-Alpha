@@ -1,0 +1,15 @@
+{
+  "HOST": "{{ scoring_host }}",
+  "PORT": {{ scoring_port }},
+  "PUBLIC_URL": "{{ public_url }}",
+  "LOGFILE": "{{ logfile }}",
+  "SAVEFILE": "{{ savefile }}",
+  "SECRET_KEY": "{{ secret_key }}",
+  "STALE_TIME": {{ stale_time }},
+  "DEFAULT_WEBHOOK_SLEEP_TIME": {{ default_webhook_sleep_time }},
+  "MAX_WEBHOOK_MSG_PER_MINUTE": {{ max_webhook_msg_per_minute }},
+  "WEBHOOK_URL": "{{ webhook_url }}",
+  "CREATE_TEST_DATA": {{ create_test_data | lower }},
+  "AGENT_AUTH_TOKENS": {{ agent_auth_tokens | to_json }},
+  "WEBGUI_USERS": {{ webgui_users | to_json }}
+}

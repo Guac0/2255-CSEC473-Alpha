@@ -1,0 +1,15 @@
+---
+- name: Ensure OpenSSL is installed
+  apt:
+    name: openssl
+    state: present
+
+- name: Generate self-signed SSL Certificate
+  command: >
+    openssl req -x509 -newkey rsa:4096 -nodes
+    -keyout {{ scoring_deploy_dir }}/key.pem
+    -out {{ scoring_deploy_dir }}/cert.pem
+    -days 365
+    -subj "/CN={{ ansible_host }}"
+  args:
+    creates: "{{ scoring_deploy_dir }}/cert.pem"

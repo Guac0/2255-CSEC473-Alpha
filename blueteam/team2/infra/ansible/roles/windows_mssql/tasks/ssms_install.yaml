@@ -1,0 +1,33 @@
+---
+- name: Check if installer is present
+  ansible.windows.win_stat:
+    path: "{{ working_dir }}\\mssql\\ssms_installer.exe"
+  register: installer_check
+  ignore_errors: true
+
+- name: Copy over installer file
+  ansible.windows.win_copy:
+    src: files/vs_SSMS.exe
+    dest: "{{ working_dir }}\\mssql\\ssms_installer.exe"
+  when:
+    - not installer_check.stat.exists
+  
+# SSMS is installed through Microsoft Visual Studio Installer, so this executable also installs VS Installer 
+# uninstalling the installer will result all packages installed through the installer being removed too
+# If the creates_path already exists, ansible will skip this task 
+- name: install SSMS
+  ansible.windows.win_package:
+    path: "{{ working_dir }}\\mssql\\ssms_installer.exe"
+    arguments:
+    - --quiet
+    - --norestart
+    - --wait
+    creates_path: "C:\\Program Files\\Microsoft SQL Server Management Studio 22\\Release"
+    state: present
+  register: ssms_install
+
+# - name: clean up installer
+#   ansible.windows.win_file:
+#     path: "{{ working_dir }}\\mssql"
+#     state: absent
+#   when: ssms_install.changed

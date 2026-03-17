@@ -1,0 +1,235 @@
+---
+#Author: Darius Flontas (daf2478)
+
+# 1) Package installation
+
+- name: Add LibreOffice PPA
+  ansible.builtin.apt_repository:
+    repo: 'ppa:libreoffice/ppa'
+    state: present
+    update_cache: yes
+
+# Refresh apt package
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: true
+
+# Install the required workstation applications from linux_client_programs/defaults/main.yaml
+- name: Install Linux client programs
+  ansible.builtin.apt:
+    name: "{{ linux_client_programs_packages }}"
+    state: present
+  become: true
+
+# Safety refresh
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true
+
+# 2) Connectivity checks (FTP & IRC)
+
+# Tries to open a TCP connection to the FTP server/port from the workstation
+- name: Verify FTP server is reachable from workstations
+  ansible.builtin.wait_for:
+    host: "{{ ftp_host }}"
+    port: "{{ ftp_port }}"
+    timeout: 10
+  register: ftp_reachable
+  failed_when: false
+  changed_when: false
+
+# Same idea as above, but for IRC (ngircd) TCP port
+- name: Verify IRC server is reachable from workstations
+  ansible.builtin.wait_for:
+    host: "{{ irc_host }}"
+    port: "{{ irc_port }}"
+    timeout: 10
+  register: irc_reachable
+  failed_when: false
+  changed_when: false
+
+# Print a clean YES/NO so we can quickly see if services are reachable
+- name: Display connectivity results
+  ansible.builtin.debug:
+    msg: |
+      - "FTP server ({{ ftp_host }}:{{ ftp_port }}) reachable: {{ 'YES' if not ftp_reachable.failed else 'NO' }}"
+      - "IRC server ({{ irc_host }}:{{ irc_port }}) reachable: {{ 'YES' if not irc_reachable.failed else 'NO' }}"
+  changed_when: false
+
+# 3) Desktop shortcuts for installed applications
+
+
+# Pulls /etc/passwd into ansible_facts.getent_passwd so we can verify usernames exist
+# also prevents errors when looping over non-existent users
+- name: Load passwd entries (so we can check users exist)
+  ansible.builtin.getent:
+    database: passwd
+  become: true
+
+- name: Ensure /etc/skel/Desktop exists
+  ansible.builtin.file:
+    path: /etc/skel/Desktop
+    state: directory
+    mode: "0755"
+  become: true
+
+# Make sure each target user has a Desktop folder so we can drop shortcuts there
+- name: Ensure desktop exisits for existing users
+  ansible.builtin.file:
+    path: "/home/{{ item }}/Desktop"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+  loop: "{{ linux_desktop_users }}"
+  when: item in ansible_facts.getent_passwd
+  become: true
+
+# 3a) Remove old launchers from the previous approach so we do not get duplicate icons
+- name: Remove legacy Desktop launchers (prevents duplicate icons)
+  ansible.builtin.file:
+    path: "/home/{{ item.0 }}/Desktop/{{ item.1 }}"
+    state: absent
+  loop: "{{ q('nested', linux_desktop_users, legacy_launchers) }}"
+  when: item.0 in ansible_facts.getent_passwd
+  become: true
+  vars:
+    legacy_launchers:
+      - "Thunderbird.desktop"
+      - "thunderbird.desktop"
+      - "LibreOffice.desktop"
+      - "libreoffice-startcenter.desktop"
+      - "FileZilla.desktop"
+      - "filezilla.desktop"
+      - "HexChat.desktop"
+      - "hexchat.desktop"
+      #- "Remmina.desktop"
+      #- "org.remmina.Remmina.desktop"
+      #- "remmina.desktop"
+      #- "Firefox.desktop"
+      #- "firefox.desktop"
+      #- "firefox_firefox.desktop"
+      #- "Chromium.desktop"
+      #- "chromium.desktop"
+      #- "chromium-browser.desktop"
+      #- "chromium_chromium.desktop"
+
+# Create Desktop Symbolic Links for client programs
+- name: Deploy Trusted System Desktop Shortcuts
+  ansible.builtin.copy:
+    src: "{{ item.1.src }}"
+    dest: "/home/{{ item.0 }}/Desktop/{{ item.1.dest }}"
+    remote_src: true
+    owner: "{{ item.0 }}"
+    group: "{{ item.0 }}"
+    mode: "0755"
+  loop: "{{ q('nested', linux_desktop_users, desktop_shortcuts) }}"
+  when: item.0 in ansible_facts.getent_passwd
+  vars:
+    desktop_shortcuts:
+      - { src: "/usr/share/applications/thunderbird.desktop", dest: "Thunderbird.desktop" }
+      - { src: "/usr/share/applications/libreoffice-startcenter.desktop", dest: "LibreOffice.desktop" }
+      - { src: "/usr/share/applications/filezilla.desktop", dest: "FileZilla.desktop" }
+
+- name: Create Custom HexChat Desktop Shortcut
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/Desktop/HexChat.desktop"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0755"
+    content: "{{ hexchat_content | regex_replace('\\r\\n', '\\n') }}"
+  vars:
+    hexchat_content: |
+      [Desktop Entry]
+      Name=HexChat
+      GenericName=IRC Client
+      Comment=Chat with other people using Internet Relay Chat
+      Exec=hexchat
+      Icon=hexchat
+      Terminal=false
+      Type=Application
+      Categories=Network;GTK;IRCClient;
+      StartupNotify=true
+  loop: "{{ linux_desktop_users }}"
+  when: item in ansible_facts.getent_passwd
+
+- name: Mark Desktop launchers as trusted
+  ansible.builtin.shell: |
+    export $(dbus-launch)  # Start a temporary bus session
+    for launcher in /home/{{ item }}/Desktop/*.desktop; do
+      [ -e "$launcher" ] || continue
+      # Set the attribute
+      gio set -t string "$launcher" metadata::trusted true
+      # Force the executable bit again to be sure
+      chmod +x "$launcher"
+    done
+    kill $DBUS_SESSION_BUS_PID # Clean up
+  loop: "{{ linux_desktop_users }}"
+  when: item in ansible_facts.getent_passwd
+  become: yes
+  become_user: "{{ item }}"
+
+#- name: Note missing desktop shortcut sources
+#  ansible.builtin.debug:
+#    msg: "A .desktop source file was missing on this host. That shortcut did not get installed."
+#  when: false
+
+# 4) Scoring service checks (LibreOffice)
+#not working no moe
+#- name: Ensure python3 is installed
+#  ansible.builtin.apt:
+#    name: python3
+#    state: present
+#    update_cache: yes
+#  become: true
+#
+#- name: Create app directory
+#  ansible.builtin.file:
+#    path: /opt/lo_score
+#    state: directory
+#    owner: root
+#    group: root
+#    mode: "0755"
+#  become: true
+#
+#
+#- name: Write lo_score_server.py directly (no repo file needed)
+#  ansible.builtin.copy:
+#    dest: /opt/lo_score/lo_score_server.py
+#    owner: root
+#    group: root
+#    mode: "0755"
+#    content: |
+#      import socket
+#      import subprocess
+#
+#      server = socket.socket()
+#      server.bind(("0.0.0.0", 12345))
+#      server.listen(1)
+#
+#      while True:
+#          conn, addr = server.accept()
+#          result = subprocess.run(
+#              ["libreoffice", "--headless", "--version"],
+#              capture_output=True,
+#              text=True
+#          )
+#          output = result.stdout
+#          if output == "":
+#              output = result.stderr
+#          if output == "":
+#              output = "ERROR: no output"
+#
+#          conn.send(output.encode())
+#          conn.close()
+#  become: true
+#
+#- name: Start LO score server (one-liner, not persistent)
+#  ansible.builtin.shell: "nohup python3 /opt/lo_score/lo_score_server.py >/var/log/lo-score.log 2>&1 &"
+#  args:
+#    executable: /bin/bash
+#  become: true
+#

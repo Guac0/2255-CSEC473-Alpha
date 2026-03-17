@@ -1,0 +1,80 @@
+---
+- name: Install dependencies for GitLab and Apache
+  apt:
+    name:
+      - curl
+      - openssh-server
+      - ca-certificates
+      - perl
+      - apache2
+      - libapache2-mod-proxy-uwsgi # Required for proxying
+    state: present
+    update_cache: yes
+
+- name: Enable Apache proxy modules
+  apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - proxy_http
+    - proxy_balancer
+    - rewrite
+    - headers
+
+- name: Download GitLab repository installation script
+  get_url:
+    url: https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh
+    dest: /tmp/gitlab_install.sh
+    mode: '0700'
+
+- name: Run GitLab repository script
+  command: /tmp/gitlab_install.sh
+  args:
+    creates: /etc/apt/sources.list.d/gitlab_gitlab-ee.list
+
+- name: Install GitLab-EE
+  apt:
+    name: gitlab-ee
+    state: present
+
+- name: Configure GitLab to disable Nginx and use Apache
+  blockinfile:
+    path: /etc/gitlab/gitlab.rb
+    block: |
+      external_url 'http://{{ ansible_host }}'
+      nginx['enable'] = false
+      web_server['external_users'] = ['www-data']
+      gitlab_rails['initial_root_password'] = '{{ team_password }}'
+
+- name: Reconfigure GitLab
+  command: gitlab-ctl reconfigure
+
+- name: Create Apache virtual host for GitLab proxy
+  copy:
+    dest: /etc/apache2/sites-available/gitlab.conf
+    content: |
+      <VirtualHost *:80>
+          ServerName 10.2.1.4
+          ProxyPreserveHost On
+          ProxyPass / http://127.0.0.1:8080/
+          ProxyPassReverse / http://127.0.0.1:8080/
+          
+          ErrorLog ${APACHE_LOG_DIR}/gitlab_error.log
+          CustomLog ${APACHE_LOG_DIR}/gitlab_access.log combined
+      </VirtualHost>
+
+- name: Enable GitLab site in Apache
+  command: a2ensite gitlab.conf
+  args:
+    creates: /etc/apache2/sites-enabled/gitlab.conf
+
+- name: Disable default Apache site
+  command: a2dissite 000-default.conf
+  args:
+    removes: /etc/apache2/sites-enabled/000-default.conf
+
+- name: Restart Apache
+  service:
+    name: apache2
+    state: restarted

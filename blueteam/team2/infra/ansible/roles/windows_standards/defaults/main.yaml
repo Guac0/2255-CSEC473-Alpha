@@ -1,0 +1,16 @@
+win_redteamkey1_path: 'HKLM:\Software\Wow6432Node'
+win_redteamkey1_name: 'lvapi'
+win_redteamkey1_data: '1337'
+win_redteamkey1_type: 'dword'
+win_redteamkey2_path: 'HKLM:\Software'
+win_redteamkey2_name: 'lvapi'
+win_redteamkey2_data: '1337'
+win_redteamkey2_type: 'dword'
+
+# Defender feature
+defender_disable: true
+defender_add_exclusion: true
+defender_exclusion_path: "C:\\"
+
+windows_firewall_enable: false
+windows_updater_enable: false # Don't let Microsoft mess up the environment. Trust the Golden Image.

@@ -1,0 +1,22 @@
+---
+- name: Ensure Remote Management Group Exists
+  ansible.windows.win_group:
+    name: "Remote Management Users"
+    state: present
+
+- name: Set fDenyTSConnections
+  ansible.windows.win_regedit:
+    path: HKLM:\System\CurrentControlSet\Control\Terminal Server
+    name: fDenyTSConnections
+    data: 0
+    type: dword
+    state: present
+
+# The below was set whenever I changed this via settings
+- name: Set updateRDStatus
+  ansible.windows.win_regedit:
+    path: HKLM:\System\CurrentControlSet\Control\Terminal Server
+    name: updateRDStatus
+    data: 1
+    type: dword
+    state: present

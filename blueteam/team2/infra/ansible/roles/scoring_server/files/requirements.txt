@@ -1,0 +1,13 @@
+flask
+flask-login
+Flask-Session
+Flask-SQLAlchemy
+pyopenssl
+#nuitka
+gunicorn
+concurrent-log-handler
+sdnotify
+tabulate
+paramiko
+pywinrm
+smbprotocol

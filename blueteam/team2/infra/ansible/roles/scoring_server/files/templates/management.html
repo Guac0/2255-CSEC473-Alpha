@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Management Dashboard</title>
+<style>
+  /* Dark Theme */
+  body { font-family: sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 0; }
+  header { background: #1f1f1f; color: #fff; padding: 1rem; text-align: center; }
+  main { display: flex; flex-direction: column; padding: 1rem; gap: 1rem; }
+  .top-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  section { flex: 1; display: flex; flex-direction: column; min-width: 300px; }
+  h2 { margin: 0 0 1rem 0; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
+  .card { background: #1e1e1e; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+  .card small { display: block; color: #aaa; margin-top: 0.25rem; }
+  input, select, button, textarea { margin: 0.25rem 0; padding: 0.5rem; border-radius: 4px; border: none; background: #2a2a2a; color: #e0e0e0; }
+  button { cursor: pointer; background: #3a3a3a; transition: background 0.2s; }
+  button:hover { background: #555; }
+  .row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  .row > * { flex: 1; min-width: 100px; }
+  textarea { resize: none; height: 300px; overflow-y: auto; font-family: monospace; width: 100%; }
+
+  
+  .site-footer {
+      background-color: #042033; /* light gray */
+      text-align: center;
+      padding: 15px 0;
+      font-size: 0.9rem;
+      color: #555;
+      /*border-top: 1px solid #e0e0e0;*/
+  }
+
+  .site-footer a {
+      color: #007bff; /* blue link */
+      text-decoration: none;
+      font-weight: 500;
+  }
+
+  .site-footer a:hover {
+      text-decoration: underline;
+  }
+
+  .header-container {
+        display: flex;
+        align-items: center;      /* vertically align image and text */
+        gap: 10px;                /* space between image and text */
+        flex-wrap: wrap;          /* wrap text to next line if needed */
+    }
+
+    .header-container h1 {
+        margin: 0;
+    }
+
+    .header-icon {
+        width: 40px;              /* adjust size as needed */
+        height: 40px;
+    }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Management Dashboard</h1>
+  <img src="../static/favicon.ico" alt="RIT Tiger" class="header-icon">
+  <div>
+    <a href="/">Back to Home</a>
+  </div>
+  <div>
+    <button id="manualSaveBtn">Trigger Manual Save</button>
+    <button id="exportSaveBtn">Export Save</button>
+  </div>
+</header>
+
+<main>
+  <div class="top-row">
+    <!-- Users Section -->
+    <section id="users">
+      <h2>Users</h2>
+      <div class="card">
+        <h3>Add User</h3>
+        <h4>Analyst can edit incidents' status, Admin can access the management page</h4>
+        <div class="row">
+          <input type="text" id="newUsername" placeholder="Username">
+          <input type="password" id="newPassword" placeholder="Password">
+          <select id="newRole">
+            <option value="analyst">Analyst</option>
+            <option value="admin">Admin</option>
+            <option value="guest">Guest</option>
+          </select>
+          <button id="addUserBtn">Add</button>
+        </div>
+      </div>
+      <div id="userList"></div>
+    </section>
+
+    <!-- Tokens Section -->
+    <section id="tokens">
+      <h2>Agent Tokens</h2>
+      <div class="card">
+        <h3>Add Token</h3>
+        <h4>Agents need a valid token before the Server accepts their connection</h4>
+        <div class="row">
+          <input type="text" id="newToken" placeholder="Token">
+          <button id="addTokenBtn">Add</button>
+        </div>
+      </div>
+      <div id="tokenList"></div>
+    </section>
+  </div>
+
+  <!-- Logs Section (Full Width) -->
+  <section id="logs">
+    <h2>Server Logs (Last 50 lines)</h2>
+    <div class="card">
+      <textarea id="logText" readonly></textarea>
+      <button id="refreshLogsBtn">Refresh Logs</button>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>
+    Made by the 
+    <a href="https://github.com/CCDC-RIT" target="_blank" rel="noopener noreferrer">
+      Rochester Institute of Technology Collegiate Cyber Defense Team
+    </a>
+  </p>
+</footer>
+
+<script>
+
+async function copyTextToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    console.log('Text copied to clipboard successfully. Text: ',text);
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+  }
+}
+
+async function apiCall(url, payload) {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    
+    if (!res.ok) {
+      const text = await res.text();
+      alert(`Error ${res.status}: ${text}`);
+      throw new Error(`HTTP ${res.status}: ${text}`);
+    }
+
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return await res.json();
+    } else {
+      return await res.text();
+    }
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
+// Users
+async function refreshUsers() {
+  try {
+    const users = await apiCall('/list_users', {});
+    await verifyClientContext();
+    const container = document.getElementById('userList');
+    container.innerHTML = '';
+    Object.entries(users).forEach(([username, info]) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="row">
+          <strong>${username}</strong> (${info.role})
+          <button data-user="${username}">Delete</button>
+        </div>
+      `;
+      card.querySelector('button').onclick = async () => {
+        if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+          await apiCall('/delete_user', { username });
+          refreshUsers();
+        }
+      };
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.log('Failed to refresh users:', err);
+  }
+}
+
+document.getElementById('addUserBtn').onclick = async () => {
+  try {
+    const username = document.getElementById('newUsername').value.trim();
+    const password = document.getElementById('newPassword').value.trim();
+    const role = document.getElementById('newRole').value;
+    if (!username || !password) return alert('Missing username or password');
+    await apiCall('/add_user', { username, password, role });
+    document.getElementById('newUsername').value = '';
+    document.getElementById('newPassword').value = '';
+    refreshUsers();
+  } catch (err) {
+    console.log('Failed to add user:', err);
+  }
+};
+
+// Tokens
+async function refreshTokens() {
+  try {
+    const tokens = await apiCall('/list_tokens', {});
+    const container = document.getElementById('tokenList');
+    container.innerHTML = '';
+    Object.entries(tokens).forEach(([token, info]) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const addedDate = new Date(info.timestamp*1000).toLocaleString();
+      card.innerHTML = `
+        <div class="row">
+          <strong>${token}</strong>
+          <small>Added by: ${info.added_by}, ${addedDate}</small>
+          <button data-token="${token}">Delete</button>
+        </div>
+      `;
+      card.querySelector('button').onclick = async () => {
+        if (confirm(`Are you sure you want to delete token "${token}"?`)) {
+          await apiCall('/delete_token', { token });
+          refreshTokens();
+        }
+      };
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.log('Failed to refresh tokens:', err);
+  }
+}
+
+async function verifyClientContext() {
+    const _0x_auth = "Made by the Rochester Institute of Technology Collegiate Cyber Defense Team";
+    const _0x_meta = document.querySelector('.site-footer');
+    const _0x_img = document.querySelector('.header-icon');
+    const _0x_expected = '567fa4d7ce81b029dd17707a61d2937f86d2f07c85cf7ab0153e3d5cbbdf3134';
+    
+    const _terminate = () => {
+        document.body.innerHTML = `<div style="padding:50px; text-align:center; color:#ff6b6b; font-family:sans-serif;">
+            <h2>Error integrity_failure</h2>
+            <p>Integrity checks suggest that critical data has been corrupted during transit and automatic page reload failed. Try restarting the server if this error persists.</p>
+        </div>`;
+        throw new Error("Integrity violation");
+    };
+
+    if (!_0x_meta || !_0x_meta.innerText.includes(_0x_auth)) _terminate();
+    if (!_0x_img) _terminate();
+
+    // 2. Wait for image load if it hasn't finished yet
+    if (!_0x_img.complete) {
+        await new Promise((resolve) => {
+            _0x_img.onload = resolve;
+            _0x_img.onerror = _terminate; // If image fails to load entirely
+        });
+    }
+
+    // 3. Now naturalWidth will be correct
+    if (_0x_img.naturalWidth === 0) _terminate();
+
+    try {
+        const _canv = document.createElement('canvas');
+        const _ctx = _canv.getContext('2d');
+        _canv.width = _0x_img.naturalWidth;
+        _canv.height = _0x_img.naturalHeight;
+        _ctx.drawImage(_0x_img, 0, 0);
+        
+        const _data = _ctx.getImageData(0, 0, _canv.width, _canv.height).data;
+        const _buffer = await crypto.subtle.digest('SHA-256', _data);
+        const _actual = Array.from(new Uint8Array(_buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        //console.log(_actual)
+        if (_actual !== _0x_expected) _terminate();
+    } catch (e) {
+        _terminate();
+    }
+}
+
+document.getElementById('addTokenBtn').onclick = async () => {
+  try {
+    const token = document.getElementById('newToken').value.trim();
+    if (!token) return alert('Missing token');
+    await apiCall('/add_token', { token });
+    document.getElementById('newToken').value = '';
+    refreshTokens();
+  } catch (err) {
+    console.log('Failed to add token:', err);
+  }
+};
+
+// Logs
+async function refreshLogs() {
+  try {
+    const logs = await apiCall('/list_logfile', { lines: 50 });
+    const logText = document.getElementById('logText');
+    logText.value = logs.join('');
+  } catch (err) {
+    console.log('Failed to refresh logs:', err);
+  }
+}
+
+document.getElementById('refreshLogsBtn').onclick = refreshLogs;
+
+// Manual Save
+async function manualSave() {
+  try {
+    const logs = await apiCall('/save_manual', {});
+    alert(`Manual Save Completed`);
+  } catch (err) {
+    console.log('Manual Save Error:', err);
+  }
+}
+
+document.getElementById('manualSaveBtn').onclick = manualSave;
+//document.getElementById('manualSaveBtn').disabled = true;
+
+// Export Save
+async function exportSave() {
+  try {
+    const logs = await apiCall('/save_export', {});
+    copyTextToClipboard(JSON.stringify(logs, null, 2));
+    alert(`Save data copied to clipboard and to console`);
+    console.log('Export Save Success:', logs);
+  } catch (err) {
+    console.log('Export Save Error:', err);
+  }
+}
+
+document.getElementById('exportSaveBtn').onclick = exportSave;
+//document.getElementById('exportSaveBtn').disabled = true;
+
+// Initial load
+refreshUsers();
+refreshTokens();
+refreshLogs();
+
+// Auto-refresh every 60 seconds
+setInterval(() => {
+  refreshLogs();
+}, 30000);
+setInterval(() => {
+  refreshUsers();
+  refreshTokens();
+}, 90000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+import time
+from server import app
+from shared import (
+CONFIG, HOST, PORT, PUBLIC_URL, LOGFILE, SAVEFILE, CREATE_TEST_DATA,
+DEFAULT_WEBHOOK_SLEEP_TIME, MAX_WEBHOOK_MSG_PER_MINUTE, WEBHOOK_URL,
+INITIAL_AGENT_AUTH_TOKENS, INITIAL_WEBGUI_USERS, SECRET_KEY, 
+setup_logging)
+from models import (
+db, AuthToken, WebUser, WebhookQueue, Host,
+ScoringUser, ScoringUserList, Service, ScoringHistory, ScoringCriteria, ScoringTeams
+)
+from data import create_db_tables
+from sqlalchemy import func
+import rotate_ips # this is deployed as a template so dont worry if its not found before deploy
+
+import checks
+import multiprocessing as mp
+import sys
+
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
+import time
+
+logger = setup_logging("scoring_worker")
+
+def check(service:Service) -> tuple[int, str]:
+    """
+    Used by processes to output check results to the main thread
+
+    Parameters
+    ---
+    service : Service
+        The Service object to perform a check for
+    """
+    # Match scorecheck name to a check
+    check_obj : checks.Check = None
+
+    match service.scorecheck_name:
+        case 'http': #nginx, apache
+          check_obj = checks.Http(service)
+        case 'mariadb':
+            check_obj = checks.Mysql(service)
+        case 'ftp':
+            check_obj = checks.Ftp(service)
+        case 'mssql':
+            check_obj = checks.Mssql(service)
+        case 'workstation_linux':
+            check_obj = checks.Workstation_linux(service)
+        case 'workstation_windows':
+            check_obj = checks.Workstation_windows(service)
+        case 'irc':
+            check_obj = checks.Irc(service)
+        case 'dns':
+            check_obj = checks.Dns(service)
+        case 'cups':
+            check_obj = checks.Cups(service)
+        case 'smb':
+            check_obj = checks.Smb(service)
+        case _: # Default: no class match
+            return (0, f'Check type "{service.scorecheck_name}" not implemented.')  
+
+    return check_obj.check()
+
+def get_services() -> list[Service]:
+    """
+    Pull all services from the database
+    
+    :return: list of Services in the database
+    :rtype: list[Service]
+    """
+    # Pull services from db
+    try:
+        logger.info("Pulling services")
+        services:list[Service] = Service.query.all()
+    except Exception as e:
+        logger.error("Failed to pull services - Exiting...")
+        sys.exit()
+    
+    return services
+
+def run_scoring_round(round_num:int, services:list[Service]):
+    '''
+    Run a scoring round.
+
+    Creates a process per check, waits 60 seconds, then harvests
+    the results from the check. Then creates a history entry per
+    check.
+    
+    :param round_num: The current round number
+    :type round_num: int
+    :param services: The services being scored
+    :type services: list[Service]
+    '''
+
+    logger.info(f"Worker checking {len(services)} services")
+    # Pool of processes
+    with ThreadPoolExecutor(max_workers=len(services)) as executor:
+        # Submit checks
+        futures = [executor.submit(check, service) for service in services]
+
+        # Wait for round end
+        time.sleep(60)
+
+        # Load into service history
+        for i, future in enumerate(futures):
+            try:
+                # timeout=0 because we already waited above
+                res = future.result(timeout=0)
+            except TimeoutError:
+                res = (0, "Check timed out")
+            except Exception as e:
+                res = (0, f"Something went wrong with scoring threading: {e}")
+
+            logger.info(
+                f"Inserting score for Service {services[i].scorecheck_name}: "
+                f"({res[0]}, {res[1]})"
+            )
+
+            new_score = ScoringHistory(
+                service_id=services[i].id,
+                host_id=services[i].host_id,
+                round=round_num,
+                value=res[0],
+                message=res[1],
+            )
+            db.session.add(new_score)
+
+if __name__ == "__main__":
+    logger.info("Scoring worker started")
+    with app.app_context():
+        create_db_tables(logger)
+        logger = setup_logging("scoring_worker")
+        logger.info("Starting scoring worker threads...")
+
+        # Get starting round number from database
+        total_services_count = db.session.query(func.count(Service.id)).scalar()
+        highest_complete_round = db.session.query(ScoringHistory.round) \
+            .group_by(ScoringHistory.round) \
+            .having(func.count(ScoringHistory.service_id.distinct()) == total_services_count) \
+            .order_by(ScoringHistory.round.desc()) \
+            .first()
+        round_num = (highest_complete_round[0] if highest_complete_round else 0) + 1
+
+        while True:
+            # Pull services from db
+            services = get_services()
+            # Run round
+            new_ip = rotate_ips.get_next_ip(logger)
+            logger.info(f"Starting scorechecks for Round {round_num} from IP {new_ip}")
+            rotate_ips.setup_iptables(new_ip,logger)
+            run_scoring_round(round_num, services)
+            round_num += 1

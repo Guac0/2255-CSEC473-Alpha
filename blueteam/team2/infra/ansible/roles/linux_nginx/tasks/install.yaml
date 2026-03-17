@@ -1,0 +1,11 @@
+---
+- name: Install NGINX
+  package:
+    name: nginx
+    state: present
+
+- name: Ensure NGINX service is running and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

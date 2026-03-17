@@ -1,0 +1,202 @@
+# ==============================
+# 1. Build prerequisites
+# ==============================
+
+# - name: Enable source repositories
+#   lineinfile:
+#     path: /etc/apt/sources.list
+#     regexp: '^# deb-src'
+#     line: 'deb-src https://archive.ubuntu.com/ubuntu jammy main'
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install build dependencies
+  apt:
+    name:
+      - build-essential
+      - libpam0g-dev
+      - libssl-dev
+    state: present
+
+- name: Download vulnerable vsftpd 2.3.4
+  get_url:
+    url: https://security.appspot.com/downloads/vsftpd-2.3.4.tar.gz
+    dest: /tmp/vsftpd-2.3.4.tar.gz
+
+- name: Extract source
+  unarchive:
+    src: /tmp/vsftpd-2.3.4.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+# ==============================
+# 2. Build / install vsftpd
+# ==============================
+
+- name: Fix Makefile PAM linking
+  lineinfile:
+    path: /tmp/vsftpd-2.3.4/Makefile
+    regexp: '^LIBS'
+    line: 'LIBS = -lcrypt -lpam -lpam_misc'
+
+- name: Build vsftpd
+  command: make
+  args:
+    chdir: /tmp/vsftpd-2.3.4
+
+- name: Create man page directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /usr/local/man
+    - /usr/local/man/man5
+    - /usr/local/man/man8
+
+- name: Install vsftpd binary
+  command: make install
+  args:
+    chdir: /tmp/vsftpd-2.3.4
+
+# ==============================
+# 3. FEATURE SETS
+# ==============================
+
+- name: Create vsftpd config file
+  copy:
+    dest: /etc/vsftpd.conf
+    content: | #secure_chroot_dir=/var/run/vsftpd/empty
+      listen=YES
+      listen_ipv6=NO
+      anonymous_enable=NO
+      local_enable=YES
+      write_enable=NO
+      chroot_local_user=YES
+      dirmessage_enable=YES
+      use_localtime=YES
+      xferlog_enable=YES
+      connect_from_port_20=YES
+      pam_service_name=vsftpd
+      rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+      rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create secure chroot directory
+  file:
+    path: /var/run/vsftpd/empty
+    state: directory
+    owner: root
+    group: root
+    mode: '0555'
+
+- name: Create PAM config for vsftpd
+  copy:
+    dest: /etc/pam.d/vsftpd
+    content: |
+      auth required pam_unix.so
+      account required pam_unix.so
+      session required pam_unix.so
+
+- name: Create systemd service for vsftpd
+  copy:
+    dest: /etc/systemd/system/vsftpd.service
+    content: |
+      [Unit]
+      Description=vsftpd FTP server
+      After=network.target
+
+      [Service]
+      ExecStart=/usr/local/sbin/vsftpd /etc/vsftpd.conf
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Enable vsftpd service
+  systemd:
+    name: vsftpd
+    enabled: yes
+
+- name: Allow FTP through firewall
+  ufw:
+    rule: allow
+    port: 21
+    proto: tcp
+  ignore_errors: yes
+
+# -------- Feature Set 1 --------
+#- name: Feature 1 – Enable anonymous FTP
+#  lineinfile:
+#    path: /etc/vsftpd.conf
+#    regexp: '^anonymous_enable='
+#    line: 'anonymous_enable=YES'
+#  notify: restart vsftpd
+
+# -------- Feature Set 2 --------
+- name: Feature 2 – Enable local users + uploads
+  block:
+    - lineinfile:
+        path: /etc/vsftpd.conf
+        regexp: '^local_enable='
+        line: 'local_enable=YES'
+
+    - lineinfile:
+        path: /etc/vsftpd.conf
+        regexp: '^write_enable='
+        line: 'write_enable=YES'
+  notify: restart vsftpd
+
+# -------- Feature Set 3 --------
+#- name: Feature 3 – Disable chroot (Option A)
+#  lineinfile:
+#    path: /etc/vsftpd.conf
+#    regexp: '^chroot_local_user='
+#    line: 'chroot_local_user=NO'
+#  notify: restart vsftpd
+
+# ==============================
+# 4. Service control (LAST)
+# ==============================
+
+- name: Ensure vsftpd is running
+  service:
+    name: vsftpd
+    state: started
+    enabled: yes
+
+# ==============================
+# Creating Scoring User & File
+# ==============================
+
+#- name: Create scoring user
+#  user:
+#    name: scoring
+#    password: "{{ 'Score123' | password_hash('sha512') }}"
+#    home: /home/scoring
+#    create_home: yes
+
+
+#- name: Create scoring file
+#  copy:
+#    #dest: /home/scoring/score.txt
+#    content: "FTP_SERVICE_OK"
+#    owner: scoring
+#    group: scoring
+#    mode: '0644'
+
+- name: Drop content files into the share
+  copy:
+    dest: "/home/{{ item.0 }}/{{ item.1.name }}"
+    content: "{{ item.1.content }}"
+    owner: "{{ item.0 }}"
+    group: "{{ item.0 }}"
+    mode: '0644'
+  loop: "{{ q('nested', local_admins + local_users, ftp_content_files) }}"

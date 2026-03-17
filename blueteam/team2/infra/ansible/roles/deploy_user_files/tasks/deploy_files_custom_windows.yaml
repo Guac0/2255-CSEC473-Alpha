@@ -1,0 +1,50 @@
+---
+- name: Ensure staging folder exists
+  ansible.windows.win_file:
+    path: "{{ working_dir }}\\user_files"
+    state: directory
+
+- name: Identify per-user folders on ansible controller
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ username }}" # needs role_path due to delegation
+  register: controller_check
+  delegate_to: localhost
+  loop: "{{ local_users + local_admins + domain_users + domain_admins + ['greyteam','Admin','Administrator']  }}" # not public as sharing on desktop is not wanted, and not default so that new users dont get it (users are already deployed by now)
+  loop_control:
+    loop_var: username #item aliased to username
+
+# Failsafe to avoid errors when user doesn't exist yet
+- name: Check if user's folder exists
+  ansible.windows.win_stat:
+    path: "C:\\Users\\{{ ctrl_result.username }}"
+  register: dest_check 
+  loop: "{{ controller_check.results }}" 
+  loop_control:
+    loop_var: ctrl_result
+  when: ctrl_result.stat.exists and ctrl_result.stat.isdir
+
+# Improves copy times by minimizing network traffic at expense of disk usage and allows for better pause and restart support
+- name: Copy files to staging folder
+  ansible.windows.win_copy:
+    src: "files/{{ target_result.ctrl_result.username }}"
+    dest: "{{ working_dir }}\\user_files\\"
+    #force: yes
+  loop: "{{ dest_check.results }}"
+  loop_control:
+    loop_var: target_result
+  when: 
+    - not target_result.skipped | default(false)
+    - target_result.stat.exists
+
+- name: Copy specific user folder to Windows Documents
+  ansible.windows.win_copy:
+    src: "{{ working_dir }}\\user_files\\{{ item.ctrl_result.username }}\\"
+    dest: "C:\\Users\\{{ item.ctrl_result.username }}"
+    remote_src: yes
+    force: no #make sure not to replace existing files since this could result in deleting essential data if greyteam copies in bad files
+  loop: "{{ dest_check.results }}"
+  loop_control:
+    loop_var: item
+  when: #only copy if folder existed locally AND user profile exists on remote
+    - not item.skipped | default(false)
+    - item.stat.exists

@@ -1,0 +1,31 @@
+---
+- name: Install Chrome
+  ansible.builtin.include_tasks: install_chrome.yaml
+
+- name: Install notepadpp
+  ansible.builtin.include_tasks: install_notepadpp.yaml
+
+- name: Install Hexchat
+  ansible.builtin.include_tasks: install_hexchat.yaml
+
+- name: Install FileZilla
+  ansible.builtin.include_tasks: install_filezilla.yaml
+
+- name: Install Thunderbird
+  ansible.builtin.include_tasks: install_thunderbird.yaml
+
+- name: Install Git
+  ansible.builtin.include_tasks: install_git.yaml
+
+- name: Install SetResolution
+  ansible.builtin.include_tasks: install_setresolution.yaml
+
+#- name: Download sysinternals
+#  ansible.builtin.include_tasks: install_sysinternals.yaml
+
+- name: Install System Shortcuts
+  ansible.builtin.include_tasks: install_shortcuts.yaml
+
+- name: Install LibreOffice
+  ansible.builtin.include_tasks: install_libreoffice.yaml
+#libreoffice restarts the system when done no matter what i do so dont put anything after it LOL

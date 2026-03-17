@@ -1,0 +1,21 @@
+---
+# Variables that apply to all Linux hosts.
+
+ansible_become: yes 
+ansible_become_method: sudo
+ansible_become_user: root
+ansible_become_password: "{{ greyteam_password }}"
+
+ftp_host: "crystal-empire"
+ftp_port: 21
+
+irc_host: "everfree-forest"
+irc_port: 6667
+
+linux_desktop_users: []
+
+
+# Payload keying
+payload_key_location: '/greyteam_key'
+
+working_dir: /tmp/ansible
