@@ -103,7 +103,7 @@ all:
         nginx:
         docker:
         mysql:
-        postfix:
+        apache2:
     #scoring_all:
     #  #children:
     #  #  scoring_workers:
@@ -154,7 +154,7 @@ all:
       children:
         docker:
         mysql:
-        postfix:
+        apache2:
     linux:
       children:
         debian:

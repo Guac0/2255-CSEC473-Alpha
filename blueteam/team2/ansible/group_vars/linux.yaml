@@ -1,6 +1,6 @@
 ---
 admin_group_name: sudo
-ansible_become: yes 
+ansible_become: yes
 ansible_become_method: sudo
 ansible_become_user: root
 ansible_become_password: "{{ ansible_password }}"

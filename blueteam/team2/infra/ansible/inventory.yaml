@@ -93,9 +93,9 @@ all:
           magpie_agent_name: apache2
           magpie_disarm: true
           magpie_ports: [25]
-          magpie_services: ["postfix"]
-          magpie_packages: ["postfix"]
-          magpie_protected_folders: ["/etc/postfix","/var/spool/postfix","/var/mail","/usr/sbin/postfix",/lib/systemd/system/postfix.service]
+          magpie_services: ["apache2"]
+          magpie_packages: ["apache2"]
+          magpie_protected_folders: ["/etc/apache2","/var/spool/apache2","/var/mail","/usr/sbin/apache2",/lib/systemd/system/apache2.service]
 
 # Groups
     # Hosts for the Teams
@@ -109,7 +109,7 @@ all:
         nginx:
         docker:
         mysql:
-        postfix:
+        apache2:
     #scoring_all:
     #  #children:
     #  #  scoring_workers:
@@ -160,7 +160,7 @@ all:
       children:
         docker:
         mysql:
-        postfix:
+        apache2:
     linux:
       children:
         debian:

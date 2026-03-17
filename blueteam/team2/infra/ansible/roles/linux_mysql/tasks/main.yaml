@@ -29,10 +29,18 @@
   register: auth_update
   changed_when: auth_update.rc == 0
 
-- name: Allow root access from any host
-  shell: |
-    mysql -u root -p'{{ team_password }}' -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '{{ team_password }}';"
-    mysql -u root -p'{{ team_password }}' -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;"
-    mysql -u root -p'{{ team_password }}' -e "FLUSH PRIVILEGES;"
-  register: remote_access
-  changed_when: remote_access.rc == 0
+- name: Update MySQL root password and authentication method
+  community.mysql.mysql_user:
+    name: root
+    host: "{{ item }}"
+    password: "{{ team_password }}"
+    plugin: mysql_native_password
+    priv: "*.*:ALL,GRANT"
+    state: present
+    # This allows the module to connect via the local socket as root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop:
+    - localhost
+    - 127.0.0.1
+    - ::1
+    - "%"  # This replaces your "Allow root access from any host" task

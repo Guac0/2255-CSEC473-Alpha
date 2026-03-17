@@ -359,15 +359,15 @@
     - linux 
     - inscope
 
-- name: Deploy Linux Client Programs
-  hosts: linux:&wksts 
-  roles:
-    - linux_client_programs
-  tags:
-    - linux
-    - inscope
-    - utilities
-    - utilities_linux
+#- name: Deploy Linux Client Programs
+#  hosts: linux:&wksts 
+#  roles:
+#    - linux_client_programs
+#  tags:
+#    - linux
+#    - inscope
+#    - utilities
+#    - utilities_linux
 
 #################################
 ########### Management ##########
