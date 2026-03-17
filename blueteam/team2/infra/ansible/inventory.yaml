@@ -117,7 +117,22 @@ all:
     #    scoring:
     #      ansible_host: "192.169.1.1"
     # Hosts for jumpboxes
-      
+    jumpblue:
+      hosts:
+    #    jumpblue1:
+    #      ansible_host: "172.20.0.41"
+    #    jumpblue2:
+    #      ansible_host: "172.20.0.42"
+    #    jumpblue3:
+    #      ansible_host: "172.20.0.43"
+    #    jumpblue4:
+    #      ansible_host: "172.20.0.44"
+    #    jumpblue5:
+    #      ansible_host: "172.20.0.45"
+        jumpblue6:
+          ansible_host: "10.20.1.20"
+        jumpblue7:
+          ansible_host: "10.20.1.21"
     #    jumpblue8:
     #      ansible_host: "172.20.0.48"
     #    jumpblue9:
