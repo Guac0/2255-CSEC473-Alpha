@@ -4,6 +4,7 @@ import socket
 import ctypes
 import os
 import subprocess
+import hashlib
 import re
 import json
 from datetime import datetime
@@ -254,8 +255,7 @@ def create_backup_primary(path,backupDir=BACKUPDIR):
     return True, ""
 def hash_id(*args):
     combined = "|".join(map(str, args))
-    encoded = base64.b64encode(combined.encode("utf-8")).decode("utf-8")
-    return encoded
+    return hashlib.sha256(combined.encode("utf-8")).hexdigest() 
 def run_powershell(cmd,noisy=True):
     result = subprocess.run(
         ["powershell", "-NoProfile", "-Command", cmd],
