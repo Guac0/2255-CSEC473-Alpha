@@ -342,11 +342,12 @@
     - inscope
 
 - name: Deploy InspIRCd
-  hosts: docker
+  hosts: irc
   roles:
     - linux_inspircd
   tags: 
     - inspircd
+    - irc
     - linux 
     - inscope
 
