@@ -7,7 +7,7 @@
       - ca-certificates
       - perl
       - apache2
-      - libapache2-mod-proxy-uwsgi # Required for proxying
+      #- libapache2-mod-proxy-uwsgi # Required for proxying
     state: present
     update_cache: yes
 
