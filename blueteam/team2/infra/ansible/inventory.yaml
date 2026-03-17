@@ -86,11 +86,11 @@ all:
           magpie_services: ["mysql"]
           magpie_packages: ["mysql-server"]
           magpie_protected_folders: ["/etc/mysql","/var/lib/mysql/","/usr/sbin/mysqld","/lib/systemd/system/mysql.service"]
-    postfix:
+    apache2:
       hosts:
         pigeontower:
           ansible_host: "10.2.1.9"
-          magpie_agent_name: postfix
+          magpie_agent_name: apache2
           magpie_disarm: true
           magpie_ports: [25]
           magpie_services: ["postfix"]

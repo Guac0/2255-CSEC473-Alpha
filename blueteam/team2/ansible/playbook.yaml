@@ -1,25 +1,6 @@
 ---
-- name: Populate Users
-  hosts: all
-  roles:
-    - setup-boxes
-  vars:
-    lab_users:
-      - { name: "twilight", admin: yes, lock: no, login: yes }
-      - { name: "pinkie", admin: no, lock: no, login: yes }
-      - { name: "dash", admin: no, lock: yes, login: no }
-      - { name: "rarity", admin: yes, lock: no, login: no }
-      - { name: "applejack", admin: no, lock: no, login: yes }
-      - { name: "fluttershy", admin: no, lock: yes, login: no }
-      - { name: "spike", admin: no, lock: no, login: no }
-      - { name: "celestia", admin: yes, lock: no, login: yes }
-      - { name: "luna", admin: yes, lock: yes, login: no }
-      - { name: "derpy", admin: no, lock: no, login: yes }
-  tags:
-    - setup
-    
 - name: Deploy Birdsnest
-  hosts: ansible-controller
+  hosts: all
   roles:
     - birdsnest
   tags:

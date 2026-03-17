@@ -11,7 +11,7 @@
     dns_domain_name: "{{ domain }}"
     domain_admin_user: "{{ greyteam_user }}@{{ domain }}"
     domain_admin_password: "{{ greyteam_password }}"
-    #domain_ou_path: "OU=Windows,OU=Servers,DC=mlp,DC=local" # TODO - dynamic
+    #domain_ou_path: "OU=Windows,OU=Servers,DC=ravencrest,DC=local" # TODO - dynamic
     hostname: "{{ inventory_hostname_short }}"
     state: domain
     reboot: true

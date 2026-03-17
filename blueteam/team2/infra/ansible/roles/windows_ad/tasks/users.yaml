@@ -26,7 +26,7 @@
 
 - name: Add domain admins to builtin access groups
   microsoft.ad.group:
-    identity: "CN={{ item }},CN=Builtin,DC=mlp,DC=local"
+    identity: "CN={{ item }},CN=Builtin,DC=ravencrest,DC=local"
     members:
       add: "{{ domain_admins }}"
     state: present
@@ -51,7 +51,7 @@
 
 - name: Add domain users to builtin access groups
   microsoft.ad.group:
-    identity: "CN={{ item }},CN=Builtin,DC=mlp,DC=local"
+    identity: "CN={{ item }},CN=Builtin,DC=ravencrest,DC=local"
     members:
       add: "{{ domain_users }}"
     state: present
