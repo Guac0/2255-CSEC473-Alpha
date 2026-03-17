@@ -5,6 +5,11 @@
     state: present
     update_cache: yes
 
+- name: Install python mysql package
+  apt:
+    name: python3-pymysql
+    state: present
+
 - name: Ensure MySQL is started and enabled
   service:
     name: mysql
