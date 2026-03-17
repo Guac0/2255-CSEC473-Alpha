@@ -49,6 +49,10 @@
     image: jwodder/nethack:latest
     state: started
     restart_policy: always
+    tty: yes
+    stdin_open: yes
+    env:
+      TERM: "xterm"
     # NetHack usually runs via telnet on port 23 inside the container
     published_ports:
       - "2323:23"
