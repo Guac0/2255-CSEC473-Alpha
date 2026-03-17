@@ -1,6 +1,6 @@
 ---
 - name: Install Docker
-  ansible.builtin.include_tasks: deploy.yaml
+  ansible.builtin.include_tasks: docker.yaml
   when: ansible_default_ipv4.address == birdsnest_host_ip
 
 - name: Deploy Birdsnest
