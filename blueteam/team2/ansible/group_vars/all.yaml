@@ -3,8 +3,8 @@ ansible_user: blueteam
 ansible_password: blueteam
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 birdsnest_token: testtoken
-birdsnest_host: 10.20.0.21:443
-birdsnest_host_ip: 10.20.0.21
+birdsnest_host: 10.20.1.21:443
+birdsnest_host_ip: 10.20.1.21
 
 legit_admins:
   - king
