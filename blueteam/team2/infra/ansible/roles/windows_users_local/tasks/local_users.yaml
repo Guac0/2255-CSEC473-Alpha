@@ -50,7 +50,7 @@
     "{{ local_users }}"
 
 - name: Remove Local Users from Admin
-  community.windows.win_group_membership:
+  ansible.windows.win_group_membership:
     name: Administrators
     members: "{{ item }}"
     state: absent
