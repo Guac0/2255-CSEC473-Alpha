@@ -1,8 +1,8 @@
 ---
-- name: Ensure Docker is installed and running
-  ansible.builtin.package:
-    name: docker.io  # Use 'docker-ce' if using the official Docker repos
-    state: present
+#- name: Ensure Docker is installed and running
+#  ansible.builtin.package:
+#    name: docker.io  # Use 'docker-ce' if using the official Docker repos
+#    state: present
 
 #- name: Ensure Python dependencies for Docker are present
 #  ansible.builtin.pip:
@@ -11,17 +11,17 @@
 #      - pyyaml
 #    state: present
 
-- name: Install Docker Compose plugin
-  ansible.builtin.package:
-    name: docker-compose-v2
-    state: present
-  when: ansible_os_family == "Debian"
-
-- name: Install Docker Compose plugin
-  ansible.builtin.dnf:
-    name: docker-compose-plugin
-    state: present
-  when: ansible_os_family == "RedHat"
+#- name: Install Docker Compose plugin
+#  ansible.builtin.package:
+#    name: docker-compose-v2
+#    state: present
+#  when: ansible_os_family == "Debian"
+#
+#- name: Install Docker Compose plugin
+#  ansible.builtin.dnf:
+#    name: docker-compose-plugin
+#    state: present
+#  when: ansible_os_family == "RedHat"
 
 - name: Start and enable Docker service
   ansible.builtin.systemd:
