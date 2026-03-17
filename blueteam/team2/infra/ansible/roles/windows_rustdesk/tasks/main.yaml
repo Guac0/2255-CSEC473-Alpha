@@ -1,3 +1,0 @@
----
-- name: Install Rustdesk
-  ansible.builtin.include_tasks: install_rustdesk.yaml
