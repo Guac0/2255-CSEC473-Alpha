@@ -111,8 +111,8 @@ all:
     #    scoring:
     #      ansible_host: "192.169.1.1"
     # Hosts for jumpboxes
-    #jumpblue:
-    #  hosts:
+    jumpblue:
+      hosts:
     #    jumpblue1:
     #      ansible_host: "172.20.0.41"
     #    jumpblue2:
@@ -123,19 +123,19 @@ all:
     #      ansible_host: "172.20.0.44"
     #    jumpblue5:
     #      ansible_host: "172.20.0.45"
-    #    jumpblue6:
-    #      ansible_host: "172.20.0.46"
-    #    jumpblue7:
-    #      ansible_host: "172.20.0.47"
+        jumpblue6:
+          ansible_host: "10.20.1.20"
+        jumpblue7:
+          ansible_host: "10.20.1.21"
     #    jumpblue8:
     #      ansible_host: "172.20.0.48"
     #    jumpblue9:
     #      ansible_host: "172.20.0.49"
     #    jumpblue10:
     #      ansible_host: "172.20.0.40"
-    #jumpboxes:
-    #  children:
-    #    jumpblue:
+    jumpboxes:
+      children:
+        jumpblue:
 
 # OS-based groups
     # Hosts that are Windows
@@ -150,11 +150,13 @@ all:
         gitlab:
         irc:
         nginx:
+        jumpblue7:
     ubuntu:
       children:
         docker:
         mysql:
         apache2:
+        jumpblue6:
     linux:
       children:
         debian:

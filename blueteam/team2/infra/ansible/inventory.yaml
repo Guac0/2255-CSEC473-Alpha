@@ -156,12 +156,13 @@ all:
         gitlab:
         irc:
         nginx:
+        jumpblue7:
     ubuntu:
       children:
         docker:
         mysql:
         apache2:
-        jumpblue:
+        jumpblue6:
     linux:
       children:
         debian:
@@ -174,4 +175,3 @@ all:
       children:
         windows:
         ubuntu:
-        jumpboxes:
