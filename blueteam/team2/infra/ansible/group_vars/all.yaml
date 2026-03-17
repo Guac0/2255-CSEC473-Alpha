@@ -25,13 +25,13 @@ mgmt_dns:
 
 payload_key_content: 'Do not modify this file in any way (name, content, permissions). Contact greyteam if you have questions.'
 
-local_users:
+local_admins:
   - king
   - duke
   - knight
   - lady
   - baron
-local_admins:
+local_users:
   - scribe
   - apothecary
   - shepherd

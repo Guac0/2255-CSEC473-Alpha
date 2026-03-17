@@ -30,6 +30,11 @@
     create_home: yes
   loop: "{{ local_users }}"
 
+- name: Explicitly remove regular users from sudo group
+  command: "gpasswd -d {{ item }} sudo"
+  loop: "{{ local_users }}"
+  ignore_errors: yes
+
 - name: Configure LXQt session for XRDP
   ansible.builtin.copy:
     dest: "/home/{{ item }}/.xsession"

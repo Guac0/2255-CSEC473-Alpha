@@ -49,6 +49,14 @@
   loop: 
     "{{ local_users }}"
 
+- name: Remove Local Users from Admin
+  community.windows.win_group_membership:
+    name: Administrators
+    members: "{{ item }}"
+    state: absent
+  loop: "{{ local_users }}"
+  ignore_errors: yes
+
 - name: Create Local Account Profiles
   ansible.windows.win_user_profile:
     username: "{{ item }}"
