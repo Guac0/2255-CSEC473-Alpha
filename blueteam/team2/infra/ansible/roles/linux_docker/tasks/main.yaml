@@ -50,7 +50,7 @@
     state: started
     restart_policy: always
     tty: yes
-    stdin_open: yes
+    interactive: yes
     env:
       TERM: "xterm"
     # NetHack usually runs via telnet on port 23 inside the container
