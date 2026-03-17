@@ -5,11 +5,6 @@
     state: present
     update_cache: yes
 
-- name: Install python mysql package
-  apt:
-    name: python3-pymysql
-    state: present
-
 - name: Ensure MySQL is started and enabled
   service:
     name: mysql
@@ -34,16 +29,6 @@
 #  register: auth_update
 #  changed_when: auth_update.rc == 0
 
-- name: Universal Root Password Configuration
-  mysql_user:
-    login_unix_socket: /var/run/mysqld/mysqld.sock
-    login_user: root
-    name: root
-    password: "{{ team_password }}"
-    host_all: true
-    plugin: mysql_native_password  # Ensures password works for remote/non-socket logins
-    state: present
-
 #- name: Update MySQL root password and authentication method
 #  community.mysql.mysql_user:
 #    name: root
@@ -59,3 +44,4 @@
 #    - 127.0.0.1
 #    - ::1
 #    - "%"  # This replaces your "Allow root access from any host" task
+#  become: true
