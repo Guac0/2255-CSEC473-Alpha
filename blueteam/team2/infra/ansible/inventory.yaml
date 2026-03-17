@@ -131,8 +131,8 @@ all:
     #      ansible_host: "172.20.0.45"
         jumpblue6:
           ansible_host: "10.20.1.20"
-    #    jumpblue7:
-    #      ansible_host: "172.20.0.47"
+        jumpblue7:
+          ansible_host: "10.20.1.21"
     #    jumpblue8:
     #      ansible_host: "172.20.0.48"
     #    jumpblue9:

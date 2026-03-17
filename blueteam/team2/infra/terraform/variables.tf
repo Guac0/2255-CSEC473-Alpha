@@ -29,6 +29,13 @@ variable "jumpblue2" {
 #  }))
 #}
 
+variable "deb12_2" {
+  type = map(object({
+    hostname = string
+    ip       = string
+    network  = string
+  }))
+}
 variable "deb13_2" {
   type = map(object({
     hostname = string

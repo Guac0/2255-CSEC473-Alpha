@@ -13,6 +13,10 @@ jumpblue2 = {
   #"jumpblue10" = { hostname = "jumpblue10", ip = "10.20.1.29" }
 }
 
+deb12_2 = {
+  "jumpblue7" = { hostname = "jumpblue7", ip = "10.20.1.21", network = "blue" }
+}
+
 deb13_2 = {
   "gitlab" = { hostname = "dungeon", ip = "10.2.1.4", network = "core" }
   "irc"    = { hostname = "cathedral", ip = "10.2.1.5", network = "core" }
