@@ -386,6 +386,7 @@ def persist_iptables_rules(noisy=True):
     print_debug("Failed to persist: No known persistence method found for this distro.")
     return False
 def send_message(endpoint,oldStatus=True,newStatus=True,message="",systemInfo=get_system_details()):
+    global AUTH_TOKEN
     if not SERVER_URL:
         return True
     url = SERVER_URL + endpoint
@@ -617,12 +618,12 @@ def interface_mtu_linux(interface=interface_get_primary(), mtu_minimum=MTU_MIN, 
             else:
                 return False, False, [f"Interface {interface}'s MTU was set to {old_mtu}, FAILED to restore new mtu {new_mtu}."]
     return True, True, []
-def interface_ttl(interface=interface_get_primary()):
+def interface_ttl():
     system = platform.system()
     if system == "Windows":
-        return interface_ttl_windows(interface)
+        return interface_ttl_windows()
     else:
-        return interface_ttl_linux(interface)
+        return interface_ttl_linux()
 def interface_ttl_windows():
     check_script = r"""
     $path = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"

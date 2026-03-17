@@ -10,7 +10,7 @@
     "SERVICES": {{ magpie_services | to_json }},
     "PACKAGES": {{ magpie_packages | to_json }},
     "SERVICE_BACKUPS": {},
-    "PROTECTED_FOLDERS": "{{ magpie_protected_folders | to_json }}",
+    "PROTECTED_FOLDERS": "{{ magpie_protected_folders | to_json | replace('"', "'") }}",
     "DEBUG_PRINT": {{ magpie_debug_print | lower }},
     "BACKUPDIR": "{{ magpie_backupdir }}",
     "LOGFILE": "{{ magpie_logfile }}",
