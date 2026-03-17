@@ -150,12 +150,14 @@ all:
         gitlab:
         irc:
         nginx:
+      hosts:
         jumpblue7:
     ubuntu:
       children:
         docker:
         mysql:
         apache2:
+      hosts:
         jumpblue6:
     linux:
       children:
