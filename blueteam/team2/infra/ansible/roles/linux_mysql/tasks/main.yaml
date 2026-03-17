@@ -22,25 +22,35 @@
     name: mysql
     state: restarted
 
-- name: Update MySQL root password and authentication method
-  shell: |
-    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '{{ team_password }}';"
-    mysql -e "FLUSH PRIVILEGES;"
-  register: auth_update
-  changed_when: auth_update.rc == 0
+#- name: Update MySQL root password and authentication method
+#  shell: |
+#    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '{{ team_password }}';"
+#    mysql -e "FLUSH PRIVILEGES;"
+#  register: auth_update
+#  changed_when: auth_update.rc == 0
 
-- name: Update MySQL root password and authentication method
-  community.mysql.mysql_user:
-    name: root
-    host: "{{ item }}"
-    password: "{{ team_password }}"
-    plugin: mysql_native_password
-    priv: "*.*:ALL,GRANT"
-    state: present
-    # This allows the module to connect via the local socket as root
+- name: Universal Root Password Configuration
+  mysql_user:
     login_unix_socket: /var/run/mysqld/mysqld.sock
-  loop:
-    - localhost
-    - 127.0.0.1
-    - ::1
-    - "%"  # This replaces your "Allow root access from any host" task
+    login_user: root
+    name: root
+    password: "{{ team_password }}"
+    host_all: true
+    plugin: mysql_native_password  # Ensures password works for remote/non-socket logins
+    state: present
+
+#- name: Update MySQL root password and authentication method
+#  community.mysql.mysql_user:
+#    name: root
+#    host: "{{ item }}"
+#    password: "{{ team_password }}"
+#    plugin: mysql_native_password
+#    priv: "*.*:ALL,GRANT"
+#    state: present
+#    # This allows the module to connect via the local socket as root
+#    login_unix_socket: /var/run/mysqld/mysqld.sock
+#  loop:
+#    - localhost
+#    - 127.0.0.1
+#    - ::1
+#    - "%"  # This replaces your "Allow root access from any host" task

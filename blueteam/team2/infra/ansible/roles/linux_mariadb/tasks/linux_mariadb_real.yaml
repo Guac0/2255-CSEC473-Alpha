@@ -67,6 +67,7 @@
     owner: root
     group: root
     mode: '0600'
+    
 - name: Remove anonymous MariaDB users
   mysql_user:
     login_user: root
