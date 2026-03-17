@@ -19,7 +19,7 @@ team_password: Change.me123!
 domain: ravencrest.local
 # DNS can be left empty to make no changes
 mgmt_dns:
-- 10.2.1.1
+- 10.2.1.3
 - 129.21.3.17
 #- 8.8.8.8
 
