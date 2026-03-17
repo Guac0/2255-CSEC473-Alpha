@@ -7,7 +7,7 @@
 kingfisher_agent_name: "usermgr"      # Agent name. Must be unique per agent per host. For example, if this is a generic auth log monitor, name it 'auth'
 kingfisher_auth_token: "{{ birdsnest_token }}" # Initial token to use for registration, found in agent_auth_tokens from main server deploy or from /web/management page
 kingfisher_server_url: "https://{{ birdsnest_host }}/" # Server IP to connect to - must be in format https://{ip}:{port}/
-kingfisher_docker: true
+kingfisher_docker: false
 
 ##########
 # Variables below this line are not critical and can almost certainly be left on the default values

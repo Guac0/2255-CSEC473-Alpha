@@ -1788,7 +1788,7 @@ def main(stop_event=None):
     systemInfo = get_system_details()
     agent_id = hash_id(AGENT_NAME, systemInfo["hostname"], systemInfo["ipadd"], systemInfo["os"])
     repo_url = os.path.join(f"{SERVER_URL}agent/git",f"{agent_id}.git")
-    repo_dir = f"{os.path.join(os.path.dirname(os.path(__file__).resolve()),f'{agent_id}.git')}"
+    repo_dir = f"{os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{agent_id}.git')}"
     send_message("agent/beacon/magpie",True,True,f"Register")
     setup_git_agent(repo_dir,PROTECTED_FOLDERS)
     oldStatus = True

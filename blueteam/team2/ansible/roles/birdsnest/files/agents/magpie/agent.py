@@ -4,6 +4,7 @@ import socket
 import ctypes
 import os
 import subprocess
+import hashlib
 import re
 import json
 from datetime import datetime
@@ -254,8 +255,7 @@ def create_backup_primary(path,backupDir=BACKUPDIR):
     return True, ""
 def hash_id(*args):
     combined = "|".join(map(str, args))
-    encoded = base64.b64encode(combined.encode("utf-8")).decode("utf-8")
-    return encoded
+    return hashlib.sha256(combined.encode("utf-8")).hexdigest() 
 def run_powershell(cmd,noisy=True):
     result = subprocess.run(
         ["powershell", "-NoProfile", "-Command", cmd],
@@ -617,12 +617,12 @@ def interface_mtu_linux(interface=interface_get_primary(), mtu_minimum=MTU_MIN, 
             else:
                 return False, False, [f"Interface {interface}'s MTU was set to {old_mtu}, FAILED to restore new mtu {new_mtu}."]
     return True, True, []
-def interface_ttl(interface=interface_get_primary()):
+def interface_ttl():
     system = platform.system()
     if system == "Windows":
-        return interface_ttl_windows(interface)
+        return interface_ttl_windows()
     else:
-        return interface_ttl_linux(interface)
+        return interface_ttl_linux()
 def interface_ttl_windows():
     check_script = r"""
     $path = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
@@ -1788,7 +1788,7 @@ def main(stop_event=None):
     systemInfo = get_system_details()
     agent_id = hash_id(AGENT_NAME, systemInfo["hostname"], systemInfo["ipadd"], systemInfo["os"])
     repo_url = os.path.join(f"{SERVER_URL}agent/git",f"{agent_id}.git")
-    repo_dir = f"{os.path.join(os.path.dirname(os.path(__file__).resolve()),f'{agent_id}.git')}"
+    repo_dir = f"{os.path.join(os.path.dirname(os.path.abspath(__file__)),f'{agent_id}.git')}"
     send_message("agent/beacon/magpie",True,True,f"Register")
     setup_git_agent(repo_dir,PROTECTED_FOLDERS)
     oldStatus = True

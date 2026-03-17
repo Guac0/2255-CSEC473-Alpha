@@ -7,9 +7,9 @@ all:
           magpie_agent_name: iis
           magpie_disarm: true
           magpie_ports: [80]
-          magpie_services: ["W3SVC"]
-          magpie_packages: ["Web-Server"]
-          magpie_protected_folders: ["C:\\Windows\\System32\\inetsrv\\config","C:\\inetpub\\wwwroot","C:\\Windows\\System32\\inetsrv\\w3wp.exe","C:\\Windows\\System32\\inetsrv\\inetmgr.exe"]
+          magpie_services: ['W3SVC']
+          magpie_packages: ['Web-Server']
+          magpie_protected_folders: ['C:\\Windows\\System32\\inetsrv\\config','C:\\inetpub\\wwwroot','C:\\Windows\\System32\\inetsrv\\w3wp.exe','C:\\Windows\\System32\\inetsrv\\inetmgr.exe']
     smb:
       hosts:
         sewers:
@@ -17,9 +17,9 @@ all:
           magpie_agent_name: smb
           magpie_disarm: true
           magpie_ports: [445,137,138,139]
-          magpie_services: ["LanmanServer"]
-          magpie_packages: ["FS-FileServer"]
-          magpie_protected_folders: ["C:\\Shares","C:\\Windows\\System32\\srv2.sys"]
+          magpie_services: ['LanmanServer']
+          magpie_packages: ['FS-FileServer']
+          magpie_protected_folders: ['C:\\Shares','C:\\Windows\\System32\\srv2.sys']
     dns:
       hosts:
         fortress:
@@ -27,9 +27,9 @@ all:
           magpie_agent_name: dns
           magpie_disarm: true
           magpie_ports: [53]
-          magpie_services: ["DNS"]
-          magpie_packages: ["DNS"]
-          magpie_protected_folders: ["C:\\Windows\\System32\\dns","C:\\Windows\\System32\\dns.exe"] #C:\Windows\NTDS\
+          magpie_services: ['DNS']
+          magpie_packages: ['DNS']
+          magpie_protected_folders: ['C:\\Windows\\System32\\dns','C:\\Windows\\System32\\dns.exe'] #C:\Windows\NTDS\
     gitlab:
       hosts:
         dungeon:
@@ -37,9 +37,9 @@ all:
           magpie_agent_name: gitlab
           magpie_disarm: true
           magpie_ports: [80]
-          magpie_services: ["gitlab-ctl","apache2"]
-          magpie_packages: ["gitlab-ee","apache2"]
-          magpie_protected_folders: ["/etc/gitlab/","/etc/apache2","/var/opt/gitlab/"]
+          magpie_services: ['gitlab-ctl','apache2']
+          magpie_packages: ['gitlab-ee','apache2']
+          magpie_protected_folders: ['/etc/gitlab/','/etc/apache2','/var/opt/gitlab/']
     irc:
       hosts:
         cathedral:
@@ -47,9 +47,9 @@ all:
           magpie_agent_name: irc
           magpie_disarm: true
           magpie_ports: [6667]
-          magpie_services: ["inspircd"]
-          magpie_packages: ["inspircd"]
-          magpie_protected_folders: ["/etc/inspircd","/usr/sbin/inspircd","/lib/systemd/system/inspircd.service"]
+          magpie_services: ['inspircd']
+          magpie_packages: ['inspircd']
+          magpie_protected_folders: ['/etc/inspircd','/usr/sbin/inspircd','/lib/systemd/system/inspircd.service']
     nginx:
       hosts:
         gallows:
@@ -57,9 +57,9 @@ all:
           magpie_agent_name: nginx
           magpie_disarm: true
           magpie_ports: [80]
-          magpie_services: ["nginx"]
-          magpie_packages: ["nginx"]
-          magpie_protected_folders: ["/etc/nginx","/var/www/html","/usr/sbin/nginx","/lib/systemd/system/nginx.service"]
+          magpie_services: ['nginx']
+          magpie_packages: ['nginx']
+          magpie_protected_folders: ['/etc/nginx','/var/www/html','/usr/sbin/nginx','/lib/systemd/system/nginx.service']
     docker:
       hosts:
         market:
@@ -67,9 +67,9 @@ all:
           magpie_agent_name: docker
           magpie_disarm: true
           magpie_ports: []
-          magpie_services: ["docker"]
-          magpie_packages: ["docker.io"]
-          magpie_protected_folders: ["/etc/docker","/var/lib/docker/","/usr/bin/docker","/usr/bin/dockerd","/lib/systemd/system/docker.service"]
+          magpie_services: ['docker']
+          magpie_packages: ['docker.io']
+          magpie_protected_folders: ['/etc/docker','/var/lib/docker/','/usr/bin/docker','/usr/bin/dockerd','/lib/systemd/system/docker.service']
     mysql:
       hosts:
         stables:
@@ -77,9 +77,9 @@ all:
           magpie_agent_name: mysql
           magpie_disarm: true
           magpie_ports: [3306]
-          magpie_services: ["mysql"]
-          magpie_packages: ["mysql-server"]
-          magpie_protected_folders: ["/etc/mysql","/var/lib/mysql/","/usr/sbin/mysqld","/lib/systemd/system/mysql.service"]
+          magpie_services: ['mysql']
+          magpie_packages: ['mysql-server']
+          magpie_protected_folders: ['/etc/mysql','/var/lib/mysql/','/usr/sbin/mysqld','/lib/systemd/system/mysql.service']
     apache2:
       hosts:
         pigeontower:
@@ -87,9 +87,9 @@ all:
           magpie_agent_name: apache2
           magpie_disarm: true
           magpie_ports: [80]
-          magpie_services: ["apache2"]
-          magpie_packages: ["apache2"]
-          magpie_protected_folders: ["/etc/apache2","/usr/sbin/apache2","/lib/systemd/system/apache2.service","/var/www/html"]
+          magpie_services: ['apache2']
+          magpie_packages: ['apache2']
+          magpie_protected_folders: ['/etc/apache2','/usr/sbin/apache2','/lib/systemd/system/apache2.service','/var/www/html']
 
 # Groups
     # Hosts for the Teams
