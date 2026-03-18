@@ -32,7 +32,7 @@ netsh advfirewall set allprofiles logging maxfilesize 4096
 netsh advfirewall set allprofiles logging droppedconnections enable
 
 netsh advfirewall set allprofiles logging allowedconnections enable
-e
+
 
 
 REM netsh advfirewall firewall add rule name="Block RPC Endpoint Mapper Port 135" dir=in action=block protocol=TCP localport=135
