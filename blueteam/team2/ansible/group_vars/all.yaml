@@ -3,7 +3,6 @@ blueteam_users:
 - one
 - two
 - three
-blueteam_password: blueteam
 
 ansible_user: blueteam
 ansible_password: blueteam
@@ -24,6 +23,7 @@ legit_ips:
   - 10.20.1.37
   - 10.20.1.16
   - 10.20.1.29 # team 2 jump 10
+  - 10.20.1.21 # testing
   #- 100.65.4.233 # scoring - what is internal?
 
 out_of_scope_users:
@@ -55,3 +55,5 @@ legit_domain_admins:
   - royalguard
   - inquisitor
   - jester
+legit_local_all: "{{ legit_local_admins + legit_local_users }}"
+legit_domain_all: "{{ legit_domain_admins + legit_domain_users }}"

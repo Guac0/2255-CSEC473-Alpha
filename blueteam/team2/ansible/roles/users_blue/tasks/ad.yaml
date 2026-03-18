@@ -1,0 +1,30 @@
+---
+- name: Windows AD | Check for existing Domain Users
+  when: is_domain_controller
+  community.windows.win_ad_object_info:
+    filter: "SamAccountName -eq '{{ item }}'"
+  loop: "{{ blueteam_users }}"
+  register: existing_ad_users
+
+- name: Safety | Warn if Domain Users exist
+  ansible.builtin.pause:
+    prompt: "WARNING: One or more Blue Team DOMAIN users already exist on the DC. Press ENTER to continue."
+  when: is_domain_controller and (existing_ad_users.results | selectattr('matched_objects', 'defined') | selectattr('matched_objects', 'ne', []) | list | length > 0)
+  throttle: 1
+
+- name: Create AD User Objects
+  community.windows.win_ad_user:
+    name: "{{ item }}"
+    password: "{{ new_password }}"
+    state: present
+    groups:
+      - Domain Admins
+  loop: "{{ blueteam_users }}"
+
+- name: Windows AD | Setup Primary Blueteam User
+  community.windows.win_ad_user:
+    name: "{{ blueteam_users[0] }}"
+    enabled: no
+    groups_action: replace
+    groups:
+      - Domain Users

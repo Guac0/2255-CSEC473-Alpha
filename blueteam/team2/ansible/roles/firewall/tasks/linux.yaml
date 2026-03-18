@@ -15,6 +15,7 @@
 - name: DEBUG - Pause
   ansible.builtin.pause:
     prompt: "Press ENTER to execute firewall script with above options or Ctrl+C to abort."
+  throttle: 1
 
 - name: Execute firewall script
   ansible.builtin.shell: "./firewall.sh '{{ ([22] + magpie_ports) | join(',') }}' 'any'"

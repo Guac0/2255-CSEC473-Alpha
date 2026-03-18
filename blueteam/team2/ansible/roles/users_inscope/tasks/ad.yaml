@@ -1,0 +1,37 @@
+---
+- name: Windows AD | Query Domain Users
+  community.windows.win_ad_object_info:
+    filter: "ObjectClass -eq 'user'"
+  register: ad_user_info
+
+- name: Windows AD | Case-Insensitive Matching
+  vars:
+    ad_users: "{{ ad_user_info.objects | map(attribute='SamAccountName') | map('lower') | list }}"
+    legit_ad_list: "{{ (legit_domain_users + legit_domain_admins) | map('lower') | list }}"
+  ansible.builtin.set_fact:
+    found_targets: "{{ legit_ad_list | intersect(ad_users) | union(['Administrator']) }}"
+    missing_targets: "{{ legit_ad_list | difference(ad_users) }}"
+
+- name: Windows AD | Warning for Missing Domain Users
+  ansible.builtin.debug:
+    msg: "CRITICAL: Domain User '{{ item }}' is missing from Active Directory!"
+  loop: "{{ missing_targets }}"
+  when: missing_targets | length > 0
+
+- name: Windows AD | Operator Confirmation
+  ansible.builtin.pause:
+    prompt: |
+      [HOST: {{ inventory_hostname }}]
+      MATCHED USERS: {{ found_targets | join(', ') }}
+      MISSING USERS: {{ missing_targets | join(', ') }}
+      
+      Press ENTER to rotate passwords for FOUND users to {{ new_password }}.
+  when: found_targets | length > 0
+  throttle: 1
+
+- name: Windows AD | Rotate Domain Passwords
+  community.windows.win_ad_user:
+    name: "{{ item }}"
+    password: "{{ new_password }}"
+  loop: "{{ found_targets }}"
+  when: found_targets | length > 0

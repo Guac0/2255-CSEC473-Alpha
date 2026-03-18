@@ -31,24 +31,32 @@ local_admins:
   - knight
   - lady
   - baron
+  - redteam
+  - redmin
 local_users:
   - scribe
   - apothecary
   - shepherd
   - blacksmith
   - herald
+  - baba
+  - cuckoo
 domain_users:
   - chancellor
   - wizard
   - treasurer
   - spymaster
   - archbishop
+  - itsame
+  - mario
 domain_admins:
   - steward
   - stablemaster
   - royalguard
   - inquisitor
   - jester
+  - luigi
+  - iamhim
 
 dns_overrides:
   - { ip: '10.2.1.3',    name: 'ravencrest.local' }

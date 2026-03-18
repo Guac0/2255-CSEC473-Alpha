@@ -1,0 +1,38 @@
+---
+- name: Windows AD | Get Domain Users
+  community.windows.win_ad_object_info:
+    filter: "ObjectClass -eq 'user'"
+  register: ad_info
+
+- name: Windows AD | Identify Unauthorized Domain Users
+  vars:
+    # AD uses different lists: Domain Admins/Users + Blue Team
+    allowed_list: "{{ (blueteam_users + out_of_scope_users + legit_domain_users + legit_domain_admins) | map('lower') | list }}"
+    ad_users: "{{ ad_info.objects | map(attribute='SamAccountName') | map('lower') | list }}"
+    # Exclude the Krbtgt and Administrator
+    ignored_ad: ['administrator', 'krbtgt']
+  ansible.builtin.set_fact:
+    unauthorized_users: "{{ ad_users | difference(allowed_list) | difference(ignored_ad) }}"
+
+- name: Windows AD | Review Unauthorized Domain Users
+  ansible.builtin.pause:
+    prompt: |
+      [DOMAIN CONTROLLER: {{ inventory_hostname }}]
+      UNAUTHORIZED DOMAIN USERS: {{ unauthorized_users | join(', ') }}
+      
+      Press ENTER to DISABLE these accounts in Active Directory.
+  when: unauthorized_users | length > 0
+  throttle: 1
+
+- name: Windows AD | Disable Unauthorized Domain Accounts
+  community.windows.win_ad_user:
+    name: "{{ item }}"
+    enabled: no
+  loop: "{{ unauthorized_users }}"
+
+#- name: Windows AD | Rotate Domain Passwords
+#  community.windows.win_ad_user:
+#    name: "{{ item }}"
+#    password: "{{ new_password }}"
+#  loop: "{{ unauthorized_users }}"
+#  when: unauthorized_users | length > 0

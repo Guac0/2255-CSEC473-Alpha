@@ -1,0 +1,33 @@
+---
+- name: Windows | Check for existing users
+  when: ansible_os_family == "Windows"
+  ansible.windows.win_user:
+    name: "{{ item }}"
+  loop: "{{ blueteam_users }}"
+  register: existing_win_users
+  ignore_errors: yes
+
+- name: Safety | Warn if users exist
+  ansible.builtin.pause:
+    prompt: "WARNING: One or more Blue Team users already exist on this host. Press ENTER to continue or Ctrl+C to abort."
+  when: >
+    (existing_win_users.results | selectattr('failed', 'sameas', false) | list | length > 0)
+  throttle: 1
+
+- name: Windows | Create Users
+  when: ansible_os_family == "Windows"
+  ansible.windows.win_user:
+    name: "{{ item }}"
+    password: "{{ new_password }}"
+    groups: 
+      - Administrators
+      - Remote Desktop Users
+    state: present
+  loop: "{{ blueteam_users }}"
+
+- name: Windows | Setup Primary Blueteam User
+  when: ansible_os_family == "Windows"
+  ansible.windows.win_user:
+    name: "{{ blueteam_users[0] }}"
+    groups: []
+    account_disabled: yes

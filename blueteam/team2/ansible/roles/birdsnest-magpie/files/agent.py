@@ -415,7 +415,7 @@ def send_message(endpoint,oldStatus=True,newStatus=True,message="",systemInfo=ge
             if response.getcode() == 200:
                 print_debug(f"send_message({url}): sent msg to server: [{oldStatus,newStatus,message}]")
                 response_text = response.read().decode('utf-8')
-                if endpoint == "agent/beacon/owlet":
+                if endpoint == "agent/beacon/magpie":
                     if response_text != AUTH_TOKEN:
                         AUTH_TOKEN = response_text
                         print_debug(f"send_message({url}): updating auth token value to new value from server {AUTH_TOKEN}")

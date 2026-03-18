@@ -1,4 +1,26 @@
 ---
+- name: Apply Firewall Script
+  hosts: inscope
+  roles:
+    - firewall
+  tags:
+    - firewall
+    - full
+
+- name: Add Blueteam Users
+  hosts: inscope
+  roles:
+    - users_blue
+  tags:
+    - users
+    - users_blue
+    - full
+  vars_prompt:
+    - name: "new_password"
+      prompt: "Enter the new password for all blue Team accounts"
+      private: no
+      confirm: yes
+
 - name: Backup Scored Services
   hosts: inscope
   roles:
@@ -7,13 +29,33 @@
     - backup
     - full
 
-- name: Apply Firewall Script
+- name: Change password of inscope users
   hosts: inscope
   roles:
-    - firewall
+    - users_inscope
   tags:
-    - firewall
+    - users
+    - users_inscope
     - full
+  vars_prompt:
+    - name: "new_password"
+      prompt: "Enter the new password for all inscope Team accounts"
+      private: no
+      confirm: yes
+
+- name: Lock unauthorized users
+  hosts: inscope
+  roles:
+    - users_red
+  tags:
+    - users
+    - users_red
+    - full
+  #vars_prompt:
+  #  - name: "new_password"
+  #    prompt: "Enter the new password for all red Team accounts"
+  #    private: no
+  #    confirm: yes
 
 - name: Deploy Birdsnest
   hosts: all

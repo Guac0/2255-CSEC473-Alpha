@@ -1,0 +1,36 @@
+---
+- name: Linux | Get System Users
+  ansible.builtin.getent:
+    database: passwd
+  register: linux_passwd
+
+- name: Linux | Case-Insensitive Matching
+  vars:
+    system_users: "{{ linux_passwd.ansible_facts.getent_passwd.keys() | map('lower') | list }}"
+    legit_list: "{{ (legit_local_admins + legit_local_users) | map('lower') | list }}"
+  ansible.builtin.set_fact:
+    found_targets: "{{ legit_list | intersect(system_users) | union(['root']) }}"
+    missing_targets: "{{ legit_list | difference(system_users) }}"
+
+- name: Linux | Warning for Missing Users
+  ansible.builtin.debug:
+    msg: "WARNING: Expected user '{{ item }}' was NOT found on {{ inventory_hostname }}."
+  loop: "{{ missing_targets }}"
+  when: missing_targets | length > 0
+
+- name: Linux | Operator Confirmation
+  ansible.builtin.pause:
+    prompt: |
+      [HOST: {{ inventory_hostname }}]
+      MATCHED USERS: {{ found_targets | join(', ') }}
+      MISSING USERS: {{ missing_targets | join(', ') }}
+      
+      Press ENTER to rotate passwords for FOUND users to {{ new_password }}.
+  when: found_targets | length > 0
+  throttle: 1
+
+- name: Linux | Rotate Passwords
+  ansible.builtin.user:
+    name: "{{ item }}"
+    password: "{{ new_password | password_hash('sha512') }}"
+  loop: "{{ found_targets }}"

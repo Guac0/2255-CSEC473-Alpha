@@ -1,0 +1,34 @@
+---
+- name: Linux | Identify Unauthorized Users
+  vars:
+    # Combine all allowed lists and normalize to lowercase
+    allowed_list: "{{ (blueteam_users + out_of_scope_users + legit_local_admins + legit_local_users) | map('lower') | list }}"
+    # Get all users currently in /etc/passwd
+    system_users: "{{ ansible_facts.getent_passwd.keys() | map('lower') | list }}"
+    # Filter for users with UID >= 1000 (standard human users) to avoid locking system accounts
+    human_users: "{{ ansible_facts.getent_passwd | dict2items | selectattr('value.1', 'ge', '1000') | map(attribute='key') | map('lower') | list }}"
+  ansible.builtin.set_fact:
+    unauthorized_users: "{{ human_users | difference(allowed_list) }}"
+
+- name: Linux | Review Unauthorized Users
+  ansible.builtin.pause:
+    prompt: |
+      [HOST: {{ inventory_hostname }}]
+      UNAUTHORIZED USERS FOUND: {{ unauthorized_users | join(', ') }}
+      
+      Press ENTER to LOCK these accounts or Ctrl+C to abort.
+  when: unauthorized_users | length > 0
+  throttle: 1
+
+- name: Linux | Lock Unauthorized Accounts
+  ansible.builtin.user:
+    name: "{{ item }}"
+    shell: /usr/sbin/nologin
+    password_lock: yes
+  loop: "{{ unauthorized_users }}"
+
+#- name: Linux | Rotate Passwords
+#  ansible.builtin.user:
+#    name: "{{ item }}"
+#    password: "{{ new_password | password_hash('sha512') }}"
+#  loop: "{{ unauthorized_users }}"

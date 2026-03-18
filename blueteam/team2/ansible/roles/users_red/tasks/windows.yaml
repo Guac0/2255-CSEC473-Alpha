@@ -1,0 +1,38 @@
+---
+- name: Windows Local | Get System Users
+  ansible.windows.win_powershell:
+    script: "Get-LocalUser | Select-Object -ExpandProperty Name"
+  register: win_local_raw
+
+- name: Windows Local | Identify Unauthorized Users
+  vars:
+    allowed_list: "{{ (blueteam_users + out_of_scope_users + legit_local_admins + legit_local_users) | map('lower') | list }}"
+    system_users: "{{ win_local_raw.output | map('lower') | list }}"
+    # Exclude built-in Windows defaults that might not be in your lists
+    ignored_defaults: ['administrator', 'defaultaccount', 'wdagutilityaccount']
+  ansible.builtin.set_fact:
+    unauthorized_users: "{{ system_users | difference(allowed_list) | difference(ignored_defaults) }}"
+
+- name: Windows Local | Review Unauthorized Users
+  ansible.builtin.pause:
+    prompt: |
+      [HOST: {{ inventory_hostname }}]
+      UNAUTHORIZED LOCAL USERS: {{ unauthorized_users | join(', ') }}
+      
+      Press ENTER to DISABLE these accounts.
+  when: unauthorized_users | length > 0
+  throttle: 1
+
+- name: Windows Local | Disable Unauthorized Accounts
+  ansible.windows.win_user:
+    name: "{{ item }}"
+    account_disabled: yes
+    state: present
+  loop: "{{ unauthorized_users }}"
+
+#- name: Windows Local | Rotate Passwords
+#  ansible.windows.win_user:
+#    name: "{{ item }}"
+#    password: "{{ new_password }}"
+#    state: present
+#  loop: "{{ found_targets }}"

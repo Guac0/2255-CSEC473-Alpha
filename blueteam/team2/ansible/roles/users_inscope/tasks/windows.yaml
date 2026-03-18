@@ -1,0 +1,38 @@
+---
+- name: Windows Local | Get Local User List via PowerShell
+  ansible.windows.win_powershell:
+    script: |
+      Get-LocalUser | Select-Object -ExpandProperty Name
+  register: win_local_raw
+
+- name: Windows Local | Case-Insensitive Matching
+  vars:
+    system_users: "{{ win_local_raw.output | map('lower') | list }}"
+    legit_local_list: "{{ (legit_local_admins + legit_local_users) | map('lower') | list }}"
+  ansible.builtin.set_fact:
+    found_targets: "{{ legit_local_list | intersect(system_users) | union(['Administrator']) }}"
+    missing_targets: "{{ legit_list | difference(system_users) }}"
+
+- name: Windows Local | Warning for Missing Users
+  ansible.builtin.debug:
+    msg: "WARNING: Local user '{{ item }}' expected but NOT found on {{ inventory_hostname }}."
+  loop: "{{ missing_targets }}"
+  when: missing_targets | length > 0
+
+- name: Windows Local | Operator Confirmation
+  ansible.builtin.pause:
+    prompt: |
+      [HOST: {{ inventory_hostname }}]
+      LOCAL MATCHES: {{ found_targets | join(', ') }}
+      LOCAL MISSING: {{ missing_targets | join(', ') }}
+      
+      Press ENTER to rotate passwords for FOUND local users to {{ new_password }}.
+  when: found_targets | length > 0
+  throttle: 1
+
+- name: Windows Local | Rotate Passwords
+  ansible.windows.win_user:
+    name: "{{ item }}"
+    password: "{{ new_password }}"
+    state: present
+  loop: "{{ found_targets }}"
