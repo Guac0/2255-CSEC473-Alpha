@@ -1,5 +1,5 @@
 @echo off
-
+setlocal enabledelayedexpansion
 
 
 
@@ -23,7 +23,7 @@ if %errorLevel% neq 0 (
 
 
 netsh advfirewall set allprofiles firewallpolicy blockinbound,allowoutbound
-
+netsh advfirewall set allprofiles state on
 
 netsh advfirewall set allprofiles logging filename %systemroot%\system32\logfiles\firewall\pfirewall.log
 
@@ -35,12 +35,12 @@ netsh advfirewall set allprofiles logging allowedconnections enable
 
 
 
-netsh advfirewall firewall add rule name="Block RPC Endpoint Mapper Port 135" dir=in action=block protocol=TCP localport=135
-netsh advfirewall firewall add rule name="Block NetBIOS Name Service Port 137" dir=in action=block protocol=TCP localport=137
-netsh advfirewall firewall add rule name="Block NetBIOS Datagram Service Port 138" dir=in action=block protocol=TCP localport=138
-netsh advfirewall firewall add rule name="Block NetBIOS Session Service Port 139" dir=in action=block protocol=TCP localport=139
-REM netsh advfirewall firewall add rule name="Block SMB Port 445" dir=in action=block protocol=TCP localport=445
-netsh advfirewall firewall add rule name="Block WinRM" dir=in action=block protocol=TCP localport=5985,5986
+ netsh advfirewall firewall add rule name="Block RPC Endpoint Mapper Port 135" dir=in action=block protocol=TCP localport=135
+ netsh advfirewall firewall add rule name="Block NetBIOS Name Service Port 137" dir=in action=block protocol=TCP localport=137
+ netsh advfirewall firewall add rule name="Block NetBIOS Datagram Service Port 138" dir=in action=block protocol=TCP localport=138
+ netsh advfirewall firewall add rule name="Block NetBIOS Session Service Port 139" dir=in action=block protocol=TCP localport=139
+ netsh advfirewall firewall add rule name="Block SMB Port 445" dir=in action=block protocol=TCP localport=445
+ netsh advfirewall firewall add rule name="Block WinRM" dir=in action=block protocol=TCP localport=5985,5986
 
 netsh advfirewall firewall add rule name="Allow DHCP" dir=in action=allow protocol=UDP localport=68
 netsh advfirewall firewall add rule name="Allow DNS" dir=out action=allow protocol=UDP remoteport=53
@@ -71,7 +71,7 @@ echo [+] Done
 echo [INFO] Check logs at: %systemroot%\system32\logfiles\firewall\pfirewall.log
 REM Dead Man's Switch: 
 echo Rules applied, will reset in 15 seconds. Hit Ctrl+C to apply the changes.
-timeout /t 15 /nobreak >nul
+timeout /t 15
 netsh advfirewall set allprofiles state off
 
-pause
+
