@@ -35,11 +35,11 @@ netsh advfirewall set allprofiles logging allowedconnections enable
 
 
 
- netsh advfirewall firewall add rule name="Block RPC Endpoint Mapper Port 135" dir=in action=block protocol=TCP localport=135
+REM netsh advfirewall firewall add rule name="Block RPC Endpoint Mapper Port 135" dir=in action=block protocol=TCP localport=135
  netsh advfirewall firewall add rule name="Block NetBIOS Name Service Port 137" dir=in action=block protocol=TCP localport=137
  netsh advfirewall firewall add rule name="Block NetBIOS Datagram Service Port 138" dir=in action=block protocol=TCP localport=138
  netsh advfirewall firewall add rule name="Block NetBIOS Session Service Port 139" dir=in action=block protocol=TCP localport=139
- netsh advfirewall firewall add rule name="Block SMB Port 445" dir=in action=block protocol=TCP localport=445
+REM netsh advfirewall firewall add rule name="Block SMB Port 445" dir=in action=block protocol=TCP localport=445
  netsh advfirewall firewall add rule name="Block WinRM" dir=in action=block protocol=TCP localport=5985,5986
 
 netsh advfirewall firewall add rule name="Allow DHCP" dir=in action=allow protocol=UDP localport=68
@@ -49,6 +49,10 @@ netsh advfirewall firewall add rule name="Allow ICMP Ping" protocol=icmpv4:8,any
 netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
 netsh advfirewall firewall add rule name="Allow RDP" dir=in action=allow protocol=TCP localport=3389
 netsh advfirewall firewall add rule name="Allow RDP" dir=in action=allow protocol=UDP localport=3389
+netsh advfirewall firewall add rule name="Allow HTTP" dir=in action=allow protocol=TCP localport=80
+netsh advfirewall firewall add rule name="Allow HTTPS" dir=in action=allow protocol=TCP localport=443
+netsh advfirewall firewall add rule name="Allow DNS" dir=in action=allow protocol=TCP localport=53
+
 
 
 
