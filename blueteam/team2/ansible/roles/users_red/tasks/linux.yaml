@@ -1,12 +1,13 @@
 ---
+- name: Linux | Get Password Database
+  ansible.builtin.getent:
+    database: passwd
+
 - name: Linux | Identify Unauthorized Users
   vars:
-    # Combine all allowed lists and normalize to lowercase
     allowed_list: "{{ (blueteam_users + out_of_scope_users + legit_local_admins + legit_local_users) | map('lower') | list }}"
-    # Get all users currently in /etc/passwd
-    system_users: "{{ ansible_facts.getent_passwd.keys() | map('lower') | list }}"
-    # Filter for users with UID >= 1000 (standard human users) to avoid locking system accounts
-    human_users: "{{ ansible_facts.getent_passwd | dict2items | selectattr('value.1', 'ge', '1000') | map(attribute='key') | map('lower') | list }}"
+    system_users: "{{ getent_passwd.keys() | map('lower') | list }}"
+    human_users: "{{ getent_passwd | dict2items | selectattr('value.1.1', 'ge', '1000') | map(attribute='key') | map('lower') | list }}"
   ansible.builtin.set_fact:
     unauthorized_users: "{{ human_users | difference(allowed_list) }}"
 
