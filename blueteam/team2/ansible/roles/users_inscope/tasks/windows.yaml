@@ -11,7 +11,7 @@
     legit_local_list: "{{ (legit_local_admins + legit_local_users) | map('lower') | list }}"
   ansible.builtin.set_fact:
     found_targets: "{{ legit_local_list | intersect(system_users) | union(['Administrator']) }}"
-    missing_targets: "{{ legit_list | difference(system_users) }}"
+    missing_targets: "{{ legit_local_list | difference(system_users) }}"
 
 - name: Windows Local | Warning for Missing Users
   ansible.builtin.debug:
