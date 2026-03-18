@@ -1,0 +1,22 @@
+---
+- name: Copy script to target
+  copy:
+    src: "files/firewall.sh"
+    dest: "{{ working_dir }}/firewall.sh"
+    owner: root
+    group: root
+    mode: '0700'
+  when: ansible_facts.os_family != "Windows"
+
+- name: DEBUG - executing firewall script with the following command line
+  ansible.builtin.debug:
+    msg: "./firewall.sh '{{ ([22] + magpie_ports) | join(',') }}' 'any'"
+
+- name: DEBUG - Pause
+  ansible.builtin.pause:
+    prompt: "Press ENTER to execute firewall script with above options or Ctrl+C to abort."
+
+- name: Execute firewall script
+  ansible.builtin.shell: "./firewall.sh '{{ ([22] + magpie_ports) | join(',') }}' 'any'"
+  args:
+    chdir: "{{ working_dir }}/firewall.sh"

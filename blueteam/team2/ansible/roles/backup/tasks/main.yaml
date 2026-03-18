@@ -1,0 +1,56 @@
+- name: Ensure Local Backup Directory Exists
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.file:
+    path: "{{ controller_backup_root }}"
+    state: directory
+    mode: '0700'
+
+- name: Windows | Process Protected Folders
+  when: ansible_os_family == "Windows"
+  block:
+    - name: Windows | Ensure Local Backup Directory Exists
+      ansible.windows.win_file:
+        path: "{{ local_backup_root }}"
+        state: directory
+
+    - name: Windows | Copy to Local Backup Folder
+      ansible.windows.win_copy:
+        src: "{{ item }}"
+        dest: "{{ local_backup_root }}\\{{ item | win_basename }}"
+        remote_src: yes
+      loop: "{{ magpie_protected_folders }}"
+      ignore_errors: yes
+
+    - name: Windows | Fetch to Controller
+      ansible.builtin.fetch:
+        src: "{{ item }}"
+        dest: "{{ controller_backup_root }}/{{ inventory_hostname_short }}/"
+        flat: no
+      loop: "{{ magpie_protected_folders }}"
+
+# --- Linux Logic ---
+- name: Linux | Process Protected Folders
+  when: ansible_os_family != "Windows"
+  block:
+    - name: Linux | Ensure Local Backup Directory Exists
+      ansible.builtin.file:
+        path: "{{ local_backup_root }}"
+        state: directory
+        mode: '0700'
+
+    - name: Linux | Copy to Local Backup Folder
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ local_backup_root }}/{{ item | basename }}"
+        remote_src: yes
+        mode: preserve
+      loop: "{{ magpie_protected_folders }}"
+      ignore_errors: yes
+
+    - name: Linux | Fetch to Controller
+      ansible.builtin.fetch:
+        src: "{{ item }}"
+        dest: "{{ controller_backup_root }}/{{ inventory_hostname_short }}/"
+        flat: no
+      loop: "{{ magpie_protected_folders }}"

@@ -1,4 +1,20 @@
 ---
+- name: Backup Scored Services
+  hosts: inscope
+  roles:
+    - backup
+  tags:
+    - backup
+    - full
+
+- name: Apply Firewall Script
+  hosts: inscope
+  roles:
+    - firewall
+  tags:
+    - firewall
+    - full
+
 - name: Deploy Birdsnest
   hosts: all
   roles:
@@ -8,7 +24,7 @@
     - full
 
 - name: Deploy Magpie
-  hosts: all
+  hosts: inscope
   roles:
     - birdsnest-magpie
   tags:
@@ -16,7 +32,7 @@
     - full
 
 - name: Deploy Owlet
-  hosts: all
+  hosts: inscope
   roles:
     - birdsnest-owlet
   tags:
@@ -24,7 +40,7 @@
     - full
 
 - name: Deploy Kingfisher
-  hosts: all
+  hosts: inscope
   roles:
     - birdsnest-kingfisher
   tags:
