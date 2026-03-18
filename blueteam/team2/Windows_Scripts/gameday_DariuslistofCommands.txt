@@ -1,0 +1,102 @@
+On BOTH boxes first (start local logging + make a folder):
+“mkdir C:\BlueTeam -ErrorAction SilentlyContinue
+Start-Transcript -Path "C:\BlueTeam\five_minute_transcript.txt" -Append
+hostname
+whoami
+Get-Date”
+
+Passwords:
+1A) Confirming local users and admins
+Printing all local acc users:
+Get-LocalUser | Select-Object Name,Enabled,LastLogon
+Printing all local admin users:
+Get-LocalGroupMember Administrators | Select-Object Name,ObjectClass
+Shows all local admin and users on that specific windows box:
+net user
+net localgroup administrators
+1B) Change admin pwords
+net user King SurfButNot181!
+net user Duke SurfButNot181!
+net user Knight SurfButNot181!
+net user Lady SurfButNot181!
+net user Baron SurfButNot181!
+1C) Change local user pwords
+net user Scribe !181SurfButNot
+net user Apothecary !181SurfButNot
+net user Shepherd !181SurfButNot
+net user Blacksmith !181SurfButNot
+net user Herald !181SurfButNot
+
+2) Baseline snapshot (what is running + what is listening):
+Gives you proof of what was running and helps if you need to roll back
+“Get-NetTCPConnection -State Listen |
+  Sort-Object LocalPort |
+  Select-Object LocalAddress,LocalPort,OwningProcess |
+  Out-File C:\BlueTeam\listening_ports.txt
+
+Get-Service | Where-Object Status -eq "Running" |
+  Sort-Object Name |
+  Out-File C:\BlueTeam\running_services.txt”
+3) Service checks (local only):
+3A) Armory (IIS) local checks
+“Get-Service W3SVC
+iisreset /status
+netstat -ano | findstr ":80 "
+netstat -ano | findstr ":443 "
+
+%windir%\system32\inetsrv\appcmd list site
+%windir%\system32\inetsrv\appcmd list bindings”
+Does the site respond locally?:
+curl.exe -I http://localhost
+3B) Sewers (SMB) local checks
+Get-Service LanmanServer
+Get-SmbShare
+netstat -ano | findstr ":445 "
+
+4) Port reachability tests:
+4A) Run on Sewers (test IIS on Armory)
+Test-NetConnection 10.2.1.1 -Port 80
+Test-NetConnection 10.2.1.1 -Port 443
+4B) Run on Armory (test SMB on Sewers)
+4B) Run on Armory (test SMB on Sewers)
+If a service is down, restart only that service:
+Restart-Service W3SVC -ErrorAction SilentlyContinue
+Restart-Service LanmanServer -ErrorAction SilentlyContinue
+
+5) Firewall
+5A) Export first so you can roll back fast
+mkdir C:\BlueTeam
+netsh advfirewall export "C:\BlueTeam\firewall_before.wfw"
+5B) Enable allow rules FIRST
+Enable-NetFirewallRule -DisplayGroup "Remote Desktop" 
+Rollback command if anything breaks
+netsh advfirewall import "C:\BlueTeam\firewall_before.wfw"
+On Armory (IIS):
+Enable-NetFirewallRule -DisplayGroup "World Wide Web Services (HTTP Traffic-In)" 
+Enable-NetFirewallRule -DisplayGroup "World Wide Web Services (HTTPS Traffic-In)" 
+On Sewers (SMB):
+Enable-NetFirewallRule -DisplayGroup "File and Printer Sharing" -ErrorAction SilentlyContinue
+5C) Turn the firewall on
+Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
+5D) Verify locally that you did not kill scoring
+Local listen checks
+Armory:
+netstat -ano | findstr ":80 "
+netstat -ano | findstr ":443 "
+Get-Service W3SVC
+Sewers:
+netstat -ano | findstr ":445 "
+Get-Service LanmanServer
+Cross tests
+Run this on Sewers to check Armory IIS:
+Test-NetConnection 10.2.1.1 -Port 80
+Test-NetConnection 10.2.1.1 -Port 443
+Run this on Armory to check Sewers SMB:
+Test-NetConnection 10.2.1.2 -Port 445
+
+6) Stop logging
+Stop-Transcript	
+
+RDP to a Windows box with a local account
+xfreerdp /v:10.2.1.1 /u:.\Administrator /p:'YourPassword'
+
