@@ -8,6 +8,11 @@
     mode: '0700'
   when: ansible_facts.os_family != "Windows"
 
+- name: install ufw
+  package:
+    name: ufw
+    state: present
+
 - name: DEBUG - executing firewall script with the following command line
   ansible.builtin.debug:
     msg: "./firewall.sh '{{ ([22] + magpie_ports) | join(',') }}' 'any'"
