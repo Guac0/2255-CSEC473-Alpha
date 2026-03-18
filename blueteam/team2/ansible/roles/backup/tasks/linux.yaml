@@ -5,18 +5,40 @@
     state: directory
     mode: '0700'
 
-- name: Linux | Copy to Local Backup Folder
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ local_backup_root }}/{{ item | basename }}"
-    remote_src: yes
-    mode: preserve
-  loop: "{{ magpie_protected_folders }}"
-  ignore_errors: yes
+#- name: Linux | Copy to Local Backup Folder
+#  ansible.builtin.copy:
+#    src: "{{ item }}"
+#    dest: "{{ local_backup_root }}/{{ item | basename }}"
+#    remote_src: yes
+#    mode: preserve
+#  loop: "{{ magpie_protected_folders }}"
+#  ignore_errors: yes
+#
+#- name: Linux | Fetch to Controller
+#  ansible.builtin.fetch:
+#    src: "{{ item }}"
+#    dest: "{{ controller_backup_root }}/{{ inventory_hostname_short }}/"
+#    flat: no
+#  loop: "{{ magpie_protected_folders }}"
 
-- name: Linux | Fetch to Controller
+- name: Linux | Create Archive of Protected Folders
+  ansible.builtin.archive:
+    path: "{{ magpie_protected_folders }}"
+    dest: "/tmp/{{ inventory_hostname }}_backup.tar.gz"
+    format: gz
+    mode: '0600'
+  register: archive_result
+
+- name: Linux | Copy Archive to Local Backup Folder
+  ansible.builtin.copy:
+    src: "{{ archive_result.dest }}"
+    dest: "{{ local_backup_root }}/{{ inventory_hostname }}_backup.tar.gz"
+    remote_src: yes
+    mode: '0700'
+  when: archive_result.state == 'file'
+
+- name: Linux | Fetch Archive to Controller
   ansible.builtin.fetch:
-    src: "{{ item }}"
-    dest: "{{ controller_backup_root }}/{{ inventory_hostname_short }}/"
-    flat: no
-  loop: "{{ magpie_protected_folders }}"
+    src: "{{ archive_result.dest }}"
+    dest: "{{ controller_backup_root }}/{{ inventory_hostname }}/"
+    flat: yes

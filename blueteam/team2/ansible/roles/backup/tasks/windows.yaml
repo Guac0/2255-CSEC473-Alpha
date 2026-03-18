@@ -3,17 +3,41 @@
     path: "{{ local_backup_root }}"
     state: directory
 
-- name: Windows | Copy to Local Backup Folder
-  ansible.windows.win_copy:
-    src: "{{ item }}"
-    dest: "{{ local_backup_root }}\\{{ item | win_basename }}"
-    remote_src: yes
+#- name: Windows | Copy to Local Backup Folder
+#  ansible.windows.win_copy:
+#    src: "{{ item }}"
+#    dest: "{{ local_backup_root }}\\{{ item | win_basename }}"
+#    remote_src: yes
+#  loop: "{{ magpie_protected_folders }}"
+#  ignore_errors: yes
+#
+#- name: Windows | Fetch to Controller
+#  ansible.builtin.fetch:
+#    src: "{{ item }}"
+#    dest: "{{ controller_backup_root }}/{{ inventory_hostname_short }}/"
+#    flat: no
+#  loop: "{{ magpie_protected_folders }}"
+
+- name: Windows | Ensure Local Backup Directory Exists
+  ansible.windows.win_file:
+    path: "{{ local_backup_root }}"
+    state: directory
+
+- name: Windows | Create Zip Archive via PowerShell
+  ansible.windows.win_powershell:
+    script: |
+      $source = "{{ item }}"
+      $dest = "{{ local_backup_root }}\\{{ item | win_basename }}.zip"
+      if (Test-Path $source) {
+          Compress-Archive -Path $source -DestinationPath $dest -Force
+      }
   loop: "{{ magpie_protected_folders }}"
   ignore_errors: yes
 
-- name: Windows | Fetch to Controller
+- name: Windows | Fetch Zipped Backups to Controller
   ansible.builtin.fetch:
-    src: "{{ item }}"
-    dest: "{{ controller_backup_root }}/{{ inventory_hostname_short }}/"
-    flat: no
+    src: "{{ local_backup_root }}\\{{ item | win_basename }}.zip"
+    dest: "{{ controller_backup_root }}/{{ inventory_hostname }}/"
+    flat: yes
   loop: "{{ magpie_protected_folders }}"
+  ignore_errors: yes

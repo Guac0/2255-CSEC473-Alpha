@@ -27,6 +27,7 @@
     - backup
   tags:
     - backup
+    - backups
     - full
 
 - name: Change password of inscope users
