@@ -3,14 +3,26 @@
   ansible.builtin.getent:
     database: passwd
 
+- name: Linux | Get Password Database
+  ansible.builtin.getent:
+    database: passwd
+
 - name: Linux | Identify Unauthorized Users
   vars:
     allowed_list: "{{ (blueteam_users + out_of_scope_users + legit_local_admins + legit_local_users) | map('lower') | list }}"
-    system_users: "{{ getent_passwd.keys() | map('lower') | list }}"
-    human_users: "{{ getent_passwd | dict2items | selectattr('value.1.1', 'ge', '1000') | map(attribute='key') | map('lower') | list }}"
+    # We filter the dict2items where the second item in the value list (the UID) 
+    # is converted to int and compared to 1000
+    human_users: >-
+      {% set users = [] %}
+      {% for name, details in getent_passwd.items() %}
+        {% if details[1] | int >= 1000 %}
+          {% set _ = users.append(name | lower) %}
+        {% endif %}
+      {% endfor %}
+      {{ users }}
   ansible.builtin.set_fact:
     unauthorized_users: "{{ human_users | difference(allowed_list) }}"
-
+    
 - name: Linux | Review Unauthorized Users
   ansible.builtin.pause:
     prompt: |
