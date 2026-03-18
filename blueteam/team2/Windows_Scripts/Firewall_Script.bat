@@ -47,8 +47,8 @@ netsh advfirewall firewall add rule name="Allow DNS" dir=out action=allow protoc
 netsh advfirewall firewall add rule name="Allow Windows Update" dir=out action=allow protocol=TCP remoteport=80,443
 netsh advfirewall firewall add rule name="Allow ICMP Ping" protocol=icmpv4:8,any dir=in action=allow
 netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
-echo Waiting 15 seconds for dead man's switch connectivity check...
-timeout /t 15 /nobreak >nul
+
+
 
 
 REM set suspicious_ips=192.168.1.100 10.0.0.1
@@ -57,6 +57,9 @@ REM     netsh advfirewall firewall add rule name="Block IP %%i" dir=in action=bl
 REM     echo [+] Blocking inbound traffic from %%i
 REM )
 
+
+echo Waiting 15 seconds for dead man's switch connectivity check...
+timeout /t 15 /nobreak >nul
 echo Checking outbound connectivity...
 ping -n 1 8.8.8.8 >nul 2>&1
 if %errorlevel% neq 0 (
