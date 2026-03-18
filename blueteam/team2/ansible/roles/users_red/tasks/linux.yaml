@@ -10,9 +10,8 @@
 - name: Linux | Identify Unauthorized Users
   vars:
     allowed_list: "{{ (blueteam_users + out_of_scope_users + legit_local_admins + legit_local_users) | map('lower') | list }}"
-    # We filter the dict2items where the second item in the value list (the UID) 
-    # is converted to int and compared to 1000
-    human_users: >-
+    # We build the list and then ensure Ansible treats it as a list, not a string
+    human_users_list: >-
       {% set users = [] %}
       {% for name, details in getent_passwd.items() %}
         {% if details[1] | int >= 1000 %}
@@ -21,7 +20,8 @@
       {% endfor %}
       {{ users }}
   ansible.builtin.set_fact:
-    unauthorized_users: "{{ human_users | difference(allowed_list) }}"
+    # Use | from_yaml if the string conversion persists
+    unauthorized_users: "{{ human_users_list | difference(allowed_list) }}"
     
 - name: Linux | Review Unauthorized Users
   ansible.builtin.pause:
