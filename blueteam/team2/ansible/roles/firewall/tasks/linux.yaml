@@ -20,4 +20,4 @@
 - name: Execute firewall script
   ansible.builtin.shell: "./firewall.sh '{{ ([22] + magpie_ports) | join(',') }}' 'any'"
   args:
-    chdir: "{{ working_dir }}/firewall.sh"
+    chdir: "{{ working_dir }}"
