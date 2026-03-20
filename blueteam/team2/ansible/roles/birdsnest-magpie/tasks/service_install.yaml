@@ -67,8 +67,9 @@
 - name: Install Magpie Agent as a Windows Service
   community.windows.win_nssm:
     name: "magpie-{{ magpie_agent_name }}"
-    executable: "{{ magpie_deploy_dir | path_join('nssm.exe') }}"
-    application: "{{ magpie_deploy_dir | path_join('agent.py') }}"
+    executable: "{{ [magpie_deploy_dir,'nssm.exe'] | path_join }}"
+    application: "{{ [magpie_deploy_dir, 'venv', 'Scripts', 'python.exe'] | path_join }}"
+    app_parameters: "{{ [magpie_deploy_dir, 'agent.py'] | path_join }}"
     app_directory: "{{ magpie_deploy_dir }}"
     username: "LocalSystem"
     state: present

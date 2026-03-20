@@ -67,8 +67,9 @@
 - name: Install kingfisher Agent as a Windows Service
   community.windows.win_nssm:
     name: "kingfisher-{{ kingfisher_agent_name }}"
-    executable: "{{ kingfisher_deploy_dir | path_join('nssm.exe') }}"
-    application: "{{ kingfisher_deploy_dir | path_join('agent.py') }}"
+    executable: "{{ [kingfisher_deploy_dir,'nssm.exe'] | path_join }}"
+    application: "{{ [kingfisher_deploy_dir, 'venv', 'Scripts', 'python.exe'] | path_join }}"
+    app_parameters: "{{ [kingfisher_deploy_dir, 'agent.py'] | path_join }}"
     app_directory: "{{ kingfisher_deploy_dir }}"
     username: "LocalSystem"
     state: present

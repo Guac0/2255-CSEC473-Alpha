@@ -67,8 +67,9 @@
 - name: Install Owlet Agent as a Windows Service
   community.windows.win_nssm:
     name: "owlet-{{ owlet_agent_name }}"
-    executable: "{{ owlet_deploy_dir | path_join('nssm.exe') }}"
-    application: "{{ owlet_deploy_dir | path_join('agent.py') }}"
+    executable: "{{ [owlet_deploy_dir, 'nssm.exe'] | path_join }}"
+    application: "{{ [owlet_deploy_dir, 'venv', 'Scripts', 'python.exe'] | path_join }}"
+    app_parameters: "{{ [owlet_deploy_dir, 'agent.py'] | path_join }}"
     app_directory: "{{ owlet_deploy_dir }}"
     username: "LocalSystem"
     state: present

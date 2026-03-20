@@ -4,7 +4,6 @@ import socket
 import ctypes
 import os
 import subprocess
-import hashlib
 import re
 import json
 from datetime import datetime
@@ -18,6 +17,7 @@ from pathlib import Path
 import ast
 import sys
 import signal
+import hashlib
 CONFIG_DEFAULTS = {
     "AGENT_NAME": "test1",
     "AUTH_TOKEN": "testtoken",
@@ -386,6 +386,7 @@ def persist_iptables_rules(noisy=True):
     print_debug("Failed to persist: No known persistence method found for this distro.")
     return False
 def send_message(endpoint,oldStatus=True,newStatus=True,message="",systemInfo=get_system_details()):
+    global AUTH_TOKEN
     if not SERVER_URL:
         return True
     url = SERVER_URL + endpoint
@@ -414,7 +415,7 @@ def send_message(endpoint,oldStatus=True,newStatus=True,message="",systemInfo=ge
             if response.getcode() == 200:
                 print_debug(f"send_message({url}): sent msg to server: [{oldStatus,newStatus,message}]")
                 response_text = response.read().decode('utf-8')
-                if endpoint == "agent/beacon/owlet":
+                if endpoint == "agent/beacon/magpie":
                     if response_text != AUTH_TOKEN:
                         AUTH_TOKEN = response_text
                         print_debug(f"send_message({url}): updating auth token value to new value from server {AUTH_TOKEN}")
@@ -1245,6 +1246,7 @@ def get_latest_commit_stats(branch_name, repo_dir):
     return {"count": len(files_info), "files": files_info}
 def file_protect_main(repo_dir, protected_folders):
     try:
+        assert len(repo_dir) > 60, f"invalid repo_dir - suspiciously short (may lead to bad path). value: {repo_dir}"
         run_git(["checkout", "good"], repo_dir)
         run_git(["pull", "origin", "good"], repo_dir)
         for item in os.listdir(repo_dir):

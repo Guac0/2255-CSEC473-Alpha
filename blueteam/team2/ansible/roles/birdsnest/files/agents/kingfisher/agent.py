@@ -20,7 +20,6 @@ import struct
 import sqlite3
 import grp
 import pwd
-import spwd
 import shlex
 try:
     import win32evtlog

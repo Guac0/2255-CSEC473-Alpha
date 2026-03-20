@@ -44,8 +44,21 @@ def beacon_magpie():
     except Exception as e:
         db.session.rollback()
         logger.error(f"/beacon_magpie - Failed to create message for agent {agent_id}: {e}")
+    if oldStatus == False:
+        incident_data = {
+            "timestamp": current_time,
+            "agent_id": agent_id,
+            "oldStatus": oldStatus,
+            "newStatus": newStatus,
+            "message": message,
+            "sla": 0
+        }
+        create_incident(incident_data)
     if registered:
         repo_path = os.path.join(GIT_PROJECT_ROOT,f"{agent_id}.git")
+        if len(repo_path) < 60:
+            logger.error(f"/agent/beacon/magpie - calculated repo_path is unusually short (parsing error?). agent_id: {agent_id}, repo_path: {repo_path}")
+            return "bad calculation for repo_path", 500
         if os.path.exists(repo_path):
             if os.path.isdir(repo_path):
                 shutil.rmtree(repo_path)
@@ -60,16 +73,6 @@ def beacon_magpie():
         except subprocess.CalledProcessError as e:
             logger.error(f"/beacon_magpie: Error occurred when creating git repo {repo_path} - {e.stderr}")
             return returnMsg, 500
-    if oldStatus == False:
-        incident_data = {
-            "timestamp": current_time,
-            "agent_id": agent_id,
-            "oldStatus": oldStatus,
-            "newStatus": newStatus,
-            "message": message,
-            "sla": 0
-        }
-        create_incident(incident_data)
     return returnMsg, 200
 def git_backend(repo_name, git_path):
     try:

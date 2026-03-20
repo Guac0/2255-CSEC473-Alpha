@@ -665,6 +665,7 @@ class AuthWatcher:
         except Exception as e:
             print_debug(f"save_state(): Failed to save state: {e}")
     def analyze_log(self):
+        self.temp_signatures = set()
         new_last_scan = self.load_state()
         self.last_scan_time = new_last_scan
         sent_msg = False
@@ -862,7 +863,7 @@ def main(stop_event=None):
         log_path = AUTH_LOG_PATH
     if AUTH_PARSER:
         parser = PARSER_MAP.get(AUTH_PARSER.lower(), parser)
-    watcher = watcherObj(parser,log_path)
+    watcher = watcherObj(parser(),log_path)
     print_debug(f"Selected parser {parser} and log path {log_path}")
     while True:
         pausedEpochServer = send_message("agent/get_pause")

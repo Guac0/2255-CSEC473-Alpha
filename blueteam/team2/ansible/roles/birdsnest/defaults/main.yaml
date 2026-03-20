@@ -7,7 +7,7 @@ webgui_users:             # Users that can log into the website frontend
   admin:                  # username
     password: "admin"     # password
     role: "admin"         # role - admin, analyst, or guest
-webhook_url: "https://discord.com/api/webhooks/1482900818180182131/1wv9928AwHTktl0d_gMbaQ5mnjUxBvmb3dehoK5edkJguc1xW9io45c-kixO9Hkna7Py?thread_id=1482165373926375485"           # Discord webhook url (empty string if none). This can be changed after deploy by modifying config.json and restarting the docker containers.
+webhook_url: ""           # Discord webhook url (empty string if none). This can be changed after deploy by modifying config.json and restarting the docker containers.
 birdsnest_allow_ips_web:   # IPs that the Nginx proxy will allow to webserver web (frontend) endpoints. Set to your jumpboxes' IPs/range.
   - 127.0.0.1
   - 0.0.0.0/0

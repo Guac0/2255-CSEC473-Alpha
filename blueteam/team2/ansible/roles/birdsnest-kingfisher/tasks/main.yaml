@@ -20,8 +20,7 @@
   ansible.builtin.shell: |
     /venv/bin/python3 agent.py &
   args:
-    chdir: "{{ kingfisher_deploy_dir }}"
-  when: kingfisher_service_start and kingfisher_docker
+        chdir: "{{ kingfisher_deploy_dir }}"
 
 #- name: Start scheduled task
 #  ansible.builtin.include_tasks: scheduled_task.yaml
