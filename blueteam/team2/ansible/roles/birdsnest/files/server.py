@@ -238,7 +238,7 @@ def get_global_config_agent_redirect():
 @app.route('/agent/git/<repo_name>.git/<path:git_path>', methods=['GET', 'POST', 'PROPFIND'])
 @app.route('/agent/git/<repo_name>.git/', defaults={'git_path': ''}, methods=['GET', 'POST', 'PROPFIND'])
 def git_backend_redirect(repo_name, git_path):
-    return git_backend()
+    return git_backend(repo_name, git_path)
 @app.route('/agent/ip')
 @login_required
 def ip_agent():

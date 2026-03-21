@@ -4,6 +4,7 @@ import subprocess
 import platform
 import re
 import socket
+import shutil
 DEBUG = True
 LOGFILE = ""
 LINE_SIZE = 75
@@ -90,27 +91,31 @@ def run_powershell(cmd,noisy=True):
             print_debug(f"PowerShell error: {result.stderr}")
         return "" 
     return result.stdout
-def run_bash(cmd, noisy=True):
+def run_bash(cmd, shellStatus=True, noisy=True):
+    executable_path = shutil.which("bash")
+    if not executable_path:
+        for path in ["/usr/local/bin/bash", "/bin/sh", "/usr/bin/sh"]:
+            if os.path.exists(path):
+                executable_path = path
+                break
     try:
         result = subprocess.run(
             cmd,
-            shell=True,
-            executable="/bin/bash", 
+            shell=shellStatus,
+            executable=executable_path,
             capture_output=True, 
             text=True,
             check=False 
         )
-    except FileNotFoundError:
-        if noisy:
-            print_debug("Error: The /bin/bash executable was not found.")
-        return ""
-    if result.returncode != 0:
-        if noisy:
-            print_debug(f"Shell command failed with exit code {result.returncode}")
+        if result.returncode != 0 and noisy:
+            print_debug(f"run_bash(): Command failed [{result.returncode}]: {cmd}")
             if result.stderr:
-                print_debug(f"Shell stderr: {result.stderr.strip()}")
-        return ""
-    return result.stdout.strip()
+                print_debug(f"Stderr: {result.stderr.strip()}")
+            return result
+    except Exception as e:
+        if noisy:
+            print_debug(f"run_bash(): System error executing command: {e}")
+        return subprocess.CompletedProcess(args=cmd, returncode=1, stdout="", stderr=str(e))
 def get_primary_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -525,8 +530,9 @@ def main():
                     if not run_powershell(f"Get-Service -Name '{service}'"):
                         raise AssertionError(f"Service not found: {service}")
                 else:
-                    if not run_bash(f"systemctl status {service}"):
-                        raise AssertionError(f"Service not found: {service}")
+                    result = run_bash(f"systemctl status {service}")
+                    if result.returncode != 0:
+                        raise AssertionError(f"Service not found: {service} - {result.stderr.strip()}")
                 test_service_main(test,service)
             elif category == "i":
                 test_interface_main(test)
@@ -547,7 +553,8 @@ def main():
                     if not run_powershell(f"Get-Service -Name '{service}'"):
                         raise AssertionError(f"Service not found: {service}")
                 else:
-                    if not run_bash(f"systemctl status {service}"):
+                    result = run_bash(f"systemctl status {service}")
+                    if result.returncode != 0:
                         raise AssertionError(f"Service not found: {service}")
                 test_unique_main(test,service)
             elif category == "a":

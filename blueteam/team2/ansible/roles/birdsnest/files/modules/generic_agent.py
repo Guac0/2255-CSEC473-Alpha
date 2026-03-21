@@ -96,6 +96,7 @@ def beacon_generic(endpoint):
             new_agent = Agent(
                 agent_id=agent_id,
                 agent_name=request_info["agent_name"],
+                agent_type=request_info["agent_type"],
                 hostname=request_info["hostname"],
                 ip=request_info["ip"],
                 os=request_info["os_name"],

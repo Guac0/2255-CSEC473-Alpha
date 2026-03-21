@@ -204,10 +204,10 @@ def run_powershell(cmd,noisy=True):
     )
     if result.returncode != 0:
         if noisy:
-            print_debug(f"PowerShell error: {result.stderr}")
+            print_debug(f"PowerShell error: {result.stderr.strip()}")
         return "" 
     return result.stdout
-def run_bash(cmd, noisy=True):
+def run_bash(cmd, shellStatus=True, noisy=True):
     executable_path = shutil.which("bash")
     if not executable_path:
         for path in ["/usr/local/bin/bash", "/bin/sh", "/usr/bin/sh"]:
@@ -217,23 +217,21 @@ def run_bash(cmd, noisy=True):
     try:
         result = subprocess.run(
             cmd,
-            shell=True,
+            shell=shellStatus,
             executable=executable_path,
             capture_output=True, 
             text=True,
             check=False 
         )
-    except FileNotFoundError:
-        if noisy:
-            print_debug(f"Error: The {executable_path} executable was not found.")
-        return ""
-    if result.returncode != 0:
-        if noisy:
-            print_debug(f"Shell command failed with exit code {result.returncode}")
+        if result.returncode != 0 and noisy:
+            print_debug(f"run_bash(): Command failed [{result.returncode}]: {cmd}")
             if result.stderr:
-                print_debug(f"Shell stderr: {result.stderr.strip()}")
-        return ""
-    return result.stdout.strip()
+                print_debug(f"Stderr: {result.stderr.strip()}")
+            return result
+    except Exception as e:
+        if noisy:
+            print_debug(f"run_bash(): System error executing command: {e}")
+        return subprocess.CompletedProcess(args=cmd, returncode=1, stdout="", stderr=str(e))
 def get_pause_status(file=STATUSFILE):
     try:
         with open(file,"r+") as f:
