@@ -1,5 +1,5 @@
 ---
-- name: Reload systemd to recognize new Owlet unit
+- name: Reload systemd to recognize new Magpie unit
   ansible.builtin.systemd:
     daemon_reload: yes
   when: ansible_os_family in ["RedHat", "Debian", "Alpine"]

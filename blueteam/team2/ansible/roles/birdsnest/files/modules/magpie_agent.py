@@ -75,6 +75,8 @@ def beacon_magpie():
             return returnMsg, 500
     return returnMsg, 200
 def git_backend(repo_name, git_path):
+    content_length = request.headers.get('Content-Length', '0')
+    logger.info(f"/git: Incoming push size: {content_length} bytes from {request.remote_addr}")
     try:
         try:
             git_path = clean_and_join_path(git_path)

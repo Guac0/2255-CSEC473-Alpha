@@ -21,6 +21,7 @@ http {
     server {
         listen {{ birdsnest_port_local }} ssl;
         server_name localhost;
+        client_max_body_size {{ birdsnest_nginx_max_size }};
         ssl_certificate     /etc/nginx/cert.pem;
         ssl_certificate_key /etc/nginx/key.pem;
 

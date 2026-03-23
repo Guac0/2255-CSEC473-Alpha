@@ -292,19 +292,23 @@ def run_bash(cmd, shellStatus=True, noisy=True):
             print_debug(f"run_bash(): System error executing command: {e}")
         return subprocess.CompletedProcess(args=cmd, returncode=1, stdout="", stderr=str(e))
 def run_git(args, cwd):
-    cmd = ["git", "-c", "http.sslVerify=false"] + args
-    result = subprocess.run(
-        cmd, 
-        cwd=cwd, 
-        capture_output=True, 
-        text=True, 
-        shell=(platform.system() == "Windows")
-    )
-    if result.returncode != 0:
-        print_debug(f"Shell command failed with exit code {result.returncode}")
-        if result.stderr.strip():
-            print_debug(f"Shell stderr: {result.stderr.strip()}")
-    return result
+    try:
+        cmd = ["git", "-c", "http.sslVerify=false"] + args
+        result = subprocess.run(
+            cmd, 
+            cwd=cwd, 
+            capture_output=True, 
+            text=True, 
+            shell=(platform.system() == "Windows")
+        )
+        if result.returncode != 0:
+            print_debug(f"Git shell command failed with exit code {result.returncode}. Command: {["git", "-c", "http.sslVerify=false"] + args}")
+            if result.stderr.strip():
+                print_debug(f"    Git shell stderr: {result.stderr.strip()}")
+        return result
+    except Exception as e:
+        print_debug(f"run_git(): System error executing command ({["git", "-c", "http.sslVerify=false"] + args}): {e}")
+        return subprocess.CompletedProcess(args=cmd, returncode=1, stdout="", stderr=str(e))
 def setup_git_agent(repo_dir, protected_folders, systemInfo=None):
     if systemInfo is None:
         systemInfo = get_system_details()
@@ -323,7 +327,7 @@ def setup_git_agent(repo_dir, protected_folders, systemInfo=None):
         run_git(["push", "-u", "origin", "good"], cwd=repo_dir)
         run_git(["checkout", "-b", "bad"], cwd=repo_dir)
         run_git(["add", "."], cwd=repo_dir)
-        run_git(["commit", "-m", "initialCommitBad"], cwd=repo_dir)
+        run_git(["commit", "-m", "initialCommitBad"], cwd=repo_dir) 
         run_git(["push", "-u", "origin", "bad"], cwd=repo_dir)
         run_git(["checkout", "good"], cwd=repo_dir)
         return True
@@ -1417,7 +1421,7 @@ def service_audit_windows(service_name):
 def service_audit_linux(service_name):
     issues = []
     systemctl_show_cmd = f"systemctl show --no-pager {service_name}"
-    raw = run_bash(systemctl_show_cmd).strip()
+    raw = run_bash(systemctl_show_cmd)
     if raw.returncode != 0:
         return False, False, [f"ServiceNotFound: could not query logs for {service_name}. Error: {raw.stderr.strip()}"]
     raw = raw.stdout.strip()
@@ -1716,10 +1720,10 @@ def service_lastrun_linux(service_name):
     oldStatus = True
     newStatus = True
     issues = []
-    active_check = run_bash(f"systemctl is-active {service_name}").strip()
+    active_check = run_bash(f"systemctl is-active {service_name}")
     if active_check.returncode != 0:
         issues.append(f"Could not check if service {service_name} is active. Error: {active_check.stderr.strip()}")
-    active_check = active_check.stdout.split()
+    active_check = active_check.stdout.strip()
     if active_check == "active":
         return True, True, []
     show_cmd = f"systemctl show --no-pager {service_name}"

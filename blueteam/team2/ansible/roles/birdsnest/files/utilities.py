@@ -360,15 +360,19 @@ def add_test_data_auth_config():
         db.session.rollback()
         logger.error(f"Failed to populate AuthConfig test data: {e}")
 def run_git(args, cwd=GIT_PROJECT_ROOT):
-    cmd = ["git", "-c", "http.sslVerify=false"] + args
-    result = subprocess.run(
-        cmd, 
-        cwd=cwd, 
-        capture_output=True, 
-        text=True, 
-        shell=(platform.system() == "Windows")
-    )
-    return result
+    try:
+        cmd = ["git", "-c", "http.sslVerify=false"] + args
+        result = subprocess.run(
+            cmd, 
+            cwd=cwd, 
+            capture_output=True, 
+            text=True, 
+            shell=(platform.system() == "Windows")
+        )
+        return result
+    except Exception as E:
+        logger.error(f"run_git: error when executing ({["git", "-c", "http.sslVerify=false"] + args}): {E}")
+        return "" 
 def hash_id(*args):
     combined = "|".join(map(str, args))
     return hashlib.sha256(combined.encode("utf-8")).hexdigest() 
