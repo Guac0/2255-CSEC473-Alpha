@@ -80,7 +80,7 @@ SECRET_KEY = CONFIG["SECRET_KEY"]
 GIT_PROJECT_ROOT = os.path.join(os.path.dirname(Path(__file__).resolve()),"repos")
 if not os.path.exists(GIT_PROJECT_ROOT):
     os.mkdir(GIT_PROJECT_ROOT)
-def setup_logging(argname="default"): 
+def setup_logging(argname="default",app=None): 
     context = os.environ.get("APP_CONTEXT", "DEFAULT")
     name = context
     logger = logging.getLogger(name)
@@ -108,6 +108,11 @@ def setup_logging(argname="default"):
         gunicorn_logger = logging.getLogger("gunicorn.error")
         gunicorn_logger.addHandler(handler)
     logging.getLogger().addHandler(stream_handler)
+    if app:
+        app.logger.handlers = []
+        app.logger.addHandler(handler)
+        app.logger.addHandler(stream_handler)
+        app.logger.setLevel(logging.INFO)
     return logger
 if "windows" in platform.system().lower():
     GIT_BACKEND = "C:/Program Files/Git/mingw64/libexec/git-core/git-http-backend.exe"

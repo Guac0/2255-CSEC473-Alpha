@@ -30,7 +30,7 @@ birdsnest_port_local: "{{ birdsnest_host.split(':') | last }}" # External port t
 # Deploy vars
 birdsnest_deploy_dir: "/birdsnest"
 birdsnest_gunicorn_workers: 1 # per replica
-birdsnest_webserver_replicas: 3
+birdsnest_webserver_replicas: 1
 birdsnest_proxy_container: "nginx:1.28.2"
 birdsnest_database_image: "postgres:18.3"
 birdsnest_python_container: "alpine:3.19"

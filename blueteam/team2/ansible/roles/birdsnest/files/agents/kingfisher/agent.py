@@ -178,28 +178,31 @@ def interface_get_primary_linux(ip):
     if system == "Linux":
         ip_bin = shutil.which("ip")
         if ip_bin:
-            try:
-                output = subprocess.check_output([ip_bin, "-j", "addr"], text=True)
-                addr_data = json.loads(output)
-                for iface in addr_data:
-                    for addr in iface.get("addr_info", []):
-                        if addr.get("local") == ip:
-                            return iface.get("ifname")
-            except Exception:
-                pass
+            res = run_bash(f"{ip_bin} -j addr", noisy=False)
+            if res.returncode == 0 and res.stdout.strip():
+                try:
+                    addr_data = json.loads(res.stdout)
+                    for iface in addr_data:
+                        for addr in iface.get("addr_info", []):
+                            if addr.get("local") == ip:
+                                return iface.get("ifname")
+                except (json.JSONDecodeError, KeyError) as e:
+                    print_debug(f"interface_get_primary_linux(): Failed to parse 'ip -j' output: {e}")
+            else:
+                print_debug(f"interface_get_primary_linux(): falling back to ifconfig mode as ip binary not found")
     ifconfig_bin = shutil.which("ifconfig")
     if ifconfig_bin:
-        try:
-            output = subprocess.check_output([ifconfig_bin], text=True)
+        res = run_bash(ifconfig_bin, noisy=False)
+        if res.returncode == 0 and res.stdout.strip():
             iface = None
-            for line in output.splitlines():
+            for line in res.stdout.splitlines():
                 header_match = re.match(r"^([a-zA-Z0-9._-]+)[:\s]", line)
                 if header_match:
                     iface = header_match.group(1)
                 if "inet " in line and ip in line:
                     return iface
-        except Exception:
-            pass
+        elif res.returncode != 0:
+            print_debug(f"interface_get_primary_linux(): ifconfig failed with code {res.returncode} and error {res.stderr.strip()}")
     return None
 def get_system_details():
     sysInfo = {

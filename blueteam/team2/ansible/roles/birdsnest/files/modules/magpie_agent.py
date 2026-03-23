@@ -70,7 +70,7 @@ def beacon_magpie():
             run_git(["init", "--bare", f"{agent_id}.git"],GIT_PROJECT_ROOT)
             run_git(["config", "-f", f"{agent_id}.git/config", "http.receivepack", "true"],GIT_PROJECT_ROOT)
             logger.info(f"/beacon_magpie: created repo {os.path.join(GIT_PROJECT_ROOT,f'{agent_id}.git')}")
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             logger.error(f"/beacon_magpie: Error occurred when creating git repo {repo_path} - {e.stderr}")
             return returnMsg, 500
     return returnMsg, 200

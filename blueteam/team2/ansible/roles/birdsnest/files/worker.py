@@ -345,7 +345,7 @@ def periodic_cleanup():
             logger.error(f"Cleanup Error: {e}")
         time.sleep(900)
 if __name__ == "__main__":
-    logger = setup_logging("worker")
+    logger = setup_logging("worker",app)
     logger.info("Starting background worker threads...")
     create_db_tables(app)
     threads = [

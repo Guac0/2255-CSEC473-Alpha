@@ -79,13 +79,20 @@ app.config.update(
     SESSION_USE_SIGNER=True 
 )
 db.init_app(app)
+@app.errorhandler(Exception)
+def handle_exception(e):
+    try:
+        logger.error(f"{request.path} ({request.endpoint}) - Unhandled top level generic internal server error: {str(e)}")
+    except Exception as E:
+        logger.error(f"unknown endpoint - Unhandled top level generic internal server error: {str(e)}.\nSecondary error when handling error: {E}")
+    return "Generic Internal Server Error", 500
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login_redirect'  
 login_manager.login_message = "Please log in to access this page."
 login_manager.login_message_category = "info"
 create_db_tables(app)
-logger = setup_logging("web")
+logger = setup_logging("web",app)
 logger.info(f"Starting server on {HOST}:{PORT}")
 def admin_required(f):
     @wraps(f)

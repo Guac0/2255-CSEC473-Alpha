@@ -7,6 +7,7 @@ import os
 from collections import deque
 from urllib.parse import unquote_plus
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from models import (
 db,
 Agent, Message, Incident, AuthToken, AuthTokenAgent, WebUser, AnsibleResult, AnsibleVars,

@@ -466,7 +466,7 @@ def get_git_stats(db,repos_root=os.path.join(GIT_PROJECT_ROOT,"")):
                     }
                 }
                 results.append(entry)
-            except (subprocess.CalledProcessError, ValueError, AttributeError) as e:
+            except Exception as e:
                 logger.warning(f"Failed to process branch {branch} in {repo_folder}: {e}")
                 continue
     return results
