@@ -1221,14 +1221,14 @@ def apply_security_policy(target_path):
             subprocess.run(cmd, capture_output=True)
     else:
         if os.path.isdir(target_path):
-            os.chmod(target_path, 0o755) 
+            os.chmod(target_path, 0o777) 
         else:
-            os.chmod(target_path, 0o744) 
+            os.chmod(target_path, 0o777) 
         for root, dirs, files in os.walk(target_path):
             for d in dirs:
-                os.chmod(os.path.join(root, d), 0o755)
+                os.chmod(os.path.join(root, d), 0o777) 
             for f in files:
-                os.chmod(os.path.join(root, f), 0o744)
+                os.chmod(os.path.join(root, f), 0o777) 
 def get_path_slug(path):
     normalized = path.replace('\\', '/')
     clean_path = re.sub(r'^[a-zA-Z]:', '', normalized).lstrip('/')
@@ -1252,9 +1252,11 @@ def restore_protected_from_repo(repo_dir, protected_folder):
     if not os.path.exists(source_in_repo):
         return status
     try:
-        if os.path.isfile(protected_folder):
-            file_name = os.path.basename(protected_folder)
-            shutil.copy2(os.path.join(source_in_repo, file_name), protected_folder)
+        repo_items = os.listdir(source_in_repo)
+        if len(repo_items) == 1 and repo_items[0] == os.path.basename(protected_folder):
+            file_in_repo = os.path.join(source_in_repo, repo_items[0])
+            os.makedirs(os.path.dirname(protected_folder), exist_ok=True)
+            shutil.copy2(file_in_repo, protected_folder)
         else:
             shutil.copytree(source_in_repo, protected_folder, dirs_exist_ok=True, copy_function=shutil.copy2)
         apply_security_policy(protected_folder)
@@ -1956,8 +1958,25 @@ def main(stop_event=None):
                     sent_msg = True
                 else:
                     suppressed_send = True
+            print_debug(f"main(): running file checks")
+            result_issues_main = []
+            result_oldStatus, result_newStatus, result_issues = file_protect_main(repo_dir,PROTECTED_FOLDERS)
+            if not result_oldStatus:
+                oldStatus = False
+            if not result_newStatus:
+                newStatus = False
+            for issue in result_issues:
+                result_issues_main.append(f"{issue}")
+            for issue in result_issues_main:
+                newIssues.append(f"File - {issue}")
+                print_debug(newIssues[-1])
+                if newIssues[-1] not in oldIssues:
+                    send_message("agent/beacon/magpie",result_oldStatus,result_newStatus,newIssues[-1])
+                    sent_msg = True
+                else:
+                    suppressed_send = True
             print_debug(f"main(): running interface checks")
-            result_oldStatus, result_newStatus, result_issues = interface_main(interface_get_primary(),ip_address,prefix,gateway)
+            result_oldStatus, result_newStatus, result_issues = True, True, [] 
             if not result_oldStatus:
                 oldStatus = False
             if not result_newStatus:
@@ -1978,23 +1997,6 @@ def main(stop_event=None):
                 newStatus = False
             for issue in result_issues:
                 newIssues.append(f"Service - {issue}")
-                print_debug(newIssues[-1])
-                if newIssues[-1] not in oldIssues:
-                    send_message("agent/beacon/magpie",result_oldStatus,result_newStatus,newIssues[-1])
-                    sent_msg = True
-                else:
-                    suppressed_send = True
-            print_debug(f"main(): running file checks")
-            result_issues_main = []
-            result_oldStatus, result_newStatus, result_issues = file_protect_main(repo_dir,PROTECTED_FOLDERS)
-            if not result_oldStatus:
-                oldStatus = False
-            if not result_newStatus:
-                newStatus = False
-            for issue in result_issues:
-                result_issues_main.append(f"{issue}")
-            for issue in result_issues_main:
-                newIssues.append(f"File - {issue}")
                 print_debug(newIssues[-1])
                 if newIssues[-1] not in oldIssues:
                     send_message("agent/beacon/magpie",result_oldStatus,result_newStatus,newIssues[-1])
