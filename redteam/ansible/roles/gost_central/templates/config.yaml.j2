@@ -1,0 +1,36 @@
+services:
+  - name: central-hub
+    addr: :{{ listen_port }}
+    handler:
+      type: relay
+      chain: boundary-pool
+    listener:
+      type: tun
+      path: /dev/net/tun
+      attrs:
+        net: {{ tun_net }}
+  - name: reverse-proxy-80
+    addr: :80
+    handler:
+      type: tcp
+    forwarder:
+      nodes:
+        - name: web-server-1
+          addr: 10.0.0.51:80
+        #  filter:
+        #    host: "api.birdsnest.local" # Matches this header
+        #- name: web-server-2
+        #  addr: 10.0.0.52:80
+        #  filter:
+        #    host: "ui.birdsnest.local" # Matches this header
+
+chains:
+  - name: boundary-pool
+    hops:
+      - name: exit-nodes
+        strategy: random
+        nodes:
+          {% for host in groups['jumpred_proxy'] %}
+          - addr: {{ hostvars[host]['ansible_host'] }}:{{ hostvars[host]['proxy_port'] | default(443) }}
+            auth: "{{ proxy_user }}:{{ proxy_pass }}"
+          {% endfor %}

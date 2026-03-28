@@ -1,0 +1,12 @@
+---
+gost_version: "2.11.5"
+gost_install_dir: "/usr/local/bin"
+gost_config_dir: "/etc/gost"
+
+# Global proxy credentials
+proxy_user: "{{ redteam_user}}"
+proxy_pass: "{{ redteam_password}}"
+
+# Internal Network Settings
+tun_net: "10.0.0.1/24"
+listen_port: "8443"

@@ -1,0 +1,73 @@
+all:
+  children:
+  
+    jumpred:
+      hosts:
+        jumpred1:
+          ansible_host: "192.168.10.11"
+        jumpred2:
+          ansible_host: "192.168.10.12"
+        jumpred3:
+          ansible_host: "192.168.10.13"
+        jumpred4:
+          ansible_host: "192.168.10.14"
+        jumpred5:
+          ansible_host: "192.168.10.15"
+        jumpred6:
+          ansible_host: "192.168.10.16"
+        jumpred7:
+          ansible_host: "192.168.10.17"
+        jumpred8:
+          ansible_host: "192.168.10.18"
+        jumpred9:
+          ansible_host: "192.168.10.19"
+        jumpred10:
+          ansible_host: "192.168.10.20"
+    proxy_central:
+      hosts:
+        jumpred_proxy_central1:
+          ansible_host: "192.168.10.100"
+    proxy:
+      hosts:
+        jumpred_proxy1:
+          ansible_host: "192.168.50.11"
+        jumpred_proxy2:
+          ansible_host: "192.168.50.12"
+        jumpred_proxy3:
+          ansible_host: "192.168.50.13"
+        jumpred_proxy4:
+          ansible_host: "192.168.50.14"
+        jumpred_proxy5:
+          ansible_host: "192.168.50.15"
+        jumpred_proxy6:
+          ansible_host: "192.168.50.16"
+        jumpred_proxy7:
+          ansible_host: "192.168.50.17"
+        jumpred_proxy8:
+          ansible_host: "192.168.50.18"
+    proxy_all:
+      children:
+        proxy:
+        proxy_central:
+    jumpboxes:
+      children:
+        jumpblue:
+        jumpgrey:
+        jumpred:
+
+    debian:
+      children:
+        proxy:
+    ubuntu:
+      children:
+        jumpboxes:
+    linux:
+      children:
+        debian:
+        ubuntu:
+    windows:
+      children:
+    gui:
+      children:
+        windows:
+        ubuntu:

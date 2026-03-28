@@ -1,0 +1,41 @@
+---
+- name: Calculate Dynamic TUN IP
+  set_fact:
+    # Extracts the last octet of the ansible_host IP
+    internal_tun_ip: "10.0.0.{{ ansible_host.split('.')[-1] }}"
+
+- name: Install dependencies
+  apt:
+    name: [wget, iproute2]
+    state: present
+
+- name: Check if GOST is installed
+  stat:
+    path: "{{ gost_install_dir }}/gost"
+  register: gost_binary
+
+- name: Download and install GOST
+  shell: |
+    wget https://github.com/ginuerzh/gost/releases/download/v{{ gost_version }}/gost-linux-amd64-{{ gost_version }}.gz
+    gunzip gost-linux-amd64-{{ gost_version }}.gz
+    mv gost-linux-amd64-{{ gost_version }} {{ gost_install_dir }}/gost
+    chmod +x {{ gost_install_dir }}/gost
+  when: not gost_binary.stat.exists
+
+- name: Deploy Client Systemd service
+  template:
+    src: gost_client.service.j2
+    dest: /etc/systemd/system/gost.service
+  notify: restart gost
+
+- name: Create static route for target subnets
+  template:
+    src: static_route.sh.j2
+    dest: /usr/local/bin/setup_proxy_routes.sh
+    mode: '0755'
+
+- name: Ensure route script runs after GOST starts
+  cron:
+    name: "Ensure proxy route exists"
+    job: "/usr/local/bin/setup_proxy_routes.sh"
+    minute: "*/5" # Keep-alive check for the route

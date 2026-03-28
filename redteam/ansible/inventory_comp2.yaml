@@ -1,0 +1,221 @@
+all:
+  children:
+    iis:
+      hosts:
+        armory:
+          ansible_host: "10.2.1.1"
+          magpie_agent_name: iis
+          magpie_disarm: true
+          magpie_ports: [80]
+          magpie_services: ['W3SVC']
+          magpie_packages: ['Web-Server']
+          magpie_protected_folders: ['C:\\Windows\\System32\\inetsrv\\config','C:\\inetpub\\wwwroot','C:\\Windows\\System32\\inetsrv\\w3wp.exe','C:\\Windows\\System32\\inetsrv\\inetmgr.exe']
+    smb:
+      hosts:
+        sewers:
+          ansible_host: "10.2.1.2"
+          magpie_agent_name: smb
+          magpie_disarm: true
+          magpie_ports: [445,137,138,139]
+          magpie_services: ['LanmanServer']
+          magpie_packages: ['FS-FileServer']
+          magpie_protected_folders: ['C:\\Shares','C:\\Windows\\System32\\srv2.sys']
+    dns:
+      hosts:
+        fortress:
+          ansible_host: "10.2.1.3"
+          magpie_agent_name: dns
+          magpie_disarm: true
+          magpie_ports: [53]
+          magpie_services: ['DNS']
+          magpie_packages: ['DNS']
+          magpie_protected_folders: ['C:\\Windows\\System32\\dns','C:\\Windows\\System32\\dns.exe'] #C:\Windows\NTDS\
+    gitlab:
+      hosts:
+        dungeon:
+          ansible_host: "10.2.1.4"
+          magpie_agent_name: gitlab
+          magpie_disarm: true
+          magpie_ports: [80]
+          magpie_services: ['gitlab-ctl','apache2']
+          magpie_packages: ['gitlab-ee','apache2']
+          magpie_protected_folders: ['/etc/gitlab/','/etc/apache2','/var/opt/gitlab/']
+    irc:
+      hosts:
+        cathedral:
+          ansible_host: "10.2.1.5"
+          magpie_agent_name: irc
+          magpie_disarm: true
+          magpie_ports: [6667]
+          magpie_services: ['inspircd']
+          magpie_packages: ['inspircd']
+          magpie_protected_folders: ['/etc/inspircd','/usr/sbin/inspircd','/lib/systemd/system/inspircd.service']
+    nginx:
+      hosts:
+        gallows:
+          ansible_host: "10.2.1.6"
+          magpie_agent_name: nginx
+          magpie_disarm: true
+          magpie_ports: [80]
+          magpie_services: ['nginx']
+          magpie_packages: ['nginx']
+          magpie_protected_folders: ['/etc/nginx','/var/www/html','/usr/sbin/nginx','/lib/systemd/system/nginx.service']
+    docker:
+      hosts:
+        market:
+          ansible_host: "10.2.1.7"
+          magpie_agent_name: docker
+          magpie_disarm: true
+          magpie_ports: []
+          magpie_services: ['docker']
+          magpie_packages: ['docker.io']
+          magpie_protected_folders: ['/etc/docker','/var/lib/docker/','/usr/bin/docker','/usr/bin/dockerd','/lib/systemd/system/docker.service']
+    mysql:
+      hosts:
+        stables:
+          ansible_host: "10.2.1.8"
+          magpie_agent_name: mysql
+          magpie_disarm: true
+          magpie_ports: [3306]
+          magpie_services: ['mysql']
+          magpie_packages: ['mysql-server']
+          magpie_protected_folders: ['/etc/mysql','/var/lib/mysql/','/usr/sbin/mysqld','/lib/systemd/system/mysql.service']
+    apache2:
+      hosts:
+        pigeontower:
+          ansible_host: "10.2.1.9"
+          magpie_agent_name: apache2
+          magpie_disarm: true
+          magpie_ports: [80]
+          magpie_services: ['apache2']
+          magpie_packages: ['apache2']
+          magpie_protected_folders: ['/etc/apache2','/usr/sbin/apache2','/lib/systemd/system/apache2.service','/var/www/html']
+
+# Groups
+    # Hosts for the Teams
+    inscope:
+      children:
+        iis:
+        smb:
+        dns:
+        gitlab:
+        irc:
+        nginx:
+        docker:
+        mysql:
+        apache2:
+    #scoring_all:
+    #  #children:
+    #  #  scoring_workers:
+    #  hosts:
+    #    scoring:
+    #      ansible_host: "192.169.1.1"
+    # Hosts for jumpboxes
+    jumpblue:
+      hosts:
+    #    jumpblue1:
+    #      ansible_host: "172.20.0.41"
+    #    jumpblue2:
+    #      ansible_host: "172.20.0.42"
+    #    jumpblue3:
+    #      ansible_host: "172.20.0.43"
+    #    jumpblue4:
+    #      ansible_host: "172.20.0.44"
+    #    jumpblue5:
+    #      ansible_host: "172.20.0.45"
+        jumpblue6:
+          ansible_host: "10.20.1.20"
+        jumpblue7:
+          ansible_host: "10.20.1.21"
+    #    jumpblue8:
+    #      ansible_host: "172.20.0.48"
+    #    jumpblue9:
+    #      ansible_host: "172.20.0.49"
+    #    jumpblue10:
+    #      ansible_host: "172.20.0.40"
+    jumpred:
+      hosts:
+        jumpred1:
+          ansible_host: "192.168.10.11"
+        jumpred2:
+          ansible_host: "192.168.10.12"
+        jumpred3:
+          ansible_host: "192.168.10.13"
+        jumpred4:
+          ansible_host: "192.168.10.14"
+        jumpred5:
+          ansible_host: "192.168.10.15"
+        jumpred6:
+          ansible_host: "192.168.10.16"
+        jumpred7:
+          ansible_host: "192.168.10.17"
+        jumpred8:
+          ansible_host: "192.168.10.18"
+        jumpred9:
+          ansible_host: "192.168.10.19"
+        jumpred10:
+          ansible_host: "192.168.10.20"
+    proxy_central:
+      hosts:
+        jumpred_proxy_central1:
+          ansible_host: "192.168.10.100"
+    proxy:
+      hosts:
+        jumpred_proxy1:
+          ansible_host: "192.168.50.11"
+        jumpred_proxy2:
+          ansible_host: "192.168.50.12"
+        jumpred_proxy3:
+          ansible_host: "192.168.50.13"
+        jumpred_proxy4:
+          ansible_host: "192.168.50.14"
+        jumpred_proxy5:
+          ansible_host: "192.168.50.15"
+        jumpred_proxy6:
+          ansible_host: "192.168.50.16"
+        jumpred_proxy7:
+          ansible_host: "192.168.50.17"
+        jumpred_proxy8:
+          ansible_host: "192.168.50.18"
+    proxy_all:
+      children:
+        proxy:
+        proxy_central:
+    jumpboxes:
+      children:
+        jumpblue:
+        jumpgrey:
+        jumpred:
+
+# OS-based groups
+    # Hosts that are Windows
+    windows:
+      children:
+        iis:
+        smb:
+        dns:
+    # Hosts that are Linux
+    debian:
+      children:
+        gitlab:
+        irc:
+        nginx:
+        proxy_all:
+    ubuntu:
+      children:
+        docker:
+        mysql:
+        apache2:
+        jumpboxes:
+    linux:
+      children:
+        debian:
+        ubuntu:
+    unix:
+      children:
+        linux:
+        
+    gui:
+      children:
+        windows:
+        ubuntu:

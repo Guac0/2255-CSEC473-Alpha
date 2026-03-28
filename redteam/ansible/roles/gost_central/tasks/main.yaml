@@ -1,0 +1,52 @@
+---
+- name: Install dependencies
+  apt:
+    name: [wget, ca-certificates, tar]
+    state: present
+    update_cache: yes
+
+- name: Create GOST configuration directory
+  file:
+    path: "{{ gost_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Check if GOST is installed
+  stat:
+    path: "{{ gost_install_dir }}/gost"
+  register: gost_binary
+
+- name: Download and install GOST
+  shell: |
+    wget https://github.com/ginuerzh/gost/releases/download/v{{ gost_version }}/gost-linux-amd64-{{ gost_version }}.gz
+    gunzip gost-linux-amd64-{{ gost_version }}.gz
+    mv gost-linux-amd64-{{ gost_version }} {{ gost_install_dir }}/gost
+    chmod +x {{ gost_install_dir }}/gost
+  when: not gost_binary.stat.exists
+
+- name: Deploy GOST configuration
+  template:
+    src: config.yaml.j2
+    dest: "{{ gost_config_dir }}/config.yaml"
+  
+- name: Deploy Systemd service unit
+  template:
+    src: gost.service.j2
+    dest: /etc/systemd/system/gost.service
+
+- name: Ensure IP forwarding is enabled
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+    
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Restart and enable GOST service
+  systemd:
+    name: gost
+    state: restarted
+    enabled: yes

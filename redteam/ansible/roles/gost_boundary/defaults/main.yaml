@@ -1,0 +1,9 @@
+gost_version: "2.11.5"
+gost_install_dir: "/usr/local/bin"
+
+# The port where the Central Proxy will connect
+boundary_listen_port: 443
+
+# Credentials matching the Central Proxy's chain config
+proxy_user: "{{ redteam_user }}"
+proxy_pass: "{{ redteam_password }}"

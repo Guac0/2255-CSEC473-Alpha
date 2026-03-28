@@ -1,0 +1,7 @@
+---
+- name: Wipe bash history for the current user
+  ansible.builtin.shell: |
+    cat /dev/null > ~/.bash_history
+    history -c
+  args:
+    executable: /bin/bash

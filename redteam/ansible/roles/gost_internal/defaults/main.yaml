@@ -1,0 +1,11 @@
+---
+gost_version: "2.11.5"
+gost_install_dir: "/usr/local/bin"
+central_proxy_lan_ip: "192.168.10.100"
+# Define multiple target networks here
+target_networks:
+  - "10.2.1.0/24"
+  - "10.0.10.0/24"
+  - "10.0.20.0/24"
+  - "10.0.30.0/24"
+tun_device: "tun0"

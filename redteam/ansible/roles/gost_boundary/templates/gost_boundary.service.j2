@@ -1,0 +1,14 @@
+[Unit]
+Description=GOST Boundary Proxy (JumpRed)
+After=network.target
+
+[Service]
+Type=simple
+# Listen for TLS-wrapped relay traffic with authentication
+ExecStart={{ gost_install_dir }}/gost -L relay+tls://{{ proxy_user }}:{{ proxy_pass }}@:{{ boundary_listen_port }}
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,73 @@
+---
+redteam_user: redteam
+redteam_password: evilscheme0!
+greyteam_user: greyteam
+greyteam_password: ponyuploc0!
+team_password: Change.me123!
+
+#ansible_user: redteam
+#ansible_password: "abcdefg"
+#ansible_user: redteam
+#ansible_password: "{{ team_password }}"
+ansible_user: "{{ redteam_user }}"
+ansible_user: "{{ redteam_password }}"
+#ansible_user: "{{ greyteam_user }}"
+#ansible_user: "{{ greyteam_password }}"
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+dns_overrides:
+  #- { ip: '10.0.10.1',    name: 'mlp.local' }
+  #- { ip: '10.0.10.1',    name: 'canterlot.mlp.local' }
+  #- { ip: '10.0.10.1',    name: 'dc.mlp.local' }
+  #- { ip: '172.20.0.100', name: 'scoring.mlp.local' }
+
+birdsnest_token: testtoken
+birdsnest_host: 192.168.10.11:443
+birdsnest_host_ip: 192.168.10.11
+controller_backup_root: /backups
+
+legit_ips:
+  - 10.20.1.73 # team 2 jump 1
+  - 10.20.1.132 
+  - 10.20.1.71
+  - 10.20.1.111
+  - 10.20.1.57
+  - 10.20.1.20
+  - 10.20.1.46
+  - 10.20.1.37
+  - 10.20.1.16
+  - 10.20.1.29 # team 2 jump 10
+  - 10.20.1.21 # testing
+  #- 100.65.4.233 # scoring - what is internal?
+
+out_of_scope_users:
+  - greyteam
+  - grayteam
+  - cyberrange
+
+legit_local_admins:
+  - king
+  - duke
+  - knight
+  - lady
+  - baron
+legit_local_users:
+  - scribe
+  - apothecary
+  - shepherd
+  - blacksmith
+  - herald
+legit_domain_users:
+  - chancellor
+  - wizard
+  - treasurer
+  - spymaster
+  - archbishop
+legit_domain_admins:
+  - steward
+  - stablemaster
+  - royalguard
+  - inquisitor
+  - jester
+legit_local_all: "{{ legit_local_admins + legit_local_users }}"
+legit_domain_all: "{{ legit_domain_admins + legit_domain_users }}"

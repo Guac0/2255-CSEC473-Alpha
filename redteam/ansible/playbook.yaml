@@ -1,0 +1,159 @@
+---
+- name: Ping Linux
+  hosts: linux
+  gather_facts: no
+  tags:
+    - ping
+    - ping_linux
+    - linux
+    - generic
+    - inscope
+  tasks:
+    - name: Ping Linux
+      ansible.builtin.ping:
+
+- name: Ping Windows
+  hosts: windows
+  gather_facts: no
+  tags: 
+    - ping
+    - ping_windows
+    - windows
+    - generic
+    - inscope
+  tasks:
+    - name: Ping Windows
+      ansible.windows.win_ping:
+
+#########################
+# Linux Infra
+#########################
+
+
+- name: Deploy Linux Standards
+  hosts: linux
+  roles:
+    - linux_standards
+  tags:
+    - linux 
+    - inscope 
+    - standards
+    - stds
+    - generic
+
+- name: Deploy Linux Users
+  hosts: linux
+  roles:
+    - linux_users
+  tags:
+    - linux 
+    - inscope 
+    - users
+    - users_linux
+    - generic
+
+- name: Deploy Rustdesk Linux
+  hosts: linux:&gui:!inscope
+  roles:
+    - linux_rustdesk
+  tags:
+    - linux 
+    - inscope 
+    - rustdesk
+    - rustdesk_linux
+    - generic
+
+- name: Change Rustdesk Password
+  hosts: linux:&gui:!inscope
+  roles:
+    - linux_rustdesk_changepwd
+  tags:
+    - rustdesk_pwd
+
+- name: Deploy GOST for Proxy Nodes
+  hosts: proxy
+  roles:
+    - gost_boundary
+  tags:
+    - gost
+    - gost_boundary
+
+- name: Deploy GOST for Manager Node
+  hosts: proxy_central
+  roles:
+    - gost_central
+  tags:
+    - gost
+    - gost_central
+
+- name: Deploy GOST for Red Team jumpboxes
+  hosts: jumpred
+  roles:
+    - gost_internal
+  tags:
+    - gost
+    - gost_internal
+
+#########################
+# Inscope
+#########################
+
+- name: Deploy Birdsnest
+  hosts: all
+  roles:
+    - birdsnest
+  tags:
+    - birdsnest
+    - full
+
+- name: Deploy Magpie
+  hosts: inscope
+  roles:
+    - birdsnest-magpie
+  tags:
+    - magpie
+    - full
+
+- name: Deploy Owlet
+  hosts: inscope
+  roles:
+    - birdsnest-owlet
+  tags:
+    - owlet
+    - full
+
+- name: Deploy Kingfisher
+  hosts: inscope
+  roles:
+    - birdsnest-kingfisher
+  tags:
+    - kingfisher
+    - full
+
+#########################
+# Finishers
+#########################
+
+- name: Clean Up
+  hosts: linux
+  roles:
+    - linux_finish
+  tags:
+    - linux 
+    - inscope
+    - finish
+    - post_deploy
+    #- generic
+
+- name: Reboot
+  hosts: linux
+  roles:
+    - linux_reboot
+  gather_facts: no
+  tags:
+    - linux
+    - inscope
+    - reboot
+    - reboot_linux
+    - post_deploy
+    - generic

@@ -1,0 +1,5 @@
+#!/bin/bash
+{% for net in target_networks %}
+# Check and add route for {{ net }}
+ip route show | grep -q "{{ net }}" || ip route add {{ net }} dev {{ tun_device }} via 10.0.0.1
+{% endfor %}
