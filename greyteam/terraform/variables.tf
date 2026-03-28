@@ -57,3 +57,19 @@ variable "winserv22" {
     network  = string
   }))
 }
+
+variable "jumpred" {
+  type = map(object({
+    hostname = string
+    ip       = string
+    network  = string
+  }))
+}
+
+variable "jumpred_proxy" {
+  type = map(object({
+    hostname = string
+    ip       = string
+    network  = string
+  }))
+}

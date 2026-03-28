@@ -1,0 +1,31 @@
+resource "openstack_compute_instance_v2" "jumpred" {
+  depends_on = [openstack_networking_secgroup_v2.secgroup_red]
+  for_each = var.jumpred
+
+  name            = each.value.hostname
+  flavor_name     = "large"
+  key_pair        = "cdt"
+
+  block_device {
+    uuid                  = "1cde3ec3-03d3-4c17-a512-d3799ae92dad" #ubuntu2404desktop
+    #uuid                  = "6cccb629-50af-4068-81ff-2e41c109f095" #ubuntu2204desktop
+    source_type           = "image"
+    destination_type      = "volume"
+    volume_size           = 70
+    boot_index            = 0
+    delete_on_termination = true
+  }
+
+  network {
+    uuid        = local.network_mapping[each.value.network]
+    fixed_ip_v4 = each.value.ip
+  }
+  network {
+    name        = "MAIN-NAT"
+  }
+
+  security_groups = ["secgroup_red"]
+
+  # Cloud-init user setup
+  user_data = file("cloud-init-debian-red.yaml")
+}

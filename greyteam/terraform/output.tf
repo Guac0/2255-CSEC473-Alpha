@@ -22,3 +22,12 @@ output "instance_ips_jumpgrey" {
     }
   }
 }
+
+output "instance_ips_jumpred" {
+  value = {
+    for name, instance in openstack_compute_instance_v2.jumpred : name => {
+      external_ip = instance.network[1].fixed_ip_v4
+      internal_ip = instance.network[0].fixed_ip_v4
+    }
+  }
+}

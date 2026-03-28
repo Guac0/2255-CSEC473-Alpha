@@ -3,5 +3,7 @@ locals {
     "core" = openstack_networking_network_v2.network_core.id
     "dmz"  = openstack_networking_network_v2.network_dmz.id
     "internal" = openstack_networking_network_v2.network_internal.id
+    "red" = openstack_networking_network_v2.network_red.id
+    "proxy" = openstack_networking_network_v2.network_red_proxy.id
   }
 }
