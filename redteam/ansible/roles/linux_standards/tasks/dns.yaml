@@ -24,7 +24,7 @@
     line: "{{ item.ip }} {{ item.name }}"
     state: present
     create: yes
-  loop: "{{ dns_overrides }}"
+  loop: "{{ dns_overrides | default([]) }}"
   when:
     - dns_overrides is defined
     - dns_overrides | length > 0
