@@ -15,6 +15,7 @@ ansible_password: "{{ redteam_password }}"
 #ansible_password: "{{ greyteam_password }}"
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
+domain: redteam.local
 dns_overrides:
   #- { ip: '10.0.10.1',    name: 'mlp.local' }
   #- { ip: '10.0.10.1',    name: 'canterlot.mlp.local' }
