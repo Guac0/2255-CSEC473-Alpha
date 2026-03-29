@@ -9,4 +9,5 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 activate-global-python-argcomplete
 ansible-galaxy install -r requirements.yml
-echo "Finished. Ansible and venv set up at ./2255-CSEC473-Alpha/redteam/ansible. Make sure to `source venv/bin/activate` before running Ansible tasks."
+chown redteam:redteam -R .
+echo "Finished. Ansible and venv set up at ./2255-CSEC473-Alpha/redteam/ansible. Make sure to source venv/bin/activate before running Ansible tasks."

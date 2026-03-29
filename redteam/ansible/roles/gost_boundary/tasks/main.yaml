@@ -38,7 +38,7 @@
     state: present
     
 - name: Deploy TCP MSS Clamping to prevent fragmentation
-  ansible.utils.iptables:
+  ansible.builtin.iptables:
     table: mangle
     chain: FORWARD
     protocol: tcp
