@@ -17,7 +17,7 @@ services:
     forwarder:
       nodes:
         - name: pyc2_server
-          addr: 10.0.0.11:{{pyc2_port }}
+          addr: 10.0.0.11:{{ pyc2_port }}
 
   - name: reverse-proxy-80
     addr: :80
@@ -50,7 +50,7 @@ chains:
       - name: exit-nodes
         strategy: random
         nodes:
-          {% for host in groups['jumpred_proxy'] %}
+          {% for host in groups['proxy'] %}
           - addr: {{ hostvars[host]['ansible_host'] }}:{{ hostvars[host]['proxy_port'] | default(443) }}
             auth: "{{ proxy_user }}:{{ proxy_pass }}"
           {% endfor %}
