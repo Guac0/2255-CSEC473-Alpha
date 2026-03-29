@@ -25,6 +25,9 @@
     state: present
     create: yes
   loop: "{{ dns_overrides }}"
+  when:
+    - dns_overrides is defined
+    - dns_overrides | length > 0
 
 - name: Flush DNS cache
   ansible.builtin.command: resolvectl flush-caches
