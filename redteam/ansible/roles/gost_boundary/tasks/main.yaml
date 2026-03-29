@@ -22,14 +22,15 @@
   template:
     src: gost_boundary.service.j2
     dest: /etc/systemd/system/gost.service
-  notify: 
-    - reload systemd
-    - restart gost
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
 
 - name: Ensure GOST is started and enabled
   systemd:
     name: gost
-    state: started
+    state: restarted
     enabled: yes
 
 - name: Install iptables
