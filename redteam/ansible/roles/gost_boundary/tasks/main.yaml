@@ -38,14 +38,18 @@
     name: iptables
     state: present
     
+- name: Install iptables-persistent
+  ansible.builtin.apt:
+    name: iptables-persistent
+    state: present
+
 - name: Deploy TCP MSS Clamping to prevent fragmentation
-  ansible.builtin.iptables:
-    table: mangle
-    chain: FORWARD
-    protocol: tcp
-    tcp_flags:
-      flags: "SYN,RST"
-      flags_set: "SYN"
-    jump: TCPMSS
-    set_mss: "1300"
-    comment: "GOST Tunnel MTU Fix"
+  ansible.builtin.shell: |
+    iptables -t mangle -C FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1300 || \
+    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1300
+  register: mss_result
+  changed_when: mss_result.rc == 0
+
+- name: Force save iptables rules immediately
+  ansible.builtin.shell: netfilter-persistent save
+  when: mss_result.changed
