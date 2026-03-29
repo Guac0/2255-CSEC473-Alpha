@@ -27,5 +27,5 @@ resource "openstack_compute_instance_v2" "jumpred" {
   security_groups = ["secgroup_red"]
 
   # Cloud-init user setup
-  user_data = file("cloud-init-debian-red.yaml")
+  user_data = file("cloud-init-ubuntu-red.yaml")
 }
