@@ -9,20 +9,40 @@ services:
       path: /dev/net/tun
       attrs:
         net: {{ tun_net }}
-  - name: reverse-proxy-80
-    addr: :80
+
+  - name: andrew_pyc2
+    addr: :{{ pyc2_port }}
     handler:
       type: tcp
     forwarder:
       nodes:
+        - name: pyc2_server
+          addr: 10.0.0.11:{{pyc2_port }}
+
+  - name: reverse-proxy-80
+    addr: :80
+    handler:
+      type: tcp # change to http if filtering on headers
+    forwarder:
+      nodes:
         - name: web-server-1
-          addr: 10.0.0.51:80
+          addr: 10.0.0.11:80
         #  filter:
         #    host: "api.birdsnest.local" # Matches this header
         #- name: web-server-2
         #  addr: 10.0.0.52:80
         #  filter:
         #    host: "ui.birdsnest.local" # Matches this header
+
+  - name: reverse-proxy-443
+    addr: :443
+    handler:
+      type: tcp
+    forwarder:
+      nodes:
+        - name: web-server-1
+          addr: 10.0.0.11:443
+
 
 chains:
   - name: boundary-pool

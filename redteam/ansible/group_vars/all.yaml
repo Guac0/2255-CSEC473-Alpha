@@ -71,3 +71,26 @@ legit_domain_admins:
   - jester
 legit_local_all: "{{ legit_local_admins + legit_local_users }}"
 legit_domain_all: "{{ legit_domain_admins + legit_domain_users }}"
+
+
+################
+# Andrew
+################
+
+#pyc2
+pyc2_server_location: "/pyc2/pyc2-server.py"
+pyc2_port: 702
+pyc2_port_range: 17
+pyc2_server: "100.64.10.150"
+pyc2_service_name: "apt_snap"
+pyc2_service_description: "Apt-Snap Integration Helper"
+pyc2_client_location_unix: "/etc/apt/apt_snap"
+pyc2_client_location_win: "C:\\Windows\\AppReadiness\\AppReadiness_Check.py"
+pyc2_firewall_name: "DRM Registration"
+pyc2_debug: "False"
+pyc2_buffer_size: 4096
+pyc2_timeout_time: 15
+pyc2_task_name_win: "Windows App Readiness Check"
+pyc2_task_desc_win: "Windows App Readiness Check"
+
+#################

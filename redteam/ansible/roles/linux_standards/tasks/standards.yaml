@@ -1,25 +1,17 @@
 ---
-- name: Create working dir
-  ansible.builtin.file:
-    path: "{{ working_dir }}"
-    state: directory
-    mode: '0777'
-    owner: root
-    group: root
+- name: Set timezone to US Eastern (October time)
+  ansible.builtin.command: timedatectl set-timezone America/New_York
 
-#- name: Set timezone to US Eastern (October time)
-#  ansible.builtin.command: timedatectl set-timezone America/New_York
-#
-#- name: Set hostname to inventory name
-#  ansible.builtin.hostname:
-#    name: "{{ inventory_hostname }}"
-#
-#- name: Set FQDN in /etc/hosts
-#  ansible.builtin.lineinfile:
-#    path: /etc/hosts
-#    regexp: '^127\.0\.0\.1\s+'
-#    line: "127.0.0.1 {{ inventory_hostname_short }}.{{ domain }} {{ inventory_hostname_short }}"
-#    state: present
+- name: Set hostname to inventory name
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Set FQDN in /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.0\.1\s+'
+    line: "127.0.0.1 {{ inventory_hostname_short }}.{{ domain }} {{ inventory_hostname_short }}"
+    state: present
 
 #- name: Configure static DNS resolvers
 #  ansible.builtin.copy:

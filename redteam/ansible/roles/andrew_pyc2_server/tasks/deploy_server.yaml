@@ -1,0 +1,77 @@
+---
+- name: Allow incoming traffic on port via iptables
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ pyc2_port }}"
+    jump: ACCEPT
+    state: present
+
+- name: Allow outbound traffic on port via iptables
+  ansible.builtin.iptables:
+    chain: OUTPUT
+    protocol: tcp
+    source_port: "{{ pyc2_port }}"
+    jump: ACCEPT
+    state: present
+
+- name: Ensure destination directory exists
+  ansible.builtin.file:
+    path: "{{ pyc2_server_location | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy the Python script to the remote machine
+  copy:
+    src: "files/server.py"
+    dest: "{{ pyc2_server_location }}"
+    mode: '0755'
+
+# Update server vars
+#- name: Update server IP
+#  replace:
+#    path: "{{ pyc2_server_location }}"
+#    regexp: '^HOST=.*'
+#    replace: 'HOST="{{ pyc2_server }}"'
+
+- name: Update pwnhost value
+  replace:
+    path: "{{ pyc2_server_location }}"
+    regexp: '^PWNHOST=.*'
+    replace: 'PWNHOST="{{ pwnhost }}"'
+
+- name: Update server port
+  replace:
+    path: "{{ pyc2_server_location }}"
+    regexp: '^LISTEN_PORT=.*'
+    replace: 'LISTEN_PORT={{ pyc2_port }}'
+
+- name: Update BUFFER value
+  replace:
+    path: "{{ pyc2_server_location }}"
+    regexp: '^BUFFER_SIZE=.*'
+    replace: 'BUFFER_SIZE={{ pyc2_buffer_size }}'
+
+- name: Update TIMEOUT value
+  replace:
+    path: "{{ pyc2_server_location }}"
+    regexp: '^TIMEOUT_TIME=.*'
+    replace: 'TIMEOUT_TIME={{ pyc2_timeout_time }}'
+
+- name: Ensure tmux is installed
+  ansible.builtin.package:
+    name: tmux
+    state: present
+
+- name: Start tmux session to run the Python script # TODO this doesnt work
+  ansible.builtin.shell: |
+    tmux new-session -d -s pyc2 'python3 {{ pyc2_server_location }}'
+  args:
+    creates: /tmp/tmux_pyc2_started
+
+#- name: Create a marker file to prevent re-running tmux command
+#  ansible.builtin.file:
+#    path: /tmp/tmux_pyc2_started
+#    state: touch

@@ -1,0 +1,76 @@
+---
+- name: Deploy Magpie Service systemd
+  copy:
+    dest: /etc/systemd/system/magpie-{{ magpie_agent_name }}.service
+    content: |
+      [Unit]
+      Description=Magpie Agent for {{ magpie_agent_name }}
+      After=network.target
+
+      [Service]
+      User=root
+      WorkingDirectory={{ magpie_deploy_dir }}
+      ExecStart={{ magpie_deploy_dir }}/venv/bin/python3 agent.py
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+  when: ansible_os_family in ["RedHat", "Debian"]
+
+- name: Deploy Magpie Service OpenRC
+  copy:
+    dest: "/etc/init.d/magpie-{{ magpie_agent_name }}"
+    mode: '0755'
+    content: |
+      #!/sbin/openrc-run
+      name="magpie-{{ magpie_agent_name }}"
+      command="{{ magpie_deploy_dir }}/venv/bin/python3"
+      command_args="agent.py"
+      directory="{{ magpie_deploy_dir }}"
+      command_background="yes"
+      pidfile="/run/${RC_SVCNAME}.pid"
+  when: ansible_os_family == "Alpine"
+
+- name: Deploy Magpie Service rc.d
+  copy:
+    dest: "/usr/local/etc/rc.d/magpie_{{ magpie_agent_name }}"
+    mode: '0555'
+    content: |
+      #!/bin/sh
+      # PROVIDE: magpie_{{ magpie_agent_name }}
+      # REQUIRE: LOGIN
+      . /etc/rc.subr
+      name="magpie_{{ magpie_agent_name }}"
+      rcvar="magpie_{{ magpie_agent_name }}_enable"
+      command="{{ magpie_deploy_dir }}/venv/bin/python3"
+      command_args="agent.py &"
+      magpie_{{ magpie_agent_name }}_chdir="{{ magpie_deploy_dir }}"
+      load_rc_config $name
+      run_rc_command "$1"
+  when: ansible_os_family == "FreeBSD"
+
+#- name: Deploy Magpie Service (NSSM)
+#  win_shell: |
+#    $BaseDir = "{{ magpie_deploy_dir }}"
+#    $NssmPath = "$BaseDir\nssm.exe"
+#    $ServiceName = "magpie-{{ magpie_agent_name }}"
+#    $PythonPath = "$BaseDir\venv\Scripts\python.exe"
+#    $ScriptPath = "$BaseDir\agent.py"
+#
+#    if (!(Get-Service $ServiceName -ErrorAction SilentlyContinue)) {
+#        & $NssmPath install $ServiceName $PythonPath $ScriptPath
+#        & $NssmPath set $ServiceName AppDirectory "$BaseDir"
+#        & $NssmPath set $ServiceName Start SERVICE_DEMAND_START
+#    }
+#  when: ansible_os_family == "Windows"
+
+- name: Install Magpie Agent as a Windows Service
+  community.windows.win_nssm:
+    name: "magpie-{{ magpie_agent_name }}"
+    executable: "{{ [magpie_deploy_dir,'nssm.exe'] | path_join }}"
+    application: "{{ [magpie_deploy_dir, 'venv', 'Scripts', 'python.exe'] | path_join }}"
+    app_parameters: "{{ [magpie_deploy_dir, 'agent.py'] | path_join }}"
+    app_directory: "{{ magpie_deploy_dir }}"
+    username: "LocalSystem"
+    state: present
+  when: ansible_os_family == "Windows"

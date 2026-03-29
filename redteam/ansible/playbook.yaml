@@ -21,6 +21,7 @@
     - windows
     - generic
     - inscope
+    - full
   tasks:
     - name: Ping Windows
       ansible.windows.win_ping:
@@ -40,20 +41,22 @@
     - standards
     - stds
     - generic
+    - full
 
-- name: Deploy Linux Users
-  hosts: linux
-  roles:
-    - linux_users
-  tags:
-    - linux 
-    - inscope 
-    - users
-    - users_linux
-    - generic
+#- name: Deploy Linux Users
+#  hosts: linux
+#  roles:
+#    - linux_users
+#  tags:
+#    - linux 
+#    - inscope 
+#    - users
+#    - users_linux
+#    - generic
+#    - full
 
 - name: Deploy Rustdesk Linux
-  hosts: linux:&gui:!inscope
+  hosts: linux:&gui
   roles:
     - linux_rustdesk
   tags:
@@ -62,13 +65,15 @@
     - rustdesk
     - rustdesk_linux
     - generic
+    - full
 
 - name: Change Rustdesk Password
-  hosts: linux:&gui:!inscope
+  hosts: linux:&gui:&jumpboxes
   roles:
     - linux_rustdesk_changepwd
   tags:
     - rustdesk_pwd
+    - full
 
 - name: Deploy GOST for Proxy Nodes
   hosts: proxy
@@ -77,6 +82,7 @@
   tags:
     - gost
     - gost_boundary
+    - full
 
 - name: Deploy GOST for Manager Node
   hosts: proxy_central
@@ -85,6 +91,7 @@
   tags:
     - gost
     - gost_central
+    - full
 
 - name: Deploy GOST for Red Team jumpboxes
   hosts: jumpred
@@ -93,10 +100,31 @@
   tags:
     - gost
     - gost_internal
+    - full
 
 #########################
 # Inscope
 #########################
+
+- name: Andrew - Deploy pyc2 Server
+  hosts: all
+  roles:
+    - andrew_pyc2_server
+  tags:
+    - andrew
+    - pyc2
+    - pyc2_server
+    - full
+
+- name: Andrew - Deploy pyc2 Client
+  hosts: inscope
+  roles:
+    - andrew_pyc2_client
+  tags:
+    - andrew
+    - pyc2
+    - pyc2_client
+    - full
 
 - name: Deploy Birdsnest
   hosts: all
@@ -104,6 +132,7 @@
     - birdsnest
   tags:
     - birdsnest
+    - andrew
     - full
 
 - name: Deploy Magpie
@@ -112,6 +141,7 @@
     - birdsnest-magpie
   tags:
     - magpie
+    - andrew
     - full
 
 - name: Deploy Owlet
@@ -120,6 +150,7 @@
     - birdsnest-owlet
   tags:
     - owlet
+    - andrew
     - full
 
 - name: Deploy Kingfisher
@@ -128,6 +159,7 @@
     - birdsnest-kingfisher
   tags:
     - kingfisher
+    - andrew
     - full
 
 #########################
@@ -144,6 +176,7 @@
     - finish
     - post_deploy
     #- generic
+    - full
 
 - name: Reboot
   hosts: linux
@@ -157,3 +190,4 @@
     - reboot_linux
     - post_deploy
     - generic
+    - full

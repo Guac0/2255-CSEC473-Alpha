@@ -1,0 +1,8 @@
+---
+- name: Deploy client - windows
+  ansible.builtin.include_tasks: deploy_client-win.yaml
+  when: ansible_facts.os_family == "Windows"
+
+- name: Deploy client - unix
+  ansible.builtin.include_tasks: deploy_client-unix.yaml
+  when: ansible_facts.os_family != "Windows"

@@ -1,0 +1,23 @@
+{
+    "AGENT_NAME": "{{ magpie_agent_name }}",
+    "AUTH_TOKEN": "{{ magpie_auth_token }}",
+    "SERVER_URL": "{{ magpie_server_url }}",
+    "SERVER_TIMEOUT": {{ magpie_server_timeout }},
+    "SLEEPTIME": {{ magpie_sleeptime }},
+    "DISARM": {{ magpie_disarm | lower }},
+    "IPTABLES_PATH": "{{ magpie_iptables_path }}",
+    "PORTS": {{ magpie_ports | to_json }},
+    "SERVICES": {{ magpie_services | to_json }},
+    "PACKAGES": {{ magpie_packages | to_json }},
+    "SERVICE_BACKUPS": {},
+    "PROTECTED_FOLDERS": "{{ magpie_protected_folders | to_json | replace('"', "'") }}",
+    "DEBUG_PRINT": {{ magpie_debug_print | lower }},
+    "BACKUPDIR": "{{ magpie_backupdir }}",
+    "LOGFILE": "{{ magpie_logfile }}",
+    "STATUSFILE": "{{ magpie_statusfile }}",
+    "MTU_MIN": {{ magpie_mtu_min }},
+    "MTU_DEFAULT": {{ magpie_mtu_default }},
+    "MTU_MAX": {{ magpie_mtu_max }},
+    "LINUX_DEFAULT_TTL": {{ magpie_linux_default_ttl }},
+    "AGENT_TYPE": "{{ magpie_agent_type }}"
+}

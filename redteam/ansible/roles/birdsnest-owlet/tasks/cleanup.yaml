@@ -1,0 +1,105 @@
+---
+- name: Check if systemd service exists
+  stat:
+    path: "/etc/systemd/system/owlet-{{ owlet_agent_name }}.service"
+  register: systemd_file
+  when: ansible_os_family in ["RedHat", "Debian"]
+
+- name: Remove systemd Owlet Service
+  block:
+    - name: Stop and disable systemd service
+      systemd:
+        name: "owlet-{{ owlet_agent_name }}"
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Remove systemd unit file
+      file:
+        path: "/etc/systemd/system/owlet-{{ owlet_agent_name }}.service"
+        state: absent
+
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+  when: 
+    - ansible_os_family in ["RedHat", "Debian"]
+    - systemd_file.stat.exists
+
+# --- Linux: OpenRC (Alpine) ---
+- name: Check if OpenRC service exists
+  stat:
+    path: "/etc/init.d/owlet-{{ owlet_agent_name }}"
+  register: openrc_file
+  when: ansible_os_family == "Alpine"
+
+- name: Remove OpenRC Owlet Service
+  block:
+    - name: Stop OpenRC service
+      service:
+        name: "owlet-{{ owlet_agent_name }}"
+        state: stopped
+      ignore_errors: yes
+
+    - name: Remove OpenRC init script
+      file:
+        path: "/etc/init.d/owlet-{{ owlet_agent_name }}"
+        state: absent
+  when: 
+    - ansible_os_family == "Alpine"
+    - openrc_file.stat.exists
+
+# --- FreeBSD: rc.d ---
+- name: Check if FreeBSD rc.d script exists
+  stat:
+    path: "/usr/local/etc/rc.d/owlet_{{ owlet_agent_name }}"
+  register: rcd_file
+  when: ansible_os_family == "FreeBSD"
+
+- name: Remove FreeBSD Owlet Service
+  block:
+    - name: Stop FreeBSD service
+      service:
+        name: "owlet_{{ owlet_agent_name }}"
+        state: stopped
+      ignore_errors: yes
+
+    - name: Remove rc.d script
+      file:
+        path: "/usr/local/etc/rc.d/owlet_{{ owlet_agent_name }}"
+        state: absent
+  when: 
+    - ansible_os_family == "FreeBSD"
+    - rcd_file.stat.exists
+
+# --- Windows: NSSM ---
+- name: Remove Owlet Service (NSSM)
+  win_shell: |
+    $ServiceName = "owlet-{{ owlet_agent_name }}"
+    $NssmPath = "{{ owlet_deploy_dir }}\nssm.exe"
+    
+    if (Get-Service $ServiceName -ErrorAction SilentlyContinue) {
+        & $NssmPath stop $ServiceName
+        & $NssmPath remove $ServiceName confirm
+    }
+  when: ansible_os_family == "Windows"
+
+############################################
+# Remove Files
+############################################
+
+- name: Remove deploy files Linux
+  ansible.builtin.file:
+    path: '{{ owlet_deploy_dir }}'
+    state: absent
+  when: 
+    - ansible_os_family != "Windows"
+  ignore_errors: yes
+
+- name: Remove deploy files Windows
+  ansible.windows.win_file:
+    path: '{{ owlet_deploy_dir }}'
+    state: absent
+  when: 
+    - ansible_os_family == "Windows"
+  ignore_errors: yes

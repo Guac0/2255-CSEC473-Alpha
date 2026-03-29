@@ -1,0 +1,82 @@
+---
+- name: Ensure destination directory exists
+  ansible.windows.win_file:
+    path: "{{ owlet_deploy_dir }}"
+    state: directory
+  when: ansible_facts.os_family == "Windows" 
+
+- name: Ensure destination directory exists
+  ansible.builtin.file:
+    path: "{{ owlet_deploy_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: ansible_facts.os_family != "Windows" 
+
+- name: Copy agent executable to target
+  win_copy:
+    src: "files/{{ owlet_agent_executable }}"
+    dest: "{{ owlet_deploy_dir }}\\{{ owlet_agent_executable }}"
+  when: ansible_facts.os_family == "Windows" 
+
+- name: Render config.json from template
+  template:
+    src: "config.json.j2"
+    dest: "{{ [owlet_deploy_dir, 'config.json'] | path_join }}"
+
+- name: Copy requirements to target
+  win_copy:
+    src: "files/requirements.txt"
+    dest: "{{ owlet_deploy_dir }}\\requirements.txt"
+  when: ansible_facts.os_family == "Windows" 
+
+- name: Copy requirements to target
+  copy:
+    src: "files/requirements.txt"
+    dest: "{{ owlet_deploy_dir }}/requirements.txt"
+    owner: root
+    group: root
+    mode: '0755'
+  when: ansible_facts.os_family != "Windows"
+
+- name: Copy agent executable to target
+  copy:
+    src: "files/{{ owlet_agent_executable }}"
+    dest: "{{ owlet_deploy_dir }}/{{ owlet_agent_executable }}"
+    owner: root
+    group: root
+    mode: '0755'
+  when: ansible_facts.os_family != "Windows" 
+
+- name: Install venv support for Debian
+  ansible.builtin.package:
+    name: python3-venv
+  when: ansible_os_family == "Debian"
+
+- name: Create venv and install requirements
+  ansible.builtin.pip:
+    requirements: "{{ [owlet_deploy_dir, 'requirements.txt'] | path_join }}"
+    virtualenv: "{{ [owlet_deploy_dir, 'venv'] | path_join }}"
+    virtualenv_command: "{{ (ansible_os_family == 'Windows') | ternary('python -m venv', 'python3 -m venv') }}"
+    state: present
+  vars:
+    base_dir: "{{ (ansible_facts.os_family == 'Windows') | ternary('python -m venv --with-pip', 'python3 -m venv --with-pip') }}"
+  when: ansible_facts.os_family != "Windows"
+
+- name: Create venv and install requirements (Windows)
+  ansible.windows.win_shell: |
+    $venvPath = Join-Path "{{ owlet_deploy_dir }}" "venv"
+    $reqPath = Join-Path "{{ owlet_deploy_dir }}" "requirements.txt"
+    $pythonExe = Join-Path $venvPath "Scripts\python.exe"
+    if (-not (Test-Path $venvPath)) {
+        python -m venv $venvPath
+    }
+    & $pythonExe -m pip install -r $reqPath
+  when: ansible_os_family == 'Windows'
+
+- name: Copy NSSM executable to target
+  win_copy:
+    src: "files/nssm-2.24_win64.exe"
+    dest: "{{ owlet_deploy_dir }}\\nssm.exe"
+  when: ansible_facts.os_family == "Windows"

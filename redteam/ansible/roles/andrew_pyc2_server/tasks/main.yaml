@@ -1,0 +1,4 @@
+---
+- name: Deploy server
+  ansible.builtin.include_tasks: deploy_server.yaml
+  when: ansible_default_ipv4.address == pyc2_server

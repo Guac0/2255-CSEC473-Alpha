@@ -1,0 +1,21 @@
+{
+  "HOST": "0.0.0.0",
+  "PORT": {{ birdsnest_port_local }},
+  "PUBLIC_URL": "{{ public_url }}",
+  "LOGFILE": "{{ logfile }}",
+  "SECRET_KEY": "{{ secret_key }}",
+  "STALE_TIME": {{ stale_time }},
+  "DEFAULT_WEBHOOK_SLEEP_TIME": {{ default_webhook_sleep_time }},
+  "MAX_WEBHOOK_MSG_PER_MINUTE": {{ max_webhook_msg_per_minute }},
+  "WEBHOOK_URL": "{{ webhook_url }}",
+  "CREATE_TEST_DATA": {{ create_test_data | lower }},
+  "DATABASE_CREDS": "{{ database_creds }}",
+  "DATABASE_LOCATION": "{{ database_location }}",
+  "DATABASE_DB": "{{ database_db }}",
+  "AUTHCONFIG_STRICT_IP": {{ authconfig_strict_ip | lower }},
+  "AUTHCONFIG_STRICT_USER": {{ authconfig_strict_user | lower }},
+  "AUTHCONFIG_CREATE_INCIDENT": {{ authconfig_create_incident | lower }},
+  "AUTHCONFIG_LOG_ATTEMPT_SUCCESSFUL": {{ authconfig_log_attempt_successful | lower }},
+  "AGENT_AUTH_TOKENS": {{ {birdsnest_token: birdsnest_token_metadata} | to_nice_json(indent=8) }},
+  "WEBGUI_USERS": {{ webgui_users | to_json }}
+}
