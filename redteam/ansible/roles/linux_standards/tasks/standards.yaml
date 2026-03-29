@@ -5,6 +5,7 @@
 - name: Set hostname to inventory name
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
+  ignore_errors: true
 
 - name: Set FQDN in /etc/hosts
   ansible.builtin.lineinfile:
