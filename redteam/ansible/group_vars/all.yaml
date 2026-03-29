@@ -16,7 +16,7 @@ ansible_password: "{{ redteam_password }}"
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
 domain: redteam.local
-dns_overrides:
+dns_overrides: [] # remove [] if using an actual value below
   #- { ip: '192.168',    name: 'redteam.local' }
   #- { ip: '10.0.10.1',    name: 'canterlot.mlp.local' }
   #- { ip: '10.0.10.1',    name: 'dc.mlp.local' }
