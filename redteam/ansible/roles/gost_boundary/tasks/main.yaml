@@ -43,7 +43,9 @@
     table: mangle
     chain: FORWARD
     protocol: tcp
-    tcp_flags: "SYN,RST SYN"
+    tcp_flags:
+      flags: "SYN,RST"
+      flags_set: "SYN"
     jump: TCPMSS
     set_mss: "1300"
-    comment: "Birdsnest Tunnel MTU Fix"
+    comment: "GOST Tunnel MTU Fix"
