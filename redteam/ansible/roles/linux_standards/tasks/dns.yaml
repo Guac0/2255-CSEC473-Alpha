@@ -6,14 +6,14 @@
     state: directory
     mode: '0755'
 
-#- name: Create DNS override file
+#- name: Create DNS override file to resolve domains
 #  ansible.builtin.copy:
 #    dest: /etc/systemd/resolved.conf.d/dns_override.conf
 #    content: |
 #      [Resolve]
 #      DNS={{ mgmt_dns[0] }}
 #      FallbackDNS={{ mgmt_dns[1] }}
-#      Domains=~mlp.local mlp.local
+#      Domains=~{{ domain }} {{ domain }}
 #    mode: '0644'
 #  register: dns_dropin
 
@@ -36,4 +36,4 @@
   ansible.builtin.systemd:
     name: systemd-resolved
     state: restarted
-  when: dns_dropin.changed
+  #when: dns_dropin.changed
