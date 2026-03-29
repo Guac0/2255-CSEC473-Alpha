@@ -10,9 +10,9 @@ team_password: Change.me123!
 #ansible_user: redteam
 #ansible_password: "{{ team_password }}"
 ansible_user: "{{ redteam_user }}"
-ansible_user: "{{ redteam_password }}"
+ansible_password: "{{ redteam_password }}"
 #ansible_user: "{{ greyteam_user }}"
-#ansible_user: "{{ greyteam_password }}"
+#ansible_password: "{{ greyteam_password }}"
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
 dns_overrides:
