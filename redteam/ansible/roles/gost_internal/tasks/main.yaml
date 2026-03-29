@@ -39,7 +39,7 @@
 
 - name: Create static route for target subnets
   template:
-    src: static_route.sh.j2
+    src: setup_routes.sh.j2
     dest: /usr/local/bin/setup_proxy_routes.sh
     mode: '0755'
 
