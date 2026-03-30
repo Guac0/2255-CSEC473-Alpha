@@ -5,7 +5,7 @@ gost_config_dir: "/etc/gost"
 
 # Global proxy credentials
 proxy_user: "{{ redteam_user }}"
-proxy_pass: "{{ redteam_password | urlencode | replace('%', '%%') }}"
+proxy_pass: "{{ redteam_password | urlencode }}"
 
 # Internal Network Settings
 tun_net: "10.0.0.1/24"
