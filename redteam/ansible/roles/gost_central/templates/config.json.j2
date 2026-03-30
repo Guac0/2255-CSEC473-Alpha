@@ -2,6 +2,7 @@
     "Retries": 3,
     "ServeNodes": [
         "tun://:{{ listen_port }}?net={{ tun_net }}&route={{ target_networks | join(',') }}",
+        "relay+tls://{{ proxy_user }}:{{ proxy_pass }}@:8443",
         "tcp://:{{ pyc2_port }}/10.0.0.11:{{ pyc2_port }}",
         "tcp://:80/10.0.0.11:80",
         "tcp://:443/10.0.0.11:443"
