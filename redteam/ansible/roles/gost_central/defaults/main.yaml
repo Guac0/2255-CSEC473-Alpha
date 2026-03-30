@@ -4,9 +4,15 @@ gost_install_dir: "/usr/local/bin"
 gost_config_dir: "/etc/gost"
 
 # Global proxy credentials
-proxy_user: "{{ redteam_user}}"
-proxy_pass: "{{ redteam_password}}"
+proxy_user: "{{ redteam_user }}"
+proxy_pass: "{{ redteam_password | urlencode }}"
 
 # Internal Network Settings
 tun_net: "10.0.0.1/24"
 listen_port: "8443"
+
+target_networks:
+  - "10.2.1.0/24"
+  - "10.0.10.0/24"
+  - "10.0.20.0/24"
+  - "10.0.30.0/24"

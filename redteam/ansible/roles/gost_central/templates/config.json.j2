@@ -1,0 +1,15 @@
+{
+    "Retries": 3,
+    "ServeNodes": [
+        "tun://:{{ listen_port }}?net={{ tun_net }}&route={{ target_networks | join(',') }}"",
+        "tcp://:{{ pyc2_port }}/10.0.0.11:{{ pyc2_port }}",
+        "tcp://:80/10.0.0.11:80",
+        "tcp://:443/10.0.0.11:443"
+    ],
+    "ChainNodes": [
+        "relay+tls://{{ proxy_user }}:{{ proxy_pass | urlencode }}@{{ hostvars[groups['proxy'][0]]['ansible_host'] }}:{{ hostvars[groups['proxy'][0]]['proxy_port'] | default(443) }}",
+        {% for host in groups['proxy'][1:] %}
+        "relay+tls://{{ proxy_user }}:{{ proxy_pass | urlencode }}@{{ hostvars[host]['ansible_host'] }}:{{ hostvars[host]['proxy_port'] | default(443) }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}

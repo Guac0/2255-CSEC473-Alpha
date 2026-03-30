@@ -1,4 +1,3 @@
 [Service]
-# Uses the dynamically calculated IP
-ExecStart={{ gost_install_dir }}/gost -L tun://:12345?net={{ internal_tun_ip }}/24 -F relay+tls://{{ central_proxy_lan_ip }}:8443
+ExecStart={{ gost_install_dir }}/gost -L "tun://:12345?net={{ internal_tun_ip }}/24&route={{ target_networks | join(',') }}" -F "relay+tls://{{ central_proxy_lan_ip }}:8443"
 Restart=always

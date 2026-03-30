@@ -5,6 +5,17 @@
     state: present
     update_cache: yes
 
+- name: Ensure TUN kernel module is loaded
+  community.general.modprobe:
+    name: tun
+    state: present
+
+- name: Ensure TUN module persists on reboot
+  ansible.builtin.lineinfile:
+    path: /etc/modules
+    line: "tun"
+    state: present
+
 - name: Create GOST configuration directory
   file:
     path: "{{ gost_config_dir }}"
@@ -26,8 +37,8 @@
 
 - name: Deploy GOST configuration
   template:
-    src: config.yaml.j2
-    dest: "{{ gost_config_dir }}/config.yaml"
+    src: config.json.j2
+    dest: "{{ gost_config_dir }}/config.json"
   
 - name: Deploy Systemd service unit
   template:

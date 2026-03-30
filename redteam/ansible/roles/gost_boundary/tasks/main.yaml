@@ -5,6 +5,17 @@
     state: present
     update_cache: yes
 
+- name: Ensure TUN kernel module is loaded
+  community.general.modprobe:
+    name: tun
+    state: present
+
+- name: Ensure TUN module persists on reboot
+  ansible.builtin.lineinfile:
+    path: /etc/modules
+    line: "tun"
+    state: present
+    
 - name: Check if GOST is installed
   stat:
     path: "{{ gost_install_dir }}/gost"
@@ -53,3 +64,10 @@
 - name: Force save iptables rules immediately
   ansible.builtin.shell: netfilter-persistent save
   when: mss_result.changed
+
+- name: Ensure IP forwarding is enabled
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes

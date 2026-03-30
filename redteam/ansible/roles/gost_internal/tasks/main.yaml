@@ -9,6 +9,17 @@
     name: [wget, iproute2]
     state: present
 
+- name: Ensure TUN kernel module is loaded
+  community.general.modprobe:
+    name: tun
+    state: present
+
+- name: Ensure TUN module persists on reboot
+  ansible.builtin.lineinfile:
+    path: /etc/modules
+    line: "tun"
+    state: present
+
 - name: Check if GOST is installed
   stat:
     path: "{{ gost_install_dir }}/gost"
@@ -37,14 +48,22 @@
     state: restarted
     enabled: yes
 
-- name: Create static route for target subnets
-  template:
-    src: setup_routes.sh.j2
-    dest: /usr/local/bin/setup_proxy_routes.sh
-    mode: '0755'
+- name: Ensure IP forwarding is enabled
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
 
-- name: Ensure route script runs after GOST starts
-  cron:
-    name: "Ensure proxy route exists"
-    job: "/usr/local/bin/setup_proxy_routes.sh"
-    minute: "*/5" # Keep-alive check for the route
+# handled in service now
+#- name: Create static route for target subnets
+#  template:
+#    src: setup_routes.sh.j2
+#    dest: /usr/local/bin/setup_proxy_routes.sh
+#    mode: '0755'
+#
+#- name: Ensure route script runs after GOST starts
+#  cron:
+#    name: "Ensure proxy route exists"
+#    job: "/usr/local/bin/setup_proxy_routes.sh"
+#    minute: "*/5" # Keep-alive check for the route

@@ -52,5 +52,5 @@ chains:
         nodes:
           {% for host in groups['proxy'] %}
           - addr: {{ hostvars[host]['ansible_host'] }}:{{ hostvars[host]['proxy_port'] | default(443) }}
-            auth: "{{ proxy_user }}:{{ proxy_pass }}"
+            auth: '{{ proxy_user }}:{{ proxy_pass }}'
           {% endfor %}
