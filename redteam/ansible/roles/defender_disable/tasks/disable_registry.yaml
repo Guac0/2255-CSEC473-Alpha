@@ -1,0 +1,11 @@
+---
+- name: Reset existing registry
+  ansible.windows.win_powershell:
+    script: |
+      Remove-ItemProperty -Path “HKLM:\SOFTWARE\Microsoft\Windows Defender” -Name DisableAntiSpyware, DisableAntiVirus, TamperProtection -Force
+
+- name: Add Disable Defender Regkey
+  ansible.windows.win_powershell:
+    script: |
+      New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name DisableAntiSpyware -Value 1 -PropertyType DWORD -Force
+      REG ADD "HKEY_LOCAL_MACHINE \ SOFTWARE \ Policies \ Microsoft \ Windows Defender" / V DisableAntiSpyware / t REG_DWORD / D 1 / F

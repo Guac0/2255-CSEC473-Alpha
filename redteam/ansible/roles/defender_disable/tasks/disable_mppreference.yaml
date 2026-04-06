@@ -1,0 +1,20 @@
+---
+- name: Disable Defender using MpPreference DisableTamperProtection
+  ansible.windows.win_powershell:
+    script: |
+      Set-MpPreference -DisableTamperProtection $true
+
+- name: Disable Defender using MpPreference DisableRea
+  ansible.windows.win_powershell:
+    script: |
+      set-MpPreference -DisableRea $true
+
+- name: Disable Defender using MpPreference DisableRealtimeMonitoring
+  ansible.windows.win_powershell:
+    script: |
+      Set-MpPreference -DisableRealtimeMonitoring $true
+
+- name: Disable Defender using MpPreference Various
+  ansible.windows.win_powershell:
+    script: |
+      Set-MpPreference -DisableIntrusionPreventionSystem $true -DisableIOAVProtection $true -DisableRealtimeMonitoring $true -DisableScriptScanning $true -EnableControlledFolderAccess Disabled -EnableNetworkProtection AuditMode -Force -MAPSReporting Disabled -SubmitSamplesConsent NeverSend

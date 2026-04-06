@@ -1,0 +1,103 @@
+---
+- name: Ensure Node.js is installed
+  win_chocolatey:
+    name: nodejs
+    state: present
+
+# may need to refreshenv after this, or for powershell: Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+#- name: Refresh env # Errors - thinks its in powershell. Seems to not be needed
+#  win_shell: refreshenv
+#  args:
+#    executable: cmd
+
+#- name: Refresh env powershell
+#  win_shell: Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+
+- name: Create iis-backend Directory
+  win_file:
+    path: C:\iis-backend
+    state: directory
+
+- name: Ensure destination directory exists on Windows
+  ansible.windows.win_file:
+    path: C:\iis-backend\
+    state: directory
+    recurse: yes
+
+- name: Copy `server.js` to the Windows server
+  win_copy:
+    src: files/server.js
+    dest: C:\iis-backend\server.js
+
+- name: Create pm2-installer Directory
+  win_file:
+    path: C:\pm2-installer
+    state: directory
+
+#If path is a directory and ends with “/”, only the inside contents of that directory are copied to the destination.
+- name: Create and copy files for installer
+  ansible.windows.win_copy:
+    src: files/pm2-installer-main/
+    dest: C:\pm2-installer
+    force: yes
+
+# Needs to be in cmd, not powershell, for npm to work
+- name: Setup pm2 installer pt 1
+  win_shell: npm run configure
+  args:
+    chdir: C:\pm2-installer
+    executable: cmd
+
+- name: Setup pm2 installer pt 2
+  win_shell: npm run configure-policy
+  args:
+    chdir: C:\pm2-installer
+    executable: cmd
+
+- name: Install pm2
+  win_shell: npm run setup
+  args:
+    chdir: C:\pm2-installer
+    executable: cmd
+
+- name: Initialize npm project
+  win_shell: npm init -y
+  args:
+    chdir: C:\iis-backend
+    executable: cmd
+
+# must be ran in iis-backend folder, NOT global
+- name: Install required Node.js dependencies in project folder
+  win_shell: npm install express cors body-parser
+  args:
+    chdir: C:\iis-backend
+    executable: cmd
+
+- name: Start iis-backend server using pm2
+  win_shell: pm2 start C:\iis-backend\server.js --name iis-backend-server
+  args:
+    executable: cmd
+
+- name: Save pm2 process list
+  win_shell: pm2 save
+  args:
+    executable: cmd
+
+# firewall prob shouldnt be needed
+- name: Allow Backend Firewall Rule (IN)
+  ansible.windows.win_command: netsh advfirewall firewall add rule name="IIS In" protocol=TCP dir=in localport=817 action=allow
+
+- name: Allow Backend Firewall Rule (OUT)
+  ansible.windows.win_command: netsh advfirewall firewall add rule name="IIS Out" protocol=TCP dir=out localport=817 action=allow
+
+# pm2 stop iis-backend-server
+# pm2 restart iis-backend-server
+# pm2 delete iis-backend-server
+
+# Verify:
+# pm2 status iis-backend-server
+# netstat -ano | findstr :817
+# curl http://localhost:817/security-audit
+# pm2 logs iis-backend-server
+# curl -X POST http://localhost:817/save-credentials -H "Content-Type: application/json" -d "{\"username\":\"testuser\",\"password\":\"SecureP@ssw0rd\"}"
+# curl -X POST http://localhost:817/save-credentials -H "Content-Type: application/json" -d '{"username": "testuser", "password": "asdfASDF1234!@#$"}'

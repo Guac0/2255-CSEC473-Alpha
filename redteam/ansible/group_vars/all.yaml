@@ -1,6 +1,6 @@
 ---
 redteam_user: redteam
-redteam_password: evilscheme0!
+redteam_password: evilpuck4me$you!
 greyteam_user: greyteam
 greyteam_password: ponyuploc0!
 team_password: Change.me123!
@@ -74,24 +74,99 @@ legit_local_all: "{{ legit_local_admins + legit_local_users }}"
 legit_domain_all: "{{ legit_domain_admins + legit_domain_users }}"
 
 
-################
-# Andrew
-################
 
-#pyc2
-pyc2_server_location: "/pyc2/pyc2-server.py"
-pyc2_port: 702
-pyc2_port_range: 17
-pyc2_server: "100.64.10.150"
-pyc2_service_name: "apt_snap"
-pyc2_service_description: "Apt-Snap Integration Helper"
-pyc2_client_location_unix: "/etc/apt/apt_snap"
-pyc2_client_location_win: "C:\\Windows\\AppReadiness\\AppReadiness_Check.py"
-pyc2_firewall_name: "DRM Registration"
-pyc2_debug: "False"
-pyc2_buffer_size: 4096
-pyc2_timeout_time: 15
-pyc2_task_name_win: "Windows App Readiness Check"
-pyc2_task_desc_win: "Windows App Readiness Check"
+pwnhost: ""
+#ansible_become: yes
+#ansible_become_method: sudo
+#ansible_become_pass: ccdc
 
-#################
+flag: "andrew niebur"
+wazuh_manager_ip: "100.64.10.150"
+red_users:
+#  - "redteam"
+#  - "letredin"
+#  - "warchief"
+#  - "nowplayingintheaters"
+#  - "identityfraud"
+#  - "andrewniebur"
+  - "bart"
+#  - "higgins"
+red_users_password: "Thedawginmebottomtext1!"
+wazuh_installer_win_path: "C:\\Windows\\Temp\\dubinstaller.msi"
+###################
+# Secure
+###################
+secure_ansible_dir: "/ansible/red-teaming"
+secure_redteam_pwd: "" # Doesn't really matter as pwd auth is disabled but still change it after downloading
+secure_key_location: "/opt/inventory/id_ed25519.pub"
+###################
+# Siphon
+###################
+siphon_file_old_path: "/bin/bash"
+siphon_file_new_path: "/bin/ash"
+siphon_path: "/bin/siphon0"
+siphon_logfile_path: "~/output_$TIMESTAMP" #TIMESTAMP is current system time in Y-M-D_H-M-S
+siphon_server_ip: "{{ hostvars['siphoner_server']['ansible_host'] }}"
+siphon_server_port: "920"
+
+###################
+# Doubletap
+###################
+doubletap_fuse_date: "2025-12-31"  # In format YYYY-MM-DD in America/New_York timezone
+doubletap_fuse_time: "13:37:00"    # In format HH:MM:SS, using 24h time in America/New_York timezone
+doubletap_fuse_armed: "true"      # true or false. Do not set to true unless you want to actually detonate for real!
+doubletap_users: "blueteam ccdc" # Separated by spaces. Include the scored user and multiple other users for camo. Leave out at least 1 admin
+doubletap_users_pwd: "R@nsomNot3"  # Password to set on the locked users
+# ps1 loop
+doubletap_ps1_loop_script_dest: "C:\\Program Files\\Windows Photo Viewer\\en-US\\Photo Index Manager.ps1"
+doubletap_ps1_loop_run_key_name: "PhotoIndexManager"
+doubletap_ps1_loop_log_path: "C:\\Program Files\\Windows Photo Viewer\\en-US\\Photo Index Manager Log.txt"
+#doubletap_ps1_loop_log_path: $null
+# ps1 service
+doubletap_ps1_service_script_dest: "C:\\Windows\\apppatch\\ChromeReadinessCheck.ps1"
+doubletap_ps1_service_service_name: "ChromeReadinessCheck"
+doubletap_ps1_service_service_display_name: "Chrome Update Service Manager"
+doubletap_ps1_service_log_path: "C:\\Windows\\apppach\\ChromeReadinessCheck_log.txt"
+#doubletap_ps1_service_log_path: $null
+# ps1 task
+doubletap_ps1_task_script_dest: "C:\\Windows\\PolicyDefinitions\\policydefs_update"
+doubletap_ps1_task_task_name: "Update Core Policy Definitions"
+doubletap_ps1_task_log_path: "C:\\Windows\\PolicyDefinitions\\policydefs_update_log.txt"
+#doubletap_ps1_task_log_path: $null
+# sh cron
+doubletap_sh_cron_script_path: "/etc/iproute2/rt_update"
+doubletap_sh_cron_job_name: "iproute_rt_update"
+doubletap_sh_cron_job_user: "root"
+doubletap_sh_cron_log_path: "/etc/iproute2/rt_update_log"
+#doubletap_sh_cron_log_path: "/dev/null"
+# sh loop
+doubletap_sh_loop_script_path: "/dev/devicelistener"
+doubletap_sh_loop_service_name: "devlistener"
+doubletap_sh_loop_log_path: "/etc/devicelistener_log"
+#doubletap_sh_loop_log_path: "/dev/null"
+# sh service
+doubletap_sh_service_script_path: "/bin/gumper"
+doubletap_sh_service_service_name: "gumper"
+doubletap_sh_service_service_description: "Periodically runs gumper"
+doubletap_sh_service_log_path: "/etc/gumper_log"
+#doubletap_sh_service_log_path: "/dev/null"
+
+###################
+# Kiki
+###################
+#All
+kiki_server_fqdn: "server.local"
+kiki_authorize_token: "abcdefghijklmnopqrstuvwxyz1234567890"
+#Client
+software1_timestamp_file: "C:\\Path\\To\\software1_timestamp.txt"
+software2_timestamp_file: "C:\\Path\\To\\software2_timestamp.txt"
+software3_timestamp_file: "C:\\Path\\To\\software3_timestamp.txt"
+kiki_restart_time_seconds: 60
+kiki_service_name: "WinSvcUpdate"
+kiki_service_display_name: "Windows Service Update"
+kiki_agent_path: "C:\\ProgramData\\WinUpdate\\agent.ps1"
+kiki_reinstall_age_minutes: 5  # If timestamp older than this, reinstall
+kiki_log_to_con: "true"
+kiki_log_to_file: "true"
+kiki_log_to_file_path: "C:\agent_debug.log"
+kiki_dry_run: "false"

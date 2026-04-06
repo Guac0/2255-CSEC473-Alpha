@@ -1,0 +1,103 @@
+#https://go2docs.graylog.org/current/downloading_and_installing_graylog/ubuntu_installation_os.html
+---
+- name: Install Java 8
+  ansible.builtin.package:
+    name: openjdk-8-jdk
+    state: present
+
+- name: Set timezone to EST
+  command: timedatectl set-timezone EST
+
+- name: Hold MongoDB package
+  dpkg_selections:
+    name: mongodb-org
+    selection: hold
+
+- name: Download and add OpenSearch GPG key
+  shell: |
+    curl -o- https://artifacts.opensearch.org/publickeys/opensearch.pgp | gpg --dearmor --batch --yes -o /usr/share/keyrings/opensearch-keyring
+
+- name: Add OpenSearch APT repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/opensearch-keyring] https://artifacts.opensearch.org/releases/bundle/opensearch/2.x/apt stable main"
+    state: present
+    filename: opensearch-2.x
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+
+- name: Install OpenSearch with predefined password
+  environment:
+    OPENSEARCH_INITIAL_ADMIN_PASSWORD: "ExampleStrong!789"
+  apt:
+    name: opensearch=2.15.0
+    state: present
+    update_cache: yes
+
+- name: Hold OpenSearch package
+  dpkg_selections:
+    name: opensearch
+    selection: hold
+
+- name: Ensure lines are commented in the config file
+  replace:
+    path: /etc/opensearch/opensearch.yml
+    regexp: '^(cluster\.name:|node\.name:|path\.data:|path\.logs:|discovery\.type:|network\.host:|action\.auto_create_index:|plugins\.security\.disabled:)(.*)'
+    replace: '# \1\2'
+
+- name: Add required content to the beginning of the config file
+  blockinfile:
+    path: /etc/opensearch/opensearch.yml
+    block: |
+      cluster.name: graylog
+      node.name: ${HOSTNAME}
+      path.data: /var/lib/opensearch
+      path.logs: /var/log/opensearch
+      discovery.type: single-node
+      network.host: 0.0.0.0
+      action.auto_create_index: false
+      plugins.security.disabled: true
+    insertbefore: BOF
+
+- name: Ensure vm.max_map_count is persisted
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: 'vm.max_map_count=262144'
+    create: yes
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable OpenSearch service
+  systemd:
+    name: opensearch.service
+    enabled: yes
+
+- name: Start OpenSearch service
+  systemd:
+    name: opensearch.service
+    state: started
+
+- name: Check OpenSearch service status
+  command: systemctl status opensearch.service
+  register: opensearch_status
+  changed_when: false
+
+- name: Display OpenSearch service status
+  debug:
+    var: opensearch_status.stdout
+
+# Should be half of the total RAM available. We assume 8 gigs of ram available
+- name: Update JVM heap size in jvm.options
+  replace:
+    path: /etc/opensearch/jvm.options
+    regexp: '^-Xms1g$'
+    replace: '-Xms4g'
+
+- name: Update JVM max heap size in jvm.options
+  replace:
+    path: /etc/opensearch/jvm.options
+    regexp: '^-Xmx1g$'
+    replace: '-Xmx4g'

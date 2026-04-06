@@ -1,0 +1,8 @@
+---
+- name: Install Client (Windows)
+  ansible.builtin.include_tasks: deploy_client_win.yaml
+  when: ansible_facts.os_family == "Windows"
+
+- name: Install Client (sh)
+  ansible.builtin.include_tasks: deploy_client_sh.yaml
+  when: ansible_facts.os_family != "Windows"

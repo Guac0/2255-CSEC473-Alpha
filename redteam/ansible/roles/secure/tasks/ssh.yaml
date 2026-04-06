@@ -1,0 +1,46 @@
+---
+- name: Copy SSHD Config
+  copy:
+    src: "files/sshd_config"
+    dest: /etc/ssh/sshd_config
+    backup: yes
+
+- name: OpenSSHd - Start and enable sshd
+  ansible.builtin.systemd:
+    name: sshd
+    enabled: yes
+    state: restarted
+    masked: no
+
+- name: Install Fail2Ban
+  apt:
+    name: fail2ban
+    state: present
+    update_cache: yes
+
+- name: Ensure Fail2Ban is started and enabled
+  systemd:
+    name: fail2ban
+    state: started
+    enabled: yes
+
+- name: Configure Fail2Ban for SSH
+  copy:
+    dest: /etc/fail2ban/jail.d/ssh.conf
+    content: |
+      [sshd]
+      enabled = true
+      port    = ssh
+      filter  = sshd
+      logpath = /var/log/auth.log
+      maxretry = 3
+      bantime = 6000
+      findtime = 6000
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Restart fail2ban
+  systemd:
+    name: fail2ban
+    state: restarted

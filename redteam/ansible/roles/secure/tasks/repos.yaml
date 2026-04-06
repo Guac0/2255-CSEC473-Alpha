@@ -1,0 +1,10 @@
+---
+- name: Clone red-teaming repository
+  git:
+    repo: https://github.com/Guac0/red-teaming
+    dest: "{{ secure_ansible_dir }}"
+
+- name: Install Ansible Galaxy roles
+  ansible.builtin.command: ansible-galaxy install -r requirements.yml
+  args:
+    chdir: "{{ secure_ansible_dir }}"

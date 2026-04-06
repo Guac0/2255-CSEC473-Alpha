@@ -1,0 +1,2 @@
+- name: Deploy client (victim)
+  ansible.builtin.include_tasks: deploy_client.yaml

@@ -1,0 +1,105 @@
+---
+- name: Ensure agent script directory exists
+  win_file:
+    path: "{{ kiki_agent_script_path | dirname }}"
+    state: directory
+    attributes:
+      - hidden
+
+- name: Copy agent script to hidden directory
+  win_copy:
+    src: agent.ps1
+    dest: "{{ kiki_agent_script_path }}"
+
+# Begin vars
+
+- name: Update Software1 value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^"software1"=.*'
+    line: '"software1"={{software1_timestamp_file}}'
+    backrefs: yes
+
+- name: Update Software2 value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^"software2"=.*'
+    line: '"software2"={{software2_timestamp_file}}'
+    backrefs: yes
+
+- name: Update Software3 value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^"software3"=.*'
+    line: '"software3"={{software3_timestamp_file}}'
+    backrefs: yes
+
+- name: Update FQDN value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^$ServerUrl=.*'
+    line: '$ServerUrl="http://{{ kiki_server_fqdn }}:8080/get-command/"'
+    backrefs: yes
+
+- name: Update TOKEN value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^$AuthToken=.*'
+    line: '$AuthToken={{ kiki_authorize_token }}'
+    backrefs: yes
+
+- name: Update Reinstall Age value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^$CheckIntervalMinutes=.*'
+    line: '$CheckIntervalMinutes={{ kiki_reinstall_age_minutes }}'
+    backrefs: yes
+
+- name: Update Log to Con value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^$LogToCon=.*'
+    line: '$LogToCon=${{ kiki_log_to_con }}'
+    backrefs: yes
+
+- name: Update Log to File value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^$LogToFile=.*'
+    line: '$LogToFile=${{ kiki_log_to_file }}'
+    backrefs: yes
+
+- name: Update Dry Run value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^$DryRun=.*'
+    line: '$DryRun=${{ kiki_dry_run }}'
+    backrefs: yes
+
+- name: Update Log to File Path value
+  community.windows.win_lineinfile:
+    path: "{{ kiki_agent_script_path }}"
+    regexp: '^$LogFilePath=.*'
+    line: '$LogFilePath={{ kiki_log_to_file_path }}'
+    backrefs: yes
+
+# End vars
+
+- name: Remove existing service if it exists
+  win_shell: |
+    if (Get-Service -Name "{{ kiki_service_name }}" -ErrorAction SilentlyContinue) {
+      Stop-Service -Name "{{ kiki_service_name }}" -Force -ErrorAction SilentlyContinue
+      sc.exe delete "{{ kiki_service_name }}"
+      Start-Sleep -Seconds 2
+    }
+  args:
+    executable: powershell.exe
+
+- name: Create Windows service for agent
+  win_service:
+    name: "{{ kiki_service_name }}"
+    display_name: "{{ kiki_service_display_name }}"
+    start_mode: auto
+    path: >-
+      powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File "{{ kiki_agent_script_path }}"
+    state: started

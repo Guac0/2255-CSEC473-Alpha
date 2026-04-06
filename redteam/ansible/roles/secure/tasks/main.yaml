@@ -1,0 +1,16 @@
+---
+- name: Install packages
+  ansible.builtin.include_tasks: packages.yaml
+
+- name: Setup users
+  ansible.builtin.include_tasks: users.yaml
+
+- name: Setup firewall
+  ansible.builtin.include_tasks: firewall.yaml
+
+- name: Setup ssh
+  ansible.builtin.include_tasks: ssh.yaml
+
+- name: Download repo
+  ansible.builtin.include_tasks: repos.yaml
+

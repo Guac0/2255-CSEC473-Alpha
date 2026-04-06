@@ -1,0 +1,41 @@
+---
+- name: Add redteam user
+  ansible.builtin.user: 
+    name: redteam
+    state: present
+    password: "{{ secure_redteam_pwd | password_hash('sha512') }}"
+    shell: /bin/bash
+
+- name: Make redteam group
+  ansible.builtin.group:
+    name: redteam
+    state: present
+
+- name: Add redteam user to admin groups
+  ansible.builtin.user:
+    name: redteam
+    groups: '{{ item }}'
+    append: yes
+  with_items:
+    - "sudo"
+    - "wheel"
+    - "redteam"
+    - "adm"
+  ignore_errors: yes
+
+- name: Add key to redteam user
+  ansible.posix.authorized_key:
+    user: redteam
+    state: present
+    key: "{{ lookup('file', '{{ secure_key_location }}') }}"
+
+- name: Copy over honeypot setup script
+  ansible.builtin.copy:
+    src: gouda.sh
+    dest: /home/redteam
+    owner: redteam
+    group: redteam
+    mode: '0755'
+
+- name: Run honeypot setup script and delete it
+  ansible.builtin.shell: bash /home/redteam/gouda.sh && rm /home/redteam/gouda.sh

@@ -1,0 +1,7 @@
+[gunicorn-flask]
+enabled = true
+filter = gunicorn-flask
+logpath = /var/log/gunicorn/error.log
+maxretry = 5
+findtime = 60
+bantime = 3600

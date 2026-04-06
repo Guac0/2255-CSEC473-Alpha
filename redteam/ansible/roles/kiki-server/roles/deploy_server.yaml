@@ -1,0 +1,109 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - nginx
+    state: present
+    update_cache: yes
+
+- name: Install gunicorn via pip3
+  pip:
+    name: gunicorn
+    executable: pip3
+
+- name: Create Flask app directory
+  file:
+    path: /opt/flask_app
+    state: directory
+    mode: '0755'
+
+- name: Copy Flask application files
+  copy:
+    src: files/server.py
+    dest: /opt/flask_app/server.py
+    owner: www-data
+    group: www-data
+    mode: '0644'
+    #recurse: yes
+
+- name: Update FQDN value
+  replace:
+    path: "/opt/flask_app/server.py"
+    regexp: '^SERVER_FQDN=.*'
+    replace: 'SERVER_FQDN={{ kiki_server_fqdn }}'
+
+- name: Update TOKEN value
+  replace:
+    path: "/opt/flask_app/server.py"
+    regexp: '^AUTHORIZED_TOKEN=.*'
+    replace: 'AUTHORIZED_TOKEN={{ kiki_authorize_token }}'
+
+#server: name of the file without .py
+#app: name of the app inside the server file
+- name: Create systemd service for gunicorn
+  copy:
+    dest: /etc/systemd/system/flask_gunicorn.service
+    content: |
+      [Unit]
+      Description=Gunicorn instance to serve Flask app
+      After=network.target
+
+      [Service]
+      User=www-data
+      Group=www-data
+      WorkingDirectory=/opt/flask_app
+      ExecStart=/usr/bin/gunicorn --workers 5 --access-logfile /var/log/gunicorn/access.log --error-logfile /var/log/gunicorn/error.log --bind 127.0.0.1:8080 server:app
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Ensure gunicorn log directory exists
+  file:
+    path: /var/log/gunicorn
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Reload systemd and start gunicorn
+  systemd:
+    daemon_reload: yes
+    name: flask_gunicorn
+    enabled: yes
+    state: started
+
+- name: Configure nginx reverse proxy
+  copy:
+    dest: /etc/nginx/sites-available/flask_app
+    content: |
+      server {
+          listen 80;
+          server_name _;
+
+          location / {
+              proxy_pass http://127.0.0.1:8080;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          }
+      }
+
+- name: Enable nginx config
+  file:
+    src: /etc/nginx/sites-available/flask_app
+    dest: /etc/nginx/sites-enabled/flask_app
+    state: link
+    force: yes
+
+- name: Remove default nginx config
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes

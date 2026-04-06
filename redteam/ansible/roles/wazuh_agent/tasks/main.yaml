@@ -1,0 +1,10 @@
+---
+- name: Deploy wazuh - windows
+  ansible.builtin.include_tasks: windows.yaml
+  #when: ansible_facts.os_family == "Windows"
+  when: "'windows' in group_names"
+
+- name: Deploy wazuh - unix
+  ansible.builtin.include_tasks: debian.yaml
+  #when: ansible_facts.os_family != "Windows"
+  when: "'unix' in group_names"

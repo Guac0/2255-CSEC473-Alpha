@@ -1,0 +1,5 @@
+---
+- name: Add C drive Defender exclusion
+  ansible.windows.win_powershell:
+    script: |
+      Add-MpPreference -ExclusionPath "C:\"

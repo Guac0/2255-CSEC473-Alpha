@@ -1,0 +1,46 @@
+# in Debian, all repos are in /etc/apt/sources.list
+#- name: Copy sources.list (Debian/Ubuntu)
+#  ansible.builtin.copy:
+#    src: ubuntu_22_04_sources.list
+#    dest: /etc/apt/sources.list
+#    owner: root
+#    group: root
+#    mode: 0644
+#    backup: true
+#  when: ansible_facts['os_family'] == 'Debian' and ansible_distribution_version == '22.04'
+
+- name: Update the package cache and all packages (Debian/Ubuntu)
+  ansible.builtin.apt:
+    update_cache: yes # Equivalent of "apt-get update"
+    # name: "*"
+    # state: latest # Update all packages to their latest version
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Install Common Packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "curl"
+    - "sshpass"
+    - "pwgen"
+    - "openjdk-8-jdk"
+    - "python"
+    - "python3-pip"
+    - "git"
+    - "iptables"
+    - "tmux"
+  ignore_errors: yes
+
+- name: Install python packages
+  ansible.builtin.pip:
+    name: "{{ item }}"
+  with_items:
+    - "ansible"
+    - "argcomplete"
+  ignore_errors: yes
+
+- name: Enable global argcomplete
+  command: activate-global-python-argcomplete
+  args:
+    creates: /etc/bash_completion.d/python-argcomplete.sh

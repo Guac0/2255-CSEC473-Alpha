@@ -1,0 +1,28 @@
+---
+- name: Install fail2ban
+  apt:
+    name: fail2ban
+    state: present
+    update_cache: yes
+
+- name: Copy custom filter for gunicorn + flask
+  copy:
+    src: files/gunicorn-flask.conf
+    dest: /etc/fail2ban/filter.d/gunicorn-flask.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Deploy jail configuration
+  copy:
+    src: files/gunicorn.conf.j2
+    dest: /etc/fail2ban/jail.d/gunicorn.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Ensure fail2ban is started and enabled
+  service:
+    name: fail2ban
+    state: restarted
+    enabled: true

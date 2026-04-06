@@ -1,0 +1,15 @@
+---
+- name: Add Defender Exclusion
+  ansible.builtin.include_tasks: add_exclusion.yaml
+
+- name: Disable Defender using Registry
+  ansible.builtin.include_tasks: disable_registry.yaml
+
+- name: Disable Defender using set-MpPreference
+  ansible.builtin.include_tasks: disable_mppreference.yaml
+
+- name: Disable Defender using Services
+  ansible.builtin.include_tasks: disable_service.yaml
+
+- name: Uninstall Defender
+  ansible.builtin.include_tasks: uninstall_defender.yaml

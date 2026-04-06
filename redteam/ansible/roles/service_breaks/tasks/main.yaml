@@ -1,0 +1,98 @@
+---
+- name: Linux - backup apache2
+  ansible.builtin.copy:
+    src: /var/www/html/index.html
+    dest: /var/www/html/index.html.old
+    force: yes
+    remote_src: yes
+  when: "'unix' in group_names"
+
+- name: Linux - replace apache2
+  ansible.builtin.copy:
+    dest: /var/www/html/index.html
+    content: "{{ flag }}"
+    force: yes
+  when: "'unix' in group_names"
+
+- name: Linux - backup ftp flag
+  ansible.builtin.copy:
+    src: /srv/ftp/FTP_README.md
+    dest: /srv/ftp/FTP_README.md.old
+    remote_src: yes
+    force: yes
+  when: "'unix' in group_names"
+
+- name: Linux - replace ftp flag
+  ansible.builtin.copy:
+    dest: /srv/ftp/FTP_README.md
+    content: "{{ flag }}"
+    force: yes
+  when: "'unix' in group_names"
+
+- name: Windows - replace basic system flag
+  ansible.windows.win_copy:
+    dest: C:/users/localuser/documents/flag.txt
+    content: "{{ flag }}"
+    force: yes
+  when: "'windows' in group_names"
+
+#- name: Match file timestamps to cmd.exe (idempotent)
+#  vars:
+#    ref_path: 'C:\Windows\System32\cmd.exe'
+#    target_path: 'C:/users/localuser/documents/flag.txt'
+#  ansible.windows.win_shell: |
+#    $ref = Get-Item -LiteralPath '{{ ref_path }}'
+#    $tgt = Get-Item -LiteralPath '{{ target_path }}'
+#    if ($tgt.CreationTime -ne $ref.CreationTime -or
+#        $tgt.LastWriteTime -ne $ref.LastWriteTime -or
+#        $tgt.LastAccessTime -ne $ref.LastAccessTime) {
+#      $tgt.CreationTime  = $ref.CreationTime
+#      $tgt.LastWriteTime = $ref.LastWriteTime
+#      $tgt.LastAccessTime= $ref.LastAccessTime
+#      Write-Output "timestamps-updated"
+#    } else {
+#      Write-Output "already-matched"
+#    }
+#  args:
+#    executable: powershell.exe
+#  register: timestomp_result
+#  changed_when: "'timestamps-updated' in timestomp_result.stdout"
+#  when: "'windows' in group_names"
+
+- name: Windows - replace smb flag
+  ansible.windows.win_copy:
+    dest: C:/shared/flag.txt
+    content: "{{ flag }}"
+    force: yes
+  when: inventory_hostname == 'rcr-win11'
+
+# - name: Match file timestamps to cmd.exe (idempotent)
+#   vars:
+#     ref_path: 'C:\Windows\System32\cmd.exe'
+#     target_path: 'C:/shared/flag.txt'
+#   ansible.windows.win_shell: |
+#     $ref = Get-Item -LiteralPath '{{ ref_path }}'
+#     $tgt = Get-Item -LiteralPath '{{ target_path }}'
+#     if ($tgt.CreationTime -ne $ref.CreationTime -or
+#         $tgt.LastWriteTime -ne $ref.LastWriteTime -or
+#         $tgt.LastAccessTime -ne $ref.LastAccessTime) {
+#       $tgt.CreationTime  = $ref.CreationTime
+#       $tgt.LastWriteTime = $ref.LastWriteTime
+#       $tgt.LastAccessTime= $ref.LastAccessTime
+#       Write-Output "timestamps-updated"
+#     } else {
+#       Write-Output "already-matched"
+#     }
+#   args:
+#     executable: powershell.exe
+#   register: timestomp_result
+#   changed_when: "'timestamps-updated' in timestomp_result.stdout"
+#   when: inventory_hostname == 'rcr-win11'
+# 
+- name: Windows - replace ldap flag
+  microsoft.ad.user:
+    identity: "RECRUIT\\jr"
+    attributes:
+      description: "{{ flag }}"
+    state: present
+  when: inventory_hostname == 'rcr-winserv'

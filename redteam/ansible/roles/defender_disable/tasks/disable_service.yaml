@@ -1,0 +1,5 @@
+---
+- name: Disable Defender Service
+  ansible.windows.win_powershell:
+    script: |
+      Get-Service WinDefend | Stop-Service -PassThru | Set-Service -StartupType Disabled

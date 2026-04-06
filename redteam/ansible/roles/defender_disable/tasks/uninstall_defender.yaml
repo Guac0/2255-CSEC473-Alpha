@@ -1,0 +1,5 @@
+---
+- name: Uninstall Defender
+  ansible.windows.win_powershell:
+    script: |
+      Uninstall-WindowsFeature -Name Windows-Defender

@@ -1,0 +1,1 @@
+Hardens a Ubuntu 22 box from defaults to something that can be used as a server/deploy/jump box for red teaming.

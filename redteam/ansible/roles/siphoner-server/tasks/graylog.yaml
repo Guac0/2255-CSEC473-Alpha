@@ -1,0 +1,31 @@
+---
+# Deploy server using Graylog Ansible Role
+# https://github.com/Graylog2/graylog-ansible-role 
+# https://galaxy.ansible.com/ui/standalone/roles/Graylog2/graylog/documentation/
+# https://computingforgeeks.com/deploy-graylog-server-using-ansible-on-ubuntu-debian-centos/
+# Install role:
+# ansible-galaxy install graylog2.graylog
+# Install dependencies (skip this, the install role should auto do it):
+# ansible-galaxy install -r ~/.ansible/roles/graylog2.graylog/requirements.yml
+# Then run this playbook.
+- name: Install Graylog on Siphoner Server
+  become: true
+  ansible.builtin.include_role:
+    name: graylog2.graylog
+  vars:
+    graylog_version: 6.1
+    graylog_install_java: True
+    graylog_password_secret: "tKpLEv25yhbKaNXi1yw8jhq7xoAn2CZDYr02vtWvBY1bmj2PqMkbSTT8ADEQpFisMUcWu8kQpctC2kRuK66Rqrnc0UYpe2iV" # Insert your own here. Used to salt password hashes. Generate with: pwgen -s 96 1
+    graylog_root_password_sha2: "bdc68a40521a2d24ec51b94f8359bc41e39325ea17e7df2f55d46e43bec887f2" # Insert your own root_password_sha2 here. Used for root user password for graylog (username: admin) Generate with:   echo -n "Enter Password: " && head -1 </dev/stdin | tr -d '\n' | sha256sum | cut -d" " -f1
+    graylog_http_bind_address: "{{ ansible_default_ipv4.address }}:9000"
+    graylog_http_publish_uri: "http://{{ ansible_default_ipv4.address }}:9000/"
+    graylog_http_external_uri: "http://{{ ansible_default_ipv4.address }}:9000/"
+    graylog_install_open_package: True
+    graylog_install_enterprise_package: False
+
+# default 127.0.0.1 is good
+#- name: Update elasticsearch_hosts setting
+#  replace:
+#    path: /etc/graylog/server/server.conf
+#    regexp: '^elasticsearch_hosts.*'
+#    replace: 'elasticsearch_hosts = 127.0.0.1'
